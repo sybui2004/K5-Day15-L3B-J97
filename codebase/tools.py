@@ -40,13 +40,15 @@ def _khoa(s):
     for a, b in _DAU_CU:
         s = s.replace(a, b)
     s = re.sub(r"\b[pq]\s*\.\s*", " ", s)
-    s = re.sub(r"\b[pq](?=\s*\d)", " ", s)
+    s = re.sub(r"\b[pq](?=\s*[0-9])", " ", s)
     tu = re.sub(r"[\W_]+", " ", s).split()
     for tt in _TIEN_TO:
         if len(tu) > len(tt) and tu[:len(tt)] == tt:
             tu = tu[len(tt):]
             break
-    tu = [str(int(t)) if t.isdigit() else t for t in tu]
+    # bỏ số 0 đầu ở token chữ số ASCII (p.07 = Phường 7). Không dùng isdigit()/int(): '²'.isdigit() là True
+    # nhưng int('²') lỗi. Token khác giữ nguyên, để tra cứu trả "không khớp" thay vì ném ngoại lệ.
+    tu = [(t.lstrip("0") or "0") if re.fullmatch(r"[0-9]+", t) else t for t in tu]
     co_dau = " ".join(tu)
     return co_dau, bo_dau(co_dau)
 
@@ -114,8 +116,8 @@ def validate_phone(sdt: str) -> dict:
         s = "0" + s[2:]
     if not s:
         return {"ok": False, "sdt_chuan": None, "ly_do": "không có số điện thoại"}
-    if not s.isdigit():
-        return {"ok": False, "sdt_chuan": None, "ly_do": "số điện thoại có ký tự không phải chữ số"}
+    if not re.fullmatch(r"[0-9]+", s):  # không dùng isdigit(): nó nhận cả '²', '０', '٣'
+        return {"ok": False, "sdt_chuan": None, "ly_do": "số điện thoại có ký tự không phải chữ số 0-9"}
     if len(s) != 10:
         return {"ok": False, "sdt_chuan": None, "ly_do": "số điện thoại phải đủ 10 chữ số (đang có %d)" % len(s)}
     if s[:2] not in ("03", "05", "07", "08", "09"):
@@ -135,20 +137,30 @@ def convert_old_address(tinh_thanh: str, quan_huyen_cu: str, phuong_xa_cu: str) 
     if not tinh:
         return dict(rong, ly_do="tỉnh/thành '%s' ngoài phạm vi bảng (chỉ TP Hồ Chí Minh, gồm Bình Dương, "
                                 "Bà Rịa - Vũng Tàu cũ)" % tinh_thanh)
-    if not str(quan_huyen_cu or "").strip() or not str(phuong_xa_cu or "").strip():
-        return dict(rong, ly_do="cần đủ quận/huyện cũ và phường/xã cũ")
+    if not str(quan_huyen_cu or "").strip():
+        return dict(rong, ly_do="cần quận/huyện cũ")
+    # tra quận/huyện trước, rồi mới xét phường
     dong = [r for r in _bang() if tinh == HCM or r["tinh_cu"] == tinh]
     quan = _khop(quan_huyen_cu, sorted({r["quan_huyen_cu"] for r in dong if r["quan_huyen_cu"]}))
     if len(quan) != 1:
         return dict(rong, ly_do="không thấy quận/huyện cũ '%s' ở %s" % (quan_huyen_cu, tinh))
     dong = [r for r in dong if r["quan_huyen_cu"] == quan[0]]
-    ca_huyen = [r for r in dong if not r["phuong_xa_cu"]]  # vd huyện Côn Đảo -> đặc khu Côn Đảo
-    phuong = _khop(phuong_xa_cu, sorted({r["phuong_xa_cu"] for r in dong if r["phuong_xa_cu"]}))
-    if len(phuong) > 1:
-        return dict(rong, ly_do="'%s' khớp nhiều phường cũ ở %s: %s" % (phuong_xa_cu, quan[0], ", ".join(phuong)))
-    trung = [r for r in dong if phuong and r["phuong_xa_cu"] == phuong[0]] or ca_huyen
-    if not trung:
-        return dict(rong, ly_do="không thấy '%s' thuộc %s trong Nghị quyết 1685" % (phuong_xa_cu, quan[0]))
+    phuong_trong = not str(phuong_xa_cu or "").strip()
+    if all(not r["phuong_xa_cu"] for r in dong):
+        # cả huyện sắp xếp thành một đơn vị (huyện Côn Đảo -> đặc khu Côn Đảo, khoản 163): huyện không có
+        # phường/xã nên phường cũ để trống hoặc ghi lại tên huyện là hợp lệ; ghi một phường khác là mâu thuẫn
+        if not phuong_trong and _khoa(phuong_xa_cu)[1] != _khoa(quan[0])[1]:
+            return dict(rong, ly_do="%s không có phường/xã, '%s' không thuộc huyện này" % (quan[0], phuong_xa_cu))
+        trung = dong
+    else:
+        if phuong_trong:
+            return dict(rong, ly_do="cần phường/xã cũ thuộc %s" % quan[0])
+        phuong = _khop(phuong_xa_cu, sorted({r["phuong_xa_cu"] for r in dong}))
+        if len(phuong) > 1:
+            return dict(rong, ly_do="'%s' khớp nhiều phường cũ ở %s: %s" % (phuong_xa_cu, quan[0], ", ".join(phuong)))
+        trung = [r for r in dong if phuong and r["phuong_xa_cu"] == phuong[0]]
+        if not trung:
+            return dict(rong, ly_do="không thấy '%s' thuộc %s trong Nghị quyết 1685" % (phuong_xa_cu, quan[0]))
     trung.sort(key=lambda r: int(r["khoan"]))
     moi = list(dict.fromkeys(r["phuong_xa_moi"] for r in trung))
     return {"ket_qua": "mot" if len(moi) == 1 else "nhieu", "phuong_moi": moi, "tinh_moi": HCM,
@@ -165,7 +177,8 @@ def lookup_address(tinh_thanh: str, phuong_xa: str) -> dict:
     if not tinh:
         return {"ok": False, "khop": None, "tinh": None, "goi_y": [],
                 "ly_do": "tỉnh/thành '%s' ngoài phạm vi bảng (chỉ TP Hồ Chí Minh)" % tinh_thanh}
-    ds = sorted({r["phuong_xa_moi"] for r in _bang()})
+    # khách ghi tỉnh cũ cụ thể -> chỉ xét phường/xã mới hình thành từ địa bàn tỉnh đó; ghi TP HCM -> cả bảng
+    ds = sorted({r["phuong_xa_moi"] for r in _bang() if tinh == HCM or r["tinh_cu"] == tinh})
     trung = _khop(phuong_xa, ds)
     if len(trung) == 1:
         return {"ok": True, "khop": trung[0], "tinh": HCM, "goi_y": [], "ly_do": ""}
@@ -177,8 +190,9 @@ def lookup_address(tinh_thanh: str, phuong_xa: str) -> dict:
     for u in ds:
         theo_khoa.setdefault(_khoa(u)[1], []).append(u)
     goi_y = [u for kk in difflib.get_close_matches(k, list(theo_khoa), n=3, cutoff=0.6) for u in theo_khoa[kk]][:3]
-    ly_do = "không thấy phường/xã '%s' trong danh sách phường/xã mới của TP Hồ Chí Minh" % phuong_xa
-    if k.isdigit():
+    pham_vi = "TP Hồ Chí Minh" if tinh == HCM else "TP Hồ Chí Minh trên địa bàn %s cũ" % tinh
+    ly_do = "không thấy phường/xã '%s' trong danh sách phường/xã mới của %s" % (phuong_xa, pham_vi)
+    if re.fullmatch(r"[0-9]+", k):
         ly_do += " (phường số là tên cũ: cần kèm quận/huyện cũ để quy đổi)"
     return {"ok": False, "khop": None, "tinh": HCM, "goi_y": goi_y, "ly_do": ly_do}
 
@@ -200,3 +214,11 @@ def create_draft_order(info: dict) -> dict:
             du_lieu["sdt"] = kq["sdt_chuan"]
     h = hashlib.sha1(json.dumps(du_lieu, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:8]
     return {"ma_don": "DN-" + h, "ma_van_don": "GHN-NHAP-" + h, "trang_thai": "cho_duyet"}
+
+
+@tool
+def search_example(query: str) -> list:
+    """(TẠM, giữ tương thích) Hàm ví dụ của khung, codebase/agent.py hiện còn import.
+    XOÁ cùng lúc X3 (feature/cp3-x3-agent) thay agent.py, để mỗi lần merge vào develop `python run.py` vẫn chạy.
+    Input: câu hỏi (str). Output: danh sách đoạn {"code", "text"}. Không tác động ra ngoài."""
+    return [{"code": "VD-1", "text": "(ví dụ) đoạn dữ liệu giả — thay bằng dữ liệu thật của bài toán"}]
