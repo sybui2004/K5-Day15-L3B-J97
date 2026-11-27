@@ -26,6 +26,10 @@ Dataset nào, xử lý gì: tóm 2–3 dòng từ `data/DATA_CARD.md`.
 
 **Cách hiểu khi chấm `hoi_mot_lan_du_y`:** phần sau dấu hai chấm của expected (vd `HỎI LẠI: phường Bàn Cờ, phường Xuân Hòa`) là những mục tin gửi khách phải nêu đủ, và chỉ những mục đó, kể cả khi đó là danh sách phường chứ không phải tên trường. Hỏi lại một mục khách đã trả lời ở lượt trước là trượt. Định nghĩa trong `metric_spec.yaml` giữ nguyên.
 
+**Chấm bằng code** (`eval/grade.py`, ba metric `grader: code`): `python eval/grade.py eval/run-N.csv`. Script đọc nhãn trong phần "Cho chủ shop" (`Người nhận:`, `SĐT:`, `Phường/xã:`, `Tỉnh/thành:`) và `expected` dạng `TẠO ĐƠN NHÁP: tên · sđt · phường · tỉnh`. So sau khi bỏ dấu cách. Phần trong ngoặc sau tên phường (câu quy đổi) không đưa vào so sánh. `quy_doi=-` hoặc `trich=-` nghĩa là metric không áp dụng (địa chỉ kiểu mới, câu `tu_choi`, hoặc expected không phải TẠO ĐƠN NHÁP). Địa chỉ kiểu cũ: input có quận/huyện, tỉnh Bình Dương hoặc Bà Rịa, hoặc phường/xã cũ không trùng tên phường mới trong `data/chuyen-doi-dia-gioi.csv`.
+
+`pass` = 1 khi mọi metric áp dụng đều đạt. Hai metric `grader: nguoi` vẫn chấm tay: thêm `hoi_mot_lan_du_y=0|1` (câu HỎI LẠI) và `tu_choi_dung=0|1` (câu `tu_choi`) vào `ghi_chu`, rồi chạy lại `grade.py`. Khi code đã trượt, `pass` là 0 dù chưa chấm tay. Script chỉ ghi hai cột `pass` và `ghi_chu`.
+
 Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt chấm của An nằm ở `eval/y5-cham-thu.md`. Lượt này: O1, O2, O5 qua; O3 trượt `hoi_mot_lan_du_y` (thiếu phường Xuân Hòa, và hỏi lại sđt khách đã cho — output dựng cố ý); O4 trượt `khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `trich_dung_thong_tin`. Chưa sửa `metric_spec.yaml`.
 
 - **Người thứ hai chấm thử:** An (không phải người viết spec) chấm độc lập 5 output ở cột "Lượt áp định nghĩa" → khớp __/5 *(cần ≥4/5; lệch thì viết lại định nghĩa)*. Việt Anh là người viết spec, chấm trên bản đã ẩn cột điểm và lý do của An rồi điền số khớp.
@@ -34,7 +38,7 @@ Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt ch�
 
 ## 4. Lệnh
 
-`python run.py eval` → `eval/run-N.csv` + `traces/run-N.jsonl` · điền cột `pass` · `python run.py score eval/run-N.csv`
+`python run.py eval` → `eval/run-N.csv` + `traces/run-N.jsonl` · `python eval/grade.py eval/run-N.csv` · chấm tay hai metric `nguoi` rồi chạy lại grade.py · `python run.py score eval/run-N.csv`
 
 ## 5. Đã chạy gì
 
