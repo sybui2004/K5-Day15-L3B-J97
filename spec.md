@@ -100,10 +100,10 @@ Số trong bảng lấy từ phỏng vấn P1–P4 (n = 4, `evidence/interviews/
   - Đáng né: phường cũ bị tách thì người tra tự chọn một phường, dẫn tới nhầm phường giáp ranh (P1 2 lần / tháng, P3, P4).
   - Mình khác: bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15; phường bị tách thì luôn hỏi lại khách kèm danh sách phường mới.
 - **Sapo Chat OmniAI** (nhóm thử trên fanpage J97-Hihi, đêm 27–28/11/2026, tài khoản dùng thử; ảnh [`05`](evidence/screenshots/05_sapo_tao_don_canh_chat.png), [`06`](evidence/screenshots/06_sapo_goi_y_dia_chi_phuong_cu.png), [`07`](evidence/screenshots/07_sapo_goi_y_ten_facebook.png), đã che tên và sđt thật của người nhắn thử):
-  - Đáng học: shop mở được biểu mẫu tạo đơn ngay cạnh đoạn chat Facebook, nên đối chiếu được từng trường với lời khách dặn. Khách gửi đủ 10 chữ số thì Sapo nhận diện được sđt. Shop sửa và lưu được tên người nhận trước khi bấm "Tạo và xác nhận".
+  - Đáng học: shop mở được biểu mẫu tạo đơn ngay cạnh đoạn chat Facebook, nên đối chiếu được từng trường với lời khách dặn. Khách gửi đủ 10 chữ số thì Sapo nhận diện được sđt (nhóm quan sát khi thử; ảnh không cho thấy vì sđt đã che). Shop sửa và lưu được tên người nhận trước khi bấm "Tạo và xác nhận".
   - Đáng né:
-    - Khách ghi rõ "người nhận Minh An", nhưng ô "Gợi ý địa chỉ bằng AI" ban đầu lấy tên Facebook của người nhắn (ô bị che ở ảnh 07); shop phải sửa lại thành "Minh An".
-    - Với "P.4, Q.3", Sapo viết đầy đủ thành "Phường 4, Quận 3, TP Hồ Chí Minh" và cho lưu nguyên. Ô địa chỉ vẫn chọn theo "TP Hồ Chí Minh – Quận 3", danh sách phường là phường cũ (Phường 1–10, Phường Võ Thị Sáu, ảnh 06). Ở bước này nhóm chưa thấy gợi ý quy đổi sang phường mới.
+    - Khách ghi rõ "người nhận Minh An", nhưng nhóm quan sát khi thử thấy ô "Gợi ý địa chỉ bằng AI" ban đầu lấy tên Facebook của người nhắn. Ở ảnh 07 ô tên này bị che vì là tên thật của người nhắn thử; ảnh 06 là sau khi shop sửa lại thành "Minh An".
+    - Với "P.4, Q.3", Sapo viết đầy đủ thành "Phường 4, Quận 3, TP Hồ Chí Minh" và cho lưu nguyên. Ô địa chỉ vẫn chọn theo "TP Hồ Chí Minh – Quận 3", danh sách phường là phường cũ của Quận 3 (ảnh 06 thấy Phường 1–5, Phường 10, Phường Võ Thị Sáu). Ở bước này nhóm chưa thấy gợi ý quy đổi sang phường mới.
   - Mình khác: đọc đoạn chat đã chốt, tạo đơn nháp và kiểm từng trường. Thiếu thông tin thì soạn **một** tin hỏi đủ các mục còn thiếu. Phường cũ bị tách thì tin hỏi lại liệt kê các phường mới theo bảng tra từ Nghị quyết 1685/NQ-UBTVQH15 để khách xác nhận. Chủ shop đọc lại và bấm gửi.
 
 ## §4. Thiết kế *(guide 2.2, 3.2)*
