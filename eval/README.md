@@ -44,11 +44,11 @@ Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt ch�
 
 | Lượt | Run ID | Model | Cấu hình (prompt / công cụ / thay đổi) | Đạt / tổng | % | Đạt chuẩn? |
 |---|---|---|---|---|---|---|
-| 1 | | | | __/__ | | |
+| 1 | run-1@20261128-003247 | claude-sonnet-5-5 | `agent.py` luồng chốt đơn, công cụ địa giới, `grade.py` + chấm tay `hoi_mot_lan_du_y` và `tu_choi_dung` | 14/19 | 74% | chưa |
 | 2 | | | | __/__ | | |
 
 Lượt chạy lại vì lỗi kỹ thuật, lượt sau CP4: ghi thêm dòng, không sửa dòng cũ.
 
 ## 6. Lỗi chính
 
-Tóm 2–3 dòng từ `eval/report.md`: nhóm lỗi lớn nhất · đã sửa gì · còn lại gì.
+Lượt 1 (`run-1@20261128-003247`, claude-sonnet-5-5): 14/19 (74%), chưa đạt. Nhóm lớn nhất: B16, B18, B19 khiếu nại mà HỎI LẠI (tu_choi 3/6). Thêm B10 không tạo đơn sau khi khách chọn phường, B12 hỏi thừa tỉnh. Chưa sửa, lượt 2 chưa chạy.
