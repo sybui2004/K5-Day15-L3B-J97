@@ -33,7 +33,7 @@ Guide ("Cách chia việc", mục 2) cho phép **đổi cặp hoặc đổi vi�
 | **Cặp X** | Sỹ, Hưng | Sỹ: X5 prompt từ chối, tự soát và nộp · Hưng: Y8 câu thử B23–B26, V1 video + mô phỏng thử |
 | **Cặp Y** | Việt Anh, An | Việt Anh: P3 luồng C + câu thử B20–B22 · An: Y7 `grade.py`, P4 lượt 1 |
 
-Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2).
+Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2). **Riêng PR kế hoạch (#17) và PR sửa mục spec của người khác: cả người giữ phần đó cùng duyệt.** Kế hoạch này đổi việc của cả 4 người, nên Hưng, Việt Anh, An đều phải Approve (hoặc comment chỗ muốn đổi ở phần của mình) rồi mới merge.
 
 **`spec.md` — mỗi mục một người giữ** (người khác muốn sửa thì nhắn người giữ; ai cũng thêm dòng §10 cho thay đổi của mình):
 
@@ -53,7 +53,7 @@ Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2).
 
 | Giờ | Sỹ | Hưng | Việt Anh | An |
 |---|---|---|---|---|
-| 23:15–23:45 | Mở PR sửa spec + PR kế hoạch này | **Duyệt, merge** PR kế hoạch rồi PR sửa spec | Đọc P3 ở Phần 4 · tạo nhánh | Đọc Y7 ở Phần 4 · tạo nhánh |
+| 23:15–23:45 | Mở PR sửa spec + PR kế hoạch này · sửa theo comment | **Duyệt PR kế hoạch** (phần Y8, V1) · duyệt PR sửa spec | **Duyệt PR kế hoạch** (phần P3) · duyệt PR sửa spec (§5) · tạo nhánh | **Duyệt PR kế hoạch** (phần Y7, P4, §7) · tạo nhánh |
 | 23:45–0:30 | **X5** prompt từ chối + test · thử tay B16, B17 | **Y8** câu thử B23–B26 (`thuong`) | **P3** `lich-su-khach.csv`, `get_customer_history`, bước 3 trong `agent.py`, test | **Y7** `eval/grade.py` + test |
 | 0:30 | **Mốc cắt luồng C** (xem dưới) · mở PR · đi ngủ | mở PR · đi ngủ | mở PR · đi ngủ | mở PR · đi ngủ |
 | 7:00–7:45 | Duyệt, merge Y8 (Hưng) | Duyệt, merge X5 (Sỹ) | Duyệt, merge Y7 (An) | Duyệt, merge P3 (Việt Anh) **sau** khi Y8 đã merge |
@@ -74,8 +74,8 @@ Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2).
 
 | # | Nhánh | Task | Người làm → người duyệt, merge | Hạn | Chờ |
 |---|---|---|---|---|---|
-| 17 | `feature/cp3-ke-hoach` | kế hoạch này | Sỹ → Hưng | 23:30 | — |
-| 18 | `feature/cp3-spec-sua-review` | sửa spec theo review PR #29 | Sỹ → Hưng | 23:45 | — |
+| 17 | `feature/cp3-ke-hoach` | kế hoạch này | Sỹ → **Hưng, Việt Anh, An** cùng Approve; người Approve cuối merge | 23:30 | — |
+| 18 | `feature/cp3-spec-sua-review` | sửa spec theo review PR #29 | Sỹ → Hưng (người review #29) + Việt Anh (PR sửa cả §5) | 23:45 | — |
 | 19 | `feature/cp3-x5-prompt-tu-choi` | X5 | Sỹ → Hưng | 7:30 | — |
 | 20 | `feature/cp3-y7-grade` | Y7 | An → Việt Anh | 7:30 | — |
 | 21 | `feature/cp3-y8-cau-thu-26` | Y8 câu thử B23–B26 | Hưng → Sỹ | 7:30 | — |
