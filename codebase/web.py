@@ -467,7 +467,7 @@ details.them-tin .nut{padding-left:0}
 JS = r"""
 "use strict";
 const NHAN = {cho_duyet: "Đơn nháp", cho_khach: "Chờ khách", tu_choi: "Từ chối", da_duyet: "Đã duyệt", da_huy: "Đã huỷ"};
-const DEM = [["cho_duyet", "đơn nháp chờ duyệt"], ["cho_khach", "chờ khách trả lời"], ["tu_choi", "từ chối"], ["da_duyet", "đã duyệt"]];
+const DEM = [["cho_duyet", "đơn nháp chờ duyệt"], ["cho_khach", "chờ khách trả lời"], ["tu_choi", "từ chối"], ["da_duyet", "đã duyệt"], ["da_huy", "đã huỷ"]];
 const TRUONG = [["ten_nguoi_nhan", "Người nhận"], ["sdt", "SĐT"], ["dia_chi_chi_tiet", "Địa chỉ"],
                 ["phuong_xa", "Phường/xã"], ["san_pham", "Sản phẩm"], ["so_luong", "Số lượng"]];
 let phien = [], chon = null, hen = null, vuaDong = null;
@@ -507,17 +507,22 @@ function cacLuot(text) {  // "Mã khách: KH-1 | Khách: … | Shop: …" → [{
 function tinKhachCuoi(p) { const k = cacLuot(p.text).filter(l => l.ai === "Khách"); return k.length ? k[k.length - 1].nd : ""; }
 
 function veHopThu() {
+  // vẽ lại cả danh sách thì phần tử đang focus bị thay: nhớ dòng đang focus rồi trả focus về dòng đó
+  const dangFocus = document.activeElement && document.activeElement.closest ? document.activeElement.closest("#hop-thu li") : null;
+  const maFocus = dangFocus ? dangFocus.getAttribute("data-ma") : null;
   document.getElementById("dem").replaceChildren(...DEM.map(([t, chu]) => {
     const n = phien.filter(p => p.trang_thai === t).length;
     return n ? el("span", {class: "chip " + t, text: n + " " + chu}) : null;
   }).filter(Boolean));
-  document.getElementById("hop-thu").replaceChildren(...phien.map(p => el("li", {class: p.ma_hoi_thoai === chon ? "chon" : null,
+  const ds = document.getElementById("hop-thu");
+  ds.replaceChildren(...phien.map(p => el("li", {class: p.ma_hoi_thoai === chon ? "chon" : null, "data-ma": p.ma_hoi_thoai,
       tabindex: "0", "aria-current": p.ma_hoi_thoai === chon ? "true" : null,
       on: {click: () => chonHoiThoai(p.ma_hoi_thoai), keydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); chonHoiThoai(p.ma_hoi_thoai); } }}},
     el("div", {class: "dong-1"}, el("span", {class: "ten-khach", text: p.ma_khach || "Khách mới"}), el("span", {class: "chip " + p.trang_thai, text: NHAN[p.trang_thai]})),
     el("div", {class: "xem-truoc", text: p.loi_doc ? "Không đọc được hội thoại này" : tinKhachCuoi(p)}),
     el("div", {class: "ma-ht"}, document.createTextNode(p.ma_hoi_thoai),
       p.so_luot_hoi_lai ? el("span", {class: "hoi-lai", text: "hỏi lại " + p.so_luot_hoi_lai + " lần"}) : null))));
+  if (maFocus) { const li = [...ds.children].find(x => x.getAttribute("data-ma") === maFocus); if (li) li.focus(); }
 }
 function chonHoiThoai(ma) { clearTimeout(hen); chon = ma; veHopThu(); veChiTiet(phien.find(p => p.ma_hoi_thoai === ma)); }
 
@@ -576,7 +581,9 @@ function veDon(p) {
   const duyet = el("button", {class: "chinh", text: "Duyệt"}), huy = el("button", {class: "nhe", text: "Huỷ"});
   const phieu = el("article", {class: "phieu", "aria-label": "Đơn nháp " + p.ma_don},
     el("div", {class: "dau-phieu"}, el("h3", {text: "Phiếu giao hàng nháp"}), el("span", {class: "ma-don", text: p.ma_don})));
-  if (q) phieu.append(dongQuyDoi(q));
+  const dai = q ? dongQuyDoi(q) : null;  // giữ tham chiếu dải quy đổi của chính phiếu này
+  if (dai) phieu.append(dai);
+  let lanKiem = 0;  // chỉ áp kết quả của lần kiểm mới nhất
   const luoi = el("div", {class: "luoi"});
   for (const [k, nhan] of TRUONG) {
     const inp = el("input", {id: "f-" + k, value: t[k] === null || t[k] === undefined ? "" : String(t[k]),
@@ -588,16 +595,18 @@ function veDon(p) {
   luoi.append(el("span", {class: "nhan-o", text: "Tỉnh/thành"}), el("div", {class: "gia-tri", text: t.tinh_thanh || ""}));
   const sua = () => Object.fromEntries(TRUONG.map(([k]) => [k, o[k].inp.value]));
   async function kiem() {
+    const lan = ++lanKiem;
     try {
       const k = await goi("/api/kiem", {ma: p.ma_hoi_thoai, sua: sua()});
+      if (lan !== lanKiem) return;  // đã có lần kiểm mới hơn trên phiếu này
       for (const [f] of TRUONG) {
         const l = k.loi[f] || "", g = (k.goi_y[f] || []).length ? ". Gần giống: " + k.goi_y[f].join(", ") : "";
         o[f].loi.textContent = l ? l + g : ""; o[f].inp.classList.toggle("sai", !!l);
       }
-      const qd = document.getElementById("qd"); if (qd) qd.hidden = k.truong_da_sua.includes("phuong_xa");
+      if (dai) dai.hidden = k.truong_da_sua.includes("phuong_xa");
       duyet.disabled = !k.duoc_duyet;
       bao(k.duoc_duyet ? (k.truong_da_sua.length ? "Đã sửa " + k.truong_da_sua.length + " trường, đơn vẫn qua kiểm" : "") : "Còn trường chưa qua kiểm, chưa duyệt được", !k.duoc_duyet, p.ma_hoi_thoai);
-    } catch (e) { bao(e.message, true, p.ma_hoi_thoai); }
+    } catch (e) { if (lan === lanKiem) bao(e.message, true, p.ma_hoi_thoai); }
   }
   duyet.addEventListener("click", async () => {
     duyet.disabled = true;
