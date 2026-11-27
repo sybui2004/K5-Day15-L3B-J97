@@ -82,7 +82,8 @@ def py(*args):
 
 
 def run_app():
-    return py(os.path.join("codebase", "app.py"))
+    # Nhóm J97 (P2): mở màn hình duyệt web ở http://127.0.0.1:8000. Bản dòng lệnh dự phòng: python codebase/app.py
+    return py(os.path.join("codebase", "web.py"))
 
 
 def main(argv):
