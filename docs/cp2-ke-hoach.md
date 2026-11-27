@@ -167,7 +167,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 | Giờ | Sỹ | Hưng | Việt Anh | An |
 |---|---|---|---|---|
 | 16:30–17:15 | Cả nhóm đọc lại §7 + metric ở PR #9 rồi merge · E3 `evidence/summary.md`: đã hỏi / đã hẹn / đã đào đến đâu | **X0** bảng chuyển đổi (TP HCM, địa bàn cũ) | **Y3** câu không cần bảng: thiếu sđt, sđt 9 số, `+84`, đổi ý giữa chừng, giao người khác, 2 câu `tu_choi` | **E3** canvas: dòng 4 (số đầu + 1 trích dẫn), dòng 5 lát cắt mới, "Đã đổi gì so với CP1" · gom tin chủ shop đã ẩn danh để làm câu `nguoi_dung` |
-| 17:15–18:15 | Lấy key, gọi thử model 1 câu (guide 3.3) · hỏi lab coach chuyện `run_app()` (P2) | Gửi Cặp Y danh sách phường cũ bị tách · bắt đầu **X2** (không bắt buộc CP2) | **Y3** câu địa chỉ cũ: gộp gọn, bị tách có / không căn cứ, tỉnh cũ đã gộp · **Y4** DATA_CARD | **Y3** câu từ lời người dùng (≥1/3 bộ) · điền số câu theo loại ở §7 |
+| 17:15–18:15 | Lấy key, gọi thử model 1 câu (guide 3.3) | Gửi Cặp Y danh sách phường cũ bị tách · bắt đầu **X2** (không bắt buộc CP2) | **Y3** câu địa chỉ cũ: gộp gọn, bị tách có / không căn cứ, tỉnh cũ đã gộp · **Y4** DATA_CARD | **Y3** câu từ lời người dùng (≥1/3 bộ) · điền số câu theo loại ở §7 |
 | 18:15–18:45 | **F1** tự soát theo guide 2.5 | Review chéo `eval/benchmark.csv` | **Y5** chấm thử 5 output chạy tay cùng An · `run.py check` sạch | **Y5** chấm thử cùng Việt Anh |
 | 18:45–19:00 | Merge `develop` → `main`, mở repo bằng cửa sổ ẩn danh, **nộp CP2** | | | |
 | Tối → 10:00 Thứ Bảy | **X3** → **X4** → **P1** | **X2** → **P2** | **P3** · mở rộng bộ câu thử lên 20–30 · `spec.md` §5 | **Y7** `eval/grade.py` → **P4** lượt 1 (8:30) |
@@ -175,7 +175,69 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - **23:00 Thứ Sáu — mốc cắt:** P2 (web) chưa chạy được thì bỏ D, giữ B (B đo được bằng câu hội thoại dài trong benchmark), ghi `spec.md` §10 là thu hẹp lát cắt.
 - **Từ 19:30:** `spec.md` là bản chính. File này chỉ còn là danh sách task; spec đổi gì thì sửa `spec.md` trước.
 
-**Cách làm git:** mỗi người tạo nhánh từ `develop` (`feature/cp2-x-…`, `feature/cp2-y-…`), PR vào `develop`, người cặp kia duyệt. Commit message không có dòng `Co-Authored-By` hay ghi công AI (AGENTS.md).
+**Cách làm git:** mỗi task một nhánh tạo từ `develop` mới nhất, PR vào `develop`, **người cặp kia duyệt** (Cặp X: Sỹ ↔ Hưng · Cặp Y: Việt Anh ↔ An). Commit message không có dòng `Co-Authored-By` hay ghi công AI (AGENTS.md). Tạo nhánh:
+
+```
+git checkout develop && git pull
+git checkout -b <tên nhánh ở bảng dưới>
+# làm, commit, rồi:
+git push -u origin <tên nhánh>   # mở PR vào develop
+```
+
+**Nhánh của từng người** (làm theo thứ tự từ trên xuống; xong nhánh trước, merge rồi mới tạo nhánh sau từ `develop` mới):
+
+| Người | Nhánh | Task | File chính | Chờ ai |
+|---|---|---|---|---|
+| **Sỹ** | `feature/cp2-e3-bang-chung` | E3 tổng hợp bằng chứng | `evidence/interviews/P1.md`–`P4.md`, `evidence/summary.md` | — |
+| | *(không nhánh)* | F1 tự soát, PR `develop` → `main`, nộp CP2 | — | mọi PR CP2 đã merge |
+| | `feature/cp3-x3-agent` | X3 luồng chính | `codebase/agent.py`, `tests/test_agent.py` | X2 (dùng stub đến khi X2 merge, rồi `git rebase develop`) |
+| | `feature/cp3-x4-chay-khung` | X4 chạy hết luồng, gọi thử model | `README.md` (lệnh chạy) | X3 |
+| | `feature/cp3-p1-hop-thu` | P1 hộp thư (luồng A) | `codebase/inbox.py`, `data/hop-thu-mau.jsonl`, `tests/test_inbox.py` | X3 |
+| **Hưng** | `feature/cp2-x0-bang-chuyen-doi` | X0 bảng chuyển đổi địa giới | `data/chuyen-doi-dia-gioi.csv` | — (**merge sớm nhất**, Cặp Y đang chờ) |
+| | `feature/cp3-x2-tools` | X2 bốn công cụ | `codebase/tools.py`, `tests/test_tools.py` | X0 |
+| | `feature/cp3-p2-man-hinh-duyet` | P2 màn hình duyệt (D + B), sửa `run_app()` | `codebase/web.py`, `run.py`, `AGENTS.md`, `tests/test_web.py` | X2, X3, P1 |
+| **Việt Anh** | `feature/cp2-y-cau-thu` *(chung với An)* | Y3 câu thử `B01`–`B09` · Y4 DATA_CARD · Y5 chấm thử | `eval/benchmark.csv`, `data/DATA_CARD.md`, `eval/README.md` | X0 (câu địa chỉ cũ) |
+| | `feature/cp3-p3-khach-cu` | P3 luồng C | `codebase/tools.py` (thêm `get_customer_history`), `data/lich-su-khach.csv`, `tests/` | X3 |
+| | `feature/cp3-y-cau-thu-30` | mở rộng bộ câu thử lên 20–30 · `spec.md` §5 | `eval/benchmark.csv`, `spec.md` §5 | — |
+| **An** | `feature/cp2-e3-canvas` | E3 canvas | `canvas.md` | ghi chép phỏng vấn |
+| | `feature/cp2-y-cau-thu` *(chung với Việt Anh)* | Y3 câu thử `B10`–`B19` (câu `nguoi_dung`) · số câu ở `spec.md` §7 · Y5 chấm thử | `eval/benchmark.csv`, `spec.md` §7 | Việt Anh tạo nhánh trước |
+| | `feature/cp3-y7-grade` | Y7 `eval/grade.py` | `eval/grade.py`, `tests/test_grade.py`, `eval/README.md` | — |
+| | `feature/cp3-p4-luot-1` | P4 lượt 1 | `eval/run-1.csv`, `traces/run-1.jsonl`, `eval/report.md` | X3, X4, Y7 |
+
+**Thứ tự merge vào `develop`** (người duyệt là người merge; trước khi merge: `git rebase develop`, chạy `python3 -m unittest discover -s tests -v` nếu có test, và `python3 run.py check`):
+
+*Trước CP2 — mọi PR merge xong trước **18:30**:*
+
+| # | Nhánh | Người làm → người duyệt, merge | Hạn | Vì sao ở vị trí này |
+|---|---|---|---|---|
+| 1 | `feature/cp2-run-app` (PR #10, kế hoạch này) | Sỹ | ngay | mọi người cần bảng nhánh |
+| 2 | `feature/cp2-x0-bang-chuyen-doi` | Hưng → Sỹ | 17:15 | Cặp Y cần tên phường để viết câu địa chỉ cũ |
+| 3 | `feature/cp2-e3-bang-chung` | Sỹ → Hưng | 18:00 | canvas lấy số và trích dẫn từ đây |
+| 4 | `feature/cp2-e3-canvas` | An → Việt Anh | 18:15 | sau #3 |
+| 5 | `feature/cp2-y-cau-thu` | Việt Anh, An → Hưng | 18:30 | merge cuối: có số câu ở §7, `run.py check` phải sạch trên `develop` sau khi merge |
+| 6 | PR `develop` → `main` | Sỹ | 18:45 | F1, rồi nộp CP2 |
+
+*CP2 → CP3 — xong trước **9:45 Thứ Bảy**:*
+
+| # | Nhánh | Người làm → người duyệt, merge | Hạn | Vì sao ở vị trí này |
+|---|---|---|---|---|
+| 7 | `feature/cp3-x2-tools` | Hưng → Sỹ | 22:00 | X3, P2, P3 đều dùng công cụ |
+| 8 | `feature/cp3-x3-agent` | Sỹ → Hưng | 23:30 | rebase sau #7, thay stub bằng công cụ thật |
+| 9 | `feature/cp3-x4-chay-khung` | Sỹ → Hưng | 0:00 | sau #8 |
+| 10 | `feature/cp3-y7-grade` | An → Việt Anh | 0:00 | không phụ thuộc ai, merge lúc nào xong cũng được |
+| 11 | `feature/cp3-p1-hop-thu` | Sỹ → Hưng | 7:30 | sau #8 |
+| 12 | `feature/cp3-p3-khach-cu` | Việt Anh → An | 7:30 | sau #7, #8; sửa cuối `tools.py` nên rebase trước khi merge |
+| 13 | `feature/cp3-y-cau-thu-30` | Việt Anh → An | 8:00 | bộ 20–30 câu phải xong trước lượt 1 |
+| 14 | `feature/cp3-p2-man-hinh-duyet` | Hưng → Sỹ | 8:00 | sau #7, #8, #11; quá 23:00 chưa chạy thì bỏ D (xem mốc cắt ở trên) |
+| 15 | `feature/cp3-p4-luot-1` | An → Việt Anh | 9:30 | chạy lượt 1 trên `develop` đã có #8–#13 |
+| 16 | PR `develop` → `main` | Sỹ | 9:45 | nộp CP3 |
+
+#11 và #12 không phụ thuộc nhau, xong trước thì merge trước. Một PR bị trễ thì các PR không phụ thuộc nó (cột "Vì sao") vẫn merge bình thường.
+
+**Tránh xung đột:**
+- `feature/cp2-y-cau-thu` là nhánh chung: Việt Anh tạo và push trước. An `git fetch && git checkout feature/cp2-y-cau-thu`. Mỗi người chỉ thêm dòng trong khoảng `id` của mình, **`git pull --rebase` trước mỗi lần push**. Xung đột ở cuối `benchmark.csv` thì giữ cả hai phía.
+- `spec.md`: An sửa §7, Việt Anh sửa §5 (sau CP2). Mục khác trong `spec.md` chỉ sửa §10 changelog, mỗi người thêm một dòng.
+- `codebase/tools.py`: Hưng sở hữu. Việt Anh thêm `get_customer_history` **sau khi X2 merge**, thêm ở cuối file.
 
 ---
 
@@ -448,7 +510,7 @@ Ba metric ghi `grader: code` (`khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `tric
 
 ### P2 · Luồng D + B — màn hình duyệt *(Hưng)*
 
-**Stack:** `http.server` của thư viện chuẩn, không thêm thư viện, **chỉ bind `127.0.0.1:8000`** (không dùng `0.0.0.0`). Docstring `codebase/app.py` yêu cầu `python run.py` là lệnh **duy nhất** chạy bản chạy thử, đổi giao diện thì sửa `run_app()` trong `run.py`; nhưng `AGENTS.md` xếp `run.py` vào phần khung không sửa. **Hỏi lab coach trước:** được thì `run_app()` mở web, giữ bản dòng lệnh làm dự phòng; chưa được thì `python run.py` vẫn là dòng lệnh, web chạy bằng `python3 codebase/web.py`, ghi rõ trong README.
+**Stack:** `http.server` của thư viện chuẩn, không thêm thư viện, **chỉ bind `127.0.0.1:8000`** (không dùng `0.0.0.0`). **`python run.py` là lệnh duy nhất chạy bản chạy thử** (docstring `codebase/app.py`): nhóm đã chốt được sửa `run.py`, chỉ sửa hàm `run_app()` để mở web; giữ bản dòng lệnh làm dự phòng (vd `python run.py cli` hoặc `python3 codebase/app.py`). Cập nhật bảng "Cấu trúc code" trong `AGENTS.md` cho khớp.
 **Consumes:** `xu_ly_hop_thu` (P1), `xu_ly` (X3), `validate_phone`, `lookup_address` (X2)
 
 Màn hình:
