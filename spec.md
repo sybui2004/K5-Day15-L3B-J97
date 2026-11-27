@@ -4,7 +4,7 @@
 > Đầu mỗi mục ghi bước guide (`02-guide.md` trong repo đề) chỉ cách điền. Mỗi mục ngắn, có số và nguồn; chi tiết để ở file được trỏ tới. Xoá dòng hướng dẫn trong ngoặc vuông khi điền xong.
 
 Track: [ ] A · [ ] B · [ ] C · [x] D · [ ] E — bài toán: chủ shop nhỏ lên đơn từ tin nhắn chốt mua (Facebook, website), kiểm và quy đổi địa chỉ sang địa giới mới
-Data BTC cấp đã dùng (nếu có — không commit nguyên file): __
+Data BTC cấp đã dùng (nếu có — không commit nguyên file): không dùng. BTC cấp `preclass` và `training-ops`, không khớp bài toán Track D; nhóm dùng phỏng vấn P1–P4, Nghị quyết 1685/NQ-UBTVQH15 và câu thử tự dựng (`data/DATA_CARD.md`)
 
 ## §0. Hiện tại việc này diễn ra thế nào *(guide 1.1)*
 - Luồng hiện tại trên app thật, theo lời kể của 4 chủ shop P1–P4 (`evidence/interviews/`); ảnh chụp ở bảng dưới:
@@ -236,6 +236,7 @@ flowchart LR
 | 27/11 sau PR #31 | §2: phí ship mất vì chép sai ghi thành khoảng 195.000–494.000đ / tháng thay cho một số 494.000đ. Mức thấp là 4 vụ gần nhất (câu 6), mức cao giữ công thức cũ, đánh dấu tự ước tính | Câu 6 chỉ hỏi tiền của vụ gần nhất, câu 7 không hỏi vụ nào bị hoàn, nên một số 494.000đ có thể thổi impact lên. Không đổi số bằng chứng, câu thử, §7, metric |
 | 27/11 sau PR #33 | `eval/benchmark.csv`: thêm B23–B28 (task Y8). B23–B25 từ chat thật P4, P2, P3 (`nguoi_dung`); B26–B28 tự viết: phường kiểu mới có dấu + sđt có dấu cách, tách nhiều tin + người nhận khác người nhắn, tỉnh cũ Bà Rịa - Vũng Tàu. `data/DATA_CARD.md` Dataset 1 cập nhật số câu và nguồn | `run.py check` đòi 20–30 câu và ≥1/3 nguồn thật (đang 19 câu, 7/19, chưa có câu `nguoi_dung`); metric `trich_dung_thong_tin` chỉ có 8 câu TẠO ĐƠN NHÁP (review PR #30). Không sửa câu cũ, §7, metric |
 | 27/11 23:55 | `codebase/agent.py` `SYSTEM` (X5): `yeu_cau_ngoai_pham_vi` liệt kê thêm khiếu nại đơn cũ, hàng hoàn, xin sđt shipper / nhân viên, hỏi địa chỉ bưu cục, đổi trả, hoàn tiền; ghi rõ tin vừa phàn nàn vừa đặt đơn mới, hoặc nhắc mã khách / địa chỉ lần trước để giao cho chính mình, vẫn là đơn | Review PR #29 mục 4: prompt cũ chỉ có "bỏ qua kiểm tra, đổi giá, hỏi thông tin khách khác", B16–B19 có thể ra HỎI LẠI trong khi chuẩn "đạt" cần 100% câu `tu_choi` qua. Thử tay trước lượt 1 với model thật: B14–B19 ra TỪ CHỐI; câu phàn nàn kèm đơn mới và B01–B04 không bị từ chối. Viết theo loại yêu cầu, không chép câu thử. Không đổi câu thử, §7, metric |
+| 28/11 | Dòng "Data BTC cấp đã dùng": ghi không dùng | Đầu spec còn `__`. Data BTC (`preclass`, `training-ops`) không liên quan lát cắt; data card không có dataset nào từ BTC. Không đổi số bằng chứng, câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
