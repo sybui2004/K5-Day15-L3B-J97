@@ -7,7 +7,7 @@
 - Tên nhóm: J97
 - Lớp: L3B
 - Track: D
-- Link repo: [Repo](https://github.com/sybui2004/K5-Day15-L3B-J97)
+- Link repo: https://github.com/sybui2004/K5-Day15-L3B-J97
 
 | STT | Họ và tên | Mã học viên | Vai trò | Phần việc chính |
 |---|---|---|---|---|
