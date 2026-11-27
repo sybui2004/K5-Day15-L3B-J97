@@ -1,22 +1,21 @@
 # Data card — dữ liệu bản chạy thử dùng
 
-> Điền ở guide bước 2.4 (bản đầu ở CP2, đủ ở CP3). Ôn lại: ngày 6 · lab ngày 6. Chấm ở rubric R4.
-> Một trang. Mỗi dataset một mục. Dữ liệu chạy thử (bài mẫu, thông báo mẫu, đoạn transcript…) để trong thư mục `data/` này.
-> Không commit nguyên tài liệu khoá, dữ liệu cá nhân thật hay nguyên file data BTC cấp — chỉ đoạn trích ngắn, bản viết lại, hoặc số đã tổng hợp.
+> Bản đầu CP2 (đủ ở CP3) · chấm ở rubric R4. Hai dataset: hội thoại chốt đơn (bộ câu thử) và bảng chuyển đổi địa giới (nguồn cho công cụ).
+> Không commit dữ liệu cá nhân thật hay nguyên file data BTC cấp. Chỗ ghi *(chờ Y3)* là số chưa có, điền khi `eval/benchmark.csv` xong.
 
-## Dataset 1 · [tên]
+## Dataset 1 · Hội thoại chốt đơn qua tin nhắn (`eval/benchmark.csv`)
 
 | | |
 |---|---|
-| Dùng để làm gì | nguồn cho công cụ `…` · bộ câu thử · đào bằng chứng |
-| Từ đâu | data BTC cấp (`…` trong repo đề) · tài liệu khoá (trích / viết lại) · nhóm tự viết · sinh có seed |
-| Xử lý những bước gì | lọc __ · làm sạch __ · ẩn danh __ · chia __ (script: `…`) |
-| Số dòng / số đoạn | __ |
-| Phiên bản / ngày lấy | __ |
-| Nhãn | thật · `synthetic` |
-| Giới hạn | thiếu gì, lệch về phía nào |
+| Dùng để làm gì | bộ câu thử cho `python run.py eval` (mỗi câu một hội thoại khách đã đồng ý mua → quyết định TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI) · input chạy tay Y1 (`eval/chay-tay-y1.md`, nhánh `feature/cp2-y-eval`) |
+| Từ đâu | hai nguồn, ghi ở cột `source` từng câu: (1) `nguoi_dung: P_` / `data_that: …` — tin nhắn thật chủ shop gửi ở E2, đã ẩn danh, **≥1/3 số câu**; (2) `tu_viet` — nhóm tự viết theo lưới input ở `docs/cp2-ke-hoach.md` Y3 (kiểu địa chỉ · mức thiếu · độ lộn xộn · người nhận · hành vi mong đợi) |
+| Xử lý những bước gì | ẩn danh tin thật: thay tên, số điện thoại, số nhà bằng giá trị dựng, giữ nguyên cách viết (không dấu, viết tắt, rải nhiều lượt) · đổi về định dạng input ở kế hoạch 1.3 (a) (cả đoạn chat một dòng, mở đầu `Mã khách: KH-xxx`, các lượt `Khách:` / `Shop:` cách nhau bằng dấu gạch đứng có cách hai bên) · mọi phường cũ/mới trong câu lấy từ Dataset 2, trừ câu cố ý dùng phường không có trong bảng · không chỉnh `expected` cho khớp output |
+| Số dòng / số đoạn | *(chờ Y3)* tổng số câu · số câu `thuong` / `kho` / `tu_choi` · số câu `nguoi_dung`/`data_that` so với `tu_viet`. Mục tiêu CP2: 12–15 câu, ≥4 `thuong`, ≥6 `kho`, ≥2 `tu_choi` |
+| Phiên bản / ngày lấy | bản CP2, 27/11/2026 · tin thật E2: *(chờ Y3: ngày nhận, từ chủ shop nào — mã P_)* |
+| Nhãn | câu `nguoi_dung` / `data_that`: thật (đã ẩn danh) · câu `tu_viet`: `synthetic` |
+| Giới hạn | ít câu (12–15), chưa đủ để kết luận tỉ lệ lỗi chắc chắn · câu `tu_viet` do chính nhóm viết nên dễ hợp ý code của nhóm hơn tin thật · địa chỉ chỉ ở TP Hồ Chí Minh (theo Dataset 2) · chỉ tiếng Việt, chỉ dạng văn bản (không ảnh chụp đơn, không tin thoại) |
 
-**Data `synthetic` (nhóm tự sinh):** ghi cách sinh (prompt / script), seed, người kiểm, số dòng đã kiểm tay. Data tự dựng **không phải bằng chứng pain**.
+**Data `synthetic` (câu `tu_viet`):** cách viết *(chờ Y3: viết tay hay nhờ model sinh — nếu nhờ model thì ghi prompt, model, ngày)*. Tên, số điện thoại, số nhà là giá trị dựng, không phải người thật. Người viết: Việt Anh (`B01`–`B09`; `B10`–`B19` là câu `nguoi_dung` do An ẩn danh từ tin thật) · người kiểm chéo: *(chờ Y3)* · số câu đã kiểm tay: *(chờ Y3)*. Data tự dựng **không phải bằng chứng pain**: bằng chứng pain nằm ở `evidence/`.
 
 ## Dataset 2 · Bảng chuyển đổi địa giới TP Hồ Chí Minh (`data/chuyen-doi-dia-gioi.csv`)
 
