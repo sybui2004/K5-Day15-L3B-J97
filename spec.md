@@ -55,15 +55,18 @@ Số trong bảng lấy từ phỏng vấn P1–P4 (n = 4, `evidence/interviews/
 
 | Hướng | Bao nhiêu người gặp | Bao nhiêu lần / tháng | Mỗi lần tốn gì | Impact / tháng (4 shop) | Làm kịp không | Chọn? |
 |---|---|---|---|---|---|---|
-| **Lên đơn từ tin nhắn chốt mua** (kiểm sđt, người nhận, quy địa chỉ cũ sang phường mới, hỏi lại một lần) | 4/4 (H2) | Vụ chép sai: P1 3 · P2 4 · P3 2 · P4 1. Đơn có địa chỉ cũ: 20–45% của 260–650 đơn | Mỗi vụ chép sai: 38.000–60.000đ phí ship, 3/4 vụ khách huỷ. Mỗi đơn địa chỉ cũ: thêm 1–3 phút | **≈ 494.000đ phí ship + ≈ 855 phút (≈ 14 giờ)** (tính ở dưới) | Kịp: workflow cố định, 1 lần gọi model, công cụ đều đọc bảng có sẵn | **Chọn** |
+| **Lên đơn từ tin nhắn chốt mua** (kiểm sđt, người nhận, quy địa chỉ cũ sang phường mới, hỏi lại một lần) | 4/4 (H2) | Vụ chép sai: P1 3 · P2 4 · P3 2 · P4 1. Đơn có địa chỉ cũ: 20–45% của 260–650 đơn | Mỗi vụ chép sai: 38.000–60.000đ phí ship, 3/4 vụ khách huỷ. Mỗi đơn địa chỉ cũ: thêm 1–3 phút | **≈ 195.000–494.000đ phí ship + ≈ 855 phút (≈ 14 giờ)** (tính ở dưới) | Kịp: workflow cố định, 1 lần gọi model, công cụ đều đọc bảng có sẵn | **Chọn** |
 | Trả lời tư vấn nhanh lúc đông khách (H1) | 1/4 kể rõ (P4) | P4: 2 lần khách bỏ vì shop trả lời chậm 15–20 phút | Mất đơn; giá trị đơn: chưa hỏi | Thấp, chưa tính được thành tiền: 2 đơn mất ở 1 shop | Không kịp: cần danh mục sản phẩm, giá, tồn kho của từng shop; chốt giá là cam kết với khách | Loại |
 | Xử lý khiếu nại, hoàn đơn vì giao nhầm | 4/4 có vụ hoàn | 1–4 vụ hoàn / shop (cùng các vụ ở hướng 1) | Thời gian xử lý khiếu nại: chưa hỏi | Chưa tính được: không có số phút hay số tiền cho việc xử lý | Không nên: hoàn tiền khó đảo nếu AI sai; chưa có bằng chứng về bước này | Loại |
 
 - **Impact / tháng của hướng chọn** gồm hai phần, đều tính cho 4 shop đã phỏng vấn:
-  - **Phí ship mất vì chép sai** = 4 shop × 2,5 vụ / shop / tháng × ≈ 49.400đ / vụ ≈ **494.000đ / tháng**.
-    - Nguồn số vụ: câu 7, P1 3, P2 4, P3 2, P4 1, cộng lại 10 vụ.
-    - Nguồn tiền mỗi vụ: câu 6, P1 52.000đ, P2 45.000đ, P3 60.000đ, P4 38.000đ. Cộng theo từng shop: 3×52 + 4×45 + 2×60 + 1×38 = 494 nghìn đồng.
-    - *(Tự ước tính:)* coi mọi vụ trong tháng đều tốn bằng vụ gần nhất. Chưa tính tiền hàng mất khi khách huỷ, như đơn 420.000đ của P1.
+  - **Phí ship mất vì chép sai** ≈ **195.000–494.000đ / tháng**:
+    - **Mức thấp, có nguồn chắc** = 4 vụ gần nhất, mỗi shop một vụ: 52.000 + 45.000 + 60.000 + 38.000 = **195.000đ** (câu 6: P1, P2, P3, P4). Phỏng vấn chỉ hỏi tiền của vụ gần nhất, và cả 4 vụ này đều nằm trong 1 tháng qua.
+    - **Mức cao, *(tự ước tính)*** = 4 shop × 2,5 vụ / shop / tháng × ≈ 49.400đ / vụ ≈ **494.000đ**:
+      - Nguồn số vụ: câu 7, P1 3, P2 4, P3 2, P4 1, cộng lại 10 vụ.
+      - Nguồn tiền mỗi vụ: câu 6. Cộng theo từng shop: 3×52 + 4×45 + 2×60 + 1×38 = 494 nghìn đồng.
+      - Phần tự ước tính: coi mọi vụ trong tháng đều bị hoàn và tốn bằng vụ gần nhất. Câu 7 chỉ hỏi "chuyện như vậy xảy ra mấy lần", không hỏi vụ nào bị hoàn, nên số thật có thể thấp hơn.
+    - Cả hai mức đều chưa tính tiền hàng mất khi khách huỷ, như đơn 420.000đ của P1.
   - **Thời gian đổi địa chỉ cũ** = Σ(đơn / tháng × tỉ lệ đơn địa chỉ cũ × phút thêm mỗi đơn) ≈ **855 phút / tháng (≈ 14 giờ)**.
     - P1: 480 × 37,5% × 1,5 = 270 phút.
     - P2: 650 × 45% × 1 = 293 phút.
@@ -230,6 +233,7 @@ flowchart LR
 | 27/11 sau khi nộp CP2 | §0–§3 và §6: điền luồng hiện tại, người dùng và bằng chứng, bảng 3 hướng kèm công thức impact, giải pháp tương tự, bốn đường đi | Lấy từ phỏng vấn P1–P4 (`evidence/summary.md`, `evidence/interviews/`) và §5. Không đổi số bằng chứng, câu thử, §7, metric |
 | 27/11 23:10 | §0, §2, §4, §5, §6: sửa 6 chỗ mô tả lệch code theo review PR #29 (phường bị tách liệt kê **đủ** danh sách, không "tối đa 3" · B13 không có gợi ý · tin TỪ CHỐI chép đúng câu trong code · phép nhân 49.400đ · đoạn chat ở cả P1–P4 · màn hình duyệt ghi nhật ký mỗi lần duyệt/huỷ) | Review của Hưng trên PR #29: spec phải khớp code trước khi nộp CP3. Không đổi số bằng chứng, câu thử, §7, metric |
 | 27/11 sau PR #31 | §0: gắn 4 ảnh chụp luồng hiện tại (`evidence/screenshots/`, đã che tên, sđt, số nhà, tài khoản); ghi kết quả thử form GHN với phường cũ, thay dòng "chưa kiểm" | Guide 1.1 yêu cầu ảnh chụp từ tài khoản của nhóm. Ảnh 03 cho thấy form GHN mặc định vẫn nhận "Phường 4, Quận 3", khác lời P2 kể, nên ghi rõ phần chưa kiểm. Không đổi số bằng chứng, câu thử, §7, metric |
+| 27/11 sau PR #31 | §2: phí ship mất vì chép sai ghi thành khoảng 195.000–494.000đ / tháng thay cho một số 494.000đ. Mức thấp là 4 vụ gần nhất (câu 6), mức cao giữ công thức cũ, đánh dấu tự ước tính | Câu 6 chỉ hỏi tiền của vụ gần nhất, câu 7 không hỏi vụ nào bị hoàn, nên một số 494.000đ có thể thổi impact lên. Không đổi số bằng chứng, câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
