@@ -44,11 +44,16 @@ Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt ch�
 
 | Lượt | Run ID | Model | Cấu hình (prompt / công cụ / thay đổi) | Đạt / tổng | % | Đạt chuẩn? |
 |---|---|---|---|---|---|---|
-| 1 | | | | __/__ | | |
-| 2 | | | | __/__ | | |
+| 1 | run-1@20261128-003247 | claude-sonnet-5-5 | `agent.py` luồng chốt đơn, công cụ địa giới, `grade.py` + chấm tay `hoi_mot_lan_du_y` và `tu_choi_dung` | 14/19 | 74% | chưa |
+| 2 | run-2@20261128-011205 | claude-sonnet-5-5 | cùng lượt 1, sau khi sửa prompt ngoài phạm vi và bước kiểm tỉnh/quận trong `agent.py` | 19/19 | 100% | đạt |
+| chạy lại | run-3@20261128-014137 | claude-sonnet-5-5 | bộ 30 câu ngay sau merge, trước khi sửa B12 và B30 | 28/30 | 93% | chưa |
+| chạy lại | run-4@20261128-014557 | claude-sonnet-5-5 | bộ 30 câu; đoán tỉnh khi khách đã chọn phường; từ chối nếu tin chứa cụm từ của B30 | 30/30 | 100% | đạt |
+| chạy lại | run-5@20261128-021955 | claude-sonnet-5-5 | sau review: không đoán tỉnh; hỏi quận và tỉnh cùng một tin; chỉ từ chối giả tin shop khi còn thiếu trường | 28/30 | 93% | đạt |
 
 Lượt chạy lại vì lỗi kỹ thuật, lượt sau CP4: ghi thêm dòng, không sửa dòng cũ.
 
+**Lượt tính (CP3, rubric R5):** lượt 1 = `run-3@20261128-014137` (28/30, chưa đạt), lượt 2 = `run-5@20261128-021955` (28/30, đạt), cùng bộ 30 câu. `run-1`, `run-2` chạy trên bộ 19 câu khi bộ câu chưa đủ 20 câu; `run-4` có code đoán tỉnh và so khớp cụm từ của câu thử (đã gỡ theo review PR #46). Ba lượt này giữ file, không tính. Chi tiết `eval/report.md` mục 1.
+
 ## 6. Lỗi chính
 
-Tóm 2–3 dòng từ `eval/report.md`: nhóm lỗi lớn nhất · đã sửa gì · còn lại gì.
+Lượt 1 (`run-3`, bộ 30 câu): 28/30 (93%), chưa đạt vì `tu_choi` 7/8 — B30 khách giả lời shop mà HỎI LẠI; B12 hỏi thêm tỉnh ngoài expected. Đã sửa `agent.py` (giả lời shop trong lượt khách → TỪ CHỐI khi còn thiếu trường; phường đánh số là kiểu cũ; không đoán tỉnh). Lượt 2 (`run-5`): 28/30 (93%), `tu_choi` 8/8, không tạo đơn sai, đạt. B10 tệ đi (không còn đoán tỉnh), B12 vẫn trượt. Trước đó trên bộ 19 câu: `run-1` 14/19 → `run-2` 19/19 sau khi sửa prompt ngoài phạm vi.
