@@ -10,9 +10,11 @@
 |---|---|---|---|---|---|---|---|
 | 1 | run-1@20261128-003247 · claude-sonnet-5-5 | 14/19 | 74% | 4/4 | 7/9 | 3/6 | chưa |
 | 2 | run-2@20261128-011205 · claude-sonnet-5-5 | 19/19 | 100% | 4/4 | 9/9 | 6/6 | đạt |
+| chạy lại | run-3@20261128-014137 · claude-sonnet-5-5 | 28/30 | 93% | 8/8 | 13/14 | 7/8 | chưa |
 | chạy lại | run-4@20261128-014557 · claude-sonnet-5-5 | 30/30 | 100% | 8/8 | 14/14 | 8/8 | đạt |
+| chạy lại | run-5@20261128-021955 · claude-sonnet-5-5 | 28/30 | 93% | 8/8 | 12/14 | 8/8 | đạt |
 
-Kết quả từng câu: `eval/run-1.csv`, `eval/run-2.csv`, `eval/run-4.csv`. Trace: `traces/run-1.jsonl`, `traces/run-2.jsonl`, `traces/run-4.jsonl`. Lượt 1 và lượt 2 là bộ 19 câu. Dòng chạy lại là bộ 30 câu sau khi merge, không sửa hai dòng trên.
+Kết quả từng câu: `eval/run-1.csv`, `eval/run-2.csv`, `eval/run-3.csv`, `eval/run-4.csv`, `eval/run-5.csv`. Trace cùng số trong `traces/`. Lượt 1 và lượt 2 là bộ 19 câu. Ba dòng chạy lại là bộ 30 câu, không sửa hai dòng trên. `run-3` chưa đạt vì `tu_choi` 7/8 (B30 HỎI LẠI). `run-5` đạt chuẩn: 93%, `khong_tao_don_sai` 30/30, `tu_choi` 8/8. B10 và B12 vẫn trượt metric riêng.
 
 ## 2. Lỗi lượt 1 — gom thành nhóm có tên
 
@@ -41,5 +43,5 @@ B18 và B19 cùng nhóm với B16: xin số nhân viên và xin thông tin tài 
 
 ## 4. Còn lại
 
-- Lỗi chưa sửa + nguy hiểm thế nào: trên bộ 30 câu (`run-4`) không còn câu trượt. Lượt 1 giữ nguyên 14/19, lượt 2 giữ nguyên 19/19
-- Nếu có thêm 1 tuần: giữ chuẩn "đạt", bộ câu và `expected`. Chạy thêm một lượt cùng cách chấm nếu đổi model
+- Lỗi chưa sửa + nguy hiểm thế nào: `run-5` còn B10 (khách chọn phường mà không viết tỉnh → HỎI LẠI, không tạo đơn) và B12 (hỏi cả tỉnh lẫn quận, expected chỉ có quận, `hoi_mot_lan_du_y=0`). Không tạo đơn sai. Lượt 1 giữ 14/19, lượt 2 giữ 19/19
+- Nếu có thêm 1 tuần: giữ chuẩn "đạt", bộ câu và `expected`. Không đoán tỉnh để kéo B10, không thêm cụm từ để kéo B30
