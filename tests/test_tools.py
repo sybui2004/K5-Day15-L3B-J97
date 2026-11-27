@@ -38,6 +38,14 @@ class TestValidatePhone(unittest.TestCase):
         self.assertFalse(validate_phone(None)["ok"])
         self.assertFalse(validate_phone("09123abc78")["ok"])
 
+    def test_chu_so_khong_phai_ascii(self):
+        # str.isdigit() coi '²', '０' (toàn khổ), '٣' là chữ số; số gọi được chỉ có 0-9
+        for s in ["09" + "²" * 8, "０９１２３４５６７８", "091234567٣"]:
+            with self.subTest(sdt=s):
+                kq = validate_phone(s)
+                self.assertFalse(kq["ok"])
+                self.assertIsNone(kq["sdt_chuan"])
+
 
 class TestConvertOldAddress(unittest.TestCase):
     def test_gop_gon_quan_viet_tat(self):
@@ -99,6 +107,25 @@ class TestConvertOldAddress(unittest.TestCase):
     def test_ngoai_pham_vi(self):
         self.assertEqual(convert_old_address("Hà Nội", "quận Hoàn Kiếm", "phường Hàng Bạc")["ket_qua"], "khong_thay")
 
+    def test_ca_huyen_con_dao(self):
+        # khoản 163: cả huyện Côn Đảo -> đặc khu Côn Đảo; huyện không có phường/xã nên phường cũ để trống là hợp lệ
+        for phuong in ["", None, "Côn Đảo"]:
+            with self.subTest(phuong=phuong):
+                kq = convert_old_address("brvt", "Côn Đảo", phuong)
+                self.assertEqual(kq["ket_qua"], "mot")
+                self.assertEqual(kq["phuong_moi"], ["đặc khu Côn Đảo"])
+                self.assertEqual(kq["khoan"], [163])
+
+    def test_ca_huyen_ten_phuong_mau_thuan(self):
+        kq = convert_old_address("brvt", "huyện Côn Đảo", "Phường 99")
+        self.assertEqual(kq["ket_qua"], "khong_thay")
+        self.assertTrue(kq["ly_do"])
+
+    def test_thieu_phuong_o_quan_co_phuong(self):
+        kq = convert_old_address(HCM, "Quận 3", "")
+        self.assertEqual(kq["ket_qua"], "khong_thay")
+        self.assertTrue(kq["ly_do"])
+
 
 class TestLookupAddress(unittest.TestCase):
     def test_khong_dau_kem_p(self):
@@ -130,6 +157,17 @@ class TestLookupAddress(unittest.TestCase):
         self.assertTrue(kq["ok"])
         self.assertEqual(kq["khop"], "phường Dĩ An")
         self.assertEqual(kq["tinh"], HCM)
+
+    def test_tinh_cu_khong_chua_phuong(self):
+        # phường Bàn Cờ hình thành từ phường của Quận 3 (TP HCM cũ), không thuộc Bình Dương cũ
+        kq = lookup_address("Bình Dương", "phường Bàn Cờ")
+        self.assertFalse(kq["ok"])
+        self.assertIsNone(kq["khop"])
+        self.assertNotIn("phường Bàn Cờ", kq["goi_y"])
+        self.assertTrue(kq["ly_do"])
+        # ghi TP Hồ Chí Minh (mới) thì vẫn tra toàn bảng
+        self.assertEqual(lookup_address(HCM, "phường Dĩ An")["khop"], "phường Dĩ An")
+        self.assertEqual(lookup_address("brvt", "phường Vũng Tàu")["khop"], "phường Vũng Tàu")
 
     def test_trung_ten_khi_bo_dau(self):
         # xã Thanh An (khoản 145) và xã Thạnh An (khoản 164) giống nhau khi bỏ dấu
