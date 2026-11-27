@@ -119,7 +119,9 @@ flowchart LR
 - Ai có thể bị hại nếu AI sai, và nhóm chặn thế nào:
 
 ## §10. Phân công & changelog
-- Phân công có tên (theo chặng, chia cặp — guide "Cách chia việc"): __
+- Phân công có tên (theo chặng, chia cặp — guide "Cách chia việc"; chi tiết task: `docs/cp2-ke-hoach.md`):
+  - **Đến CP2:** Sỹ — sơ đồ §4, tổng hợp bằng chứng, tự soát và nộp · Hưng — bảng chuyển đổi địa giới · Việt Anh — bộ câu thử, data card, metric · An — bộ câu thử (câu từ người dùng), canvas, chuẩn "đạt" §7 · Việt Anh + An — hai người chấm thử.
+  - **CP2 → CP3:** Sỹ — luồng chính `agent.py`, hộp thư (A) · Hưng — công cụ `tools.py`, màn hình duyệt (D + B) · Việt Anh — khách cũ (C), mở rộng bộ câu thử, §5 · An — `eval/grade.py`, chạy lượt 1.
 - Dùng AI vào việc gì (2–3 dòng; chi tiết `docs/ai-usage.md`):
 - Nhật ký thay đổi — **mọi thay đổi sau CP2 19:30 Thứ Sáu 27/11 phải có dòng ở đây**:
 

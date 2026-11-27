@@ -162,15 +162,18 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 
 # Phần 2 · Kế hoạch theo giờ (giờ VN)
 
-| Giờ | Cặp X (Sỹ, Hưng) | Cặp Y (Việt Anh, An) | Cả nhóm |
-|---|---|---|---|
-| ngay bây giờ | X0 bảng chuyển đổi địa giới | Y1 chạy tay | E1 giả thuyết, hẹn người |
-| đến 13:30 | X1 sơ đồ | Y1 (tiếp) | |
-| 13:30–16:00 | X2 công cụ · X3 luồng | Y2 metric · Y3 bộ câu thử · Y4 data card | E2 phỏng vấn, đào review |
-| 16:00–16:45 | review chéo bộ câu thử | Y5 chấm thử 2 người · review chéo sơ đồ | |
-| 16:45–18:00 | X4 chạy hết luồng | Y6 §5 + chốt §7 | E3 đếm bằng chứng, canvas |
-| 18:00–19:00 | F1 tự soát, merge `develop` → `main` | | |
-| 19:00 | **Nộp CP2** (còn 30 phút dự phòng) | | |
+**Lịch thực tế (cập nhật 16:25).** Lịch ban đầu trễ khoảng 2 tiếng. CP2 chỉ cần khung chạy với AI giả (khung của đề đã chạy được), nên **X2, X3 dời sang sau 19:30**. Từ giờ đến 19:30 dồn vào bảng chuyển đổi, bộ câu thử, data card, canvas và bằng chứng.
+
+| Giờ | Sỹ | Hưng | Việt Anh | An |
+|---|---|---|---|---|
+| 16:30–17:15 | Cả nhóm đọc lại §7 + metric ở PR #9 rồi merge · E3 `evidence/summary.md`: đã hỏi / đã hẹn / đã đào đến đâu | **X0** bảng chuyển đổi (TP HCM, địa bàn cũ) | **Y3** câu không cần bảng: thiếu sđt, sđt 9 số, `+84`, đổi ý giữa chừng, giao người khác, 2 câu `tu_choi` | **E3** canvas: dòng 4 (số đầu + 1 trích dẫn), dòng 5 lát cắt mới, "Đã đổi gì so với CP1" · gom tin chủ shop đã ẩn danh để làm câu `nguoi_dung` |
+| 17:15–18:15 | Lấy key, gọi thử model 1 câu (guide 3.3) · hỏi lab coach chuyện `run_app()` (P2) | Gửi Cặp Y danh sách phường cũ bị tách · bắt đầu **X2** (không bắt buộc CP2) | **Y3** câu địa chỉ cũ: gộp gọn, bị tách có / không căn cứ, tỉnh cũ đã gộp · **Y4** DATA_CARD | **Y3** câu từ lời người dùng (≥1/3 bộ) · điền số câu theo loại ở §7 |
+| 18:15–18:45 | **F1** tự soát theo guide 2.5 | Review chéo `eval/benchmark.csv` | **Y5** chấm thử 5 output chạy tay cùng An · `run.py check` sạch | **Y5** chấm thử cùng Việt Anh |
+| 18:45–19:00 | Merge `develop` → `main`, mở repo bằng cửa sổ ẩn danh, **nộp CP2** | | | |
+| Tối → 10:00 Thứ Bảy | **X3** → **X4** → **P1** | **X2** → **P2** | **P3** · mở rộng bộ câu thử lên 20–30 · `spec.md` §5 | **Y7** `eval/grade.py` → **P4** lượt 1 (8:30) |
+
+- **23:00 Thứ Sáu — mốc cắt:** P2 (web) chưa chạy được thì bỏ D, giữ B (B đo được bằng câu hội thoại dài trong benchmark), ghi `spec.md` §10 là thu hẹp lát cắt.
+- **Từ 19:30:** `spec.md` là bản chính. File này chỉ còn là danh sách task; spec đổi gì thì sửa `spec.md` trước.
 
 **Cách làm git:** mỗi người tạo nhánh từ `develop` (`feature/cp2-x-…`, `feature/cp2-y-…`), PR vào `develop`, người cặp kia duyệt. Commit message không có dòng `Co-Authored-By` hay ghi công AI (AGENTS.md).
 
@@ -190,7 +193,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 
 ## Cặp X — Sỹ, Hưng
 
-### X0 · Bảng chuyển đổi địa giới *(30 phút, làm đầu tiên vì Cặp Y cần để viết câu thử)*
+### X0 · Bảng chuyển đổi địa giới *(Hưng · 30 phút, làm đầu tiên vì Cặp Y cần để viết câu thử)*
 
 **File:** tạo `data/chuyen-doi-dia-gioi.csv`, cột `tinh_thanh,quan_huyen_cu,phuong_xa_cu,phuong_xa_moi`
 
@@ -199,7 +202,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - [ ] Gửi Cặp Y: tên file, nguồn, ngày lấy, danh sách phường cũ bị tách.
 - [ ] Commit `data: bảng chuyển đổi địa giới mẫu`.
 
-### X1 · Sơ đồ kiến trúc vào `spec.md` §4 *(30 phút)*
+### X1 · Sơ đồ kiến trúc vào `spec.md` §4 *(Sỹ · đã xong ở PR #9)*
 
 **File:** `spec.md` (dòng tiêu đề, Track, §4)
 
@@ -220,7 +223,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - [ ] Dòng "phần còn giả": bảng chuyển đổi chỉ 1–2 tỉnh; mã vận đơn GHN là mã giả; model đang chế độ fake.
 - [ ] Kiểm: mở `spec.md` trên GitHub thấy sơ đồ hiển thị. Commit `spec §4: sơ đồ kiến trúc CP2`.
 
-### X2 · Công cụ trong `codebase/tools.py` *(1 giờ 15)*
+### X2 · Công cụ trong `codebase/tools.py` *(Hưng · 1 giờ 15 · sau CP2)*
 
 **File:** sửa `codebase/tools.py` (xoá `search_example`), tạo `tests/test_tools.py`
 **Consumes:** `data/chuyen-doi-dia-gioi.csv` (X0)
@@ -257,7 +260,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - [ ] Chạy lại → PASS cả 13 test.
 - [ ] Commit `tools: kiểm sđt, quy đổi và tra địa giới, tạo đơn nháp`.
 
-### X3 · Luồng chính trong `codebase/agent.py` *(1 giờ 15)*
+### X3 · Luồng chính trong `codebase/agent.py` *(Sỹ · 1 giờ 15 · sau CP2, viết theo hợp đồng X2, dùng stub đến khi X2 xong)*
 
 **File:** sửa `codebase/agent.py`, tạo `tests/test_agent.py`
 **Consumes:** 4 công cụ ở X2 · `call_model(system, user) -> {"text", ...}` có sẵn trong `ai.py`
@@ -287,7 +290,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - [ ] Chạy `python3 -m unittest discover -s tests -v` → FAIL, viết code, chạy lại → PASS cả 29 test (X2 + X3).
 - [ ] Commit `agent: workflow đọc hội thoại → kiểm → quyết định`.
 
-### X4 · Chạy hết luồng với AI giả *(20 phút)*
+### X4 · Chạy hết luồng với AI giả *(Sỹ · 20 phút · sau X3)*
 
 - [ ] Không có `.env` (hoặc `MODEL_PROVIDER=fake`). Chạy `python3 run.py`, gõ input mẫu ở 1.3 (a) → in ra `QUYẾT ĐỊNH: HỎI LẠI` và dòng thống kê `(model: fake · gọi model 1 lần · công cụ …)`.
 - [ ] Khi Cặp Y đã có bộ câu thử: `python3 run.py eval --try 3` → chạy hết, không có lỗi ở cột `error`. `eval/run-try.csv` đã có trong `.gitignore`, **không commit**.
@@ -297,18 +300,18 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 
 ## Cặp Y — Việt Anh, An
 
-### Y1 · Chạy tay trước, viết tiêu chí sau *(30 phút)*
+### Y1 · Chạy tay trước, viết tiêu chí sau *(Việt Anh, An · gộp vào Y5)*
 
 - [ ] Lấy 10–15 đoạn chat chốt đơn (ưu tiên tin thật chủ shop gửi ở E2, **đã che tên, sđt, số nhà**), có cả đoạn ghi địa chỉ kiểu cũ. Dán từng đoạn vào ChatGPT hoặc Claude với prompt: "tách người nhận, sđt, địa chỉ, sản phẩm, số lượng; địa chỉ kiểu cũ thì nay thuộc phường nào, chắc không".
 - [ ] Ghi thô từng output: dùng được / sửa được / không chấp nhận được, kèm tên lỗi (đoán sđt, lấy nhầm người nhắn, bỏ sót đổi địa chỉ, **quy đổi phường sai mà vẫn nói chắc**…). Ghi vào `eval/README.md` mục 1.
 - [ ] Đối chiếu với 5 metric ở 1.5. Lỗi thấy được mà chưa metric nào bắt thì báo cả nhóm **trước 16:45** (sau 19:30 không sửa được nữa).
 
-### Y2 · `eval/metric_spec.yaml` *(20 phút)*
+### Y2 · `eval/metric_spec.yaml` *(Việt Anh · đã có ở PR #9, Việt Anh đọc lại và giải thích được)*
 
 - [ ] Điền 5 metric đúng bảng 1.5 (đủ `name, definition, grader, threshold, why`; `why` trỏ về `evidence/summary.md` / canvas dòng 3).
 - [ ] `python3 run.py check` → không còn cảnh báo về metric.
 
-### Y3 · `eval/benchmark.csv` — 12–15 câu cho CP2 *(1 giờ 30)*
+### Y3 · `eval/benchmark.csv` — 12–15 câu cho CP2 *(Việt Anh, An · 1 giờ 30)*
 
 **Lưới input** (mỗi câu một tổ hợp, ô trống là lỗ hổng):
 
@@ -330,25 +333,25 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - [ ] Xoá 3 dòng mẫu B01–B03. `python3 run.py check` → đủ 6 cột, ≥10 câu, ≥5 kho, ≥2 tu_choi, không còn dòng "(ví dụ)".
 - [ ] Commit `eval: bộ câu thử CP2 + metric spec`.
 
-### Y4 · `data/DATA_CARD.md` bản đầu *(20 phút)*
+### Y4 · `data/DATA_CARD.md` bản đầu *(Việt Anh · 20 phút)*
 
 - [ ] **Dataset 1 · Hội thoại chốt đơn:** từ đâu (tin chủ shop gửi, đã che · nhóm tự viết) · ẩn danh gì (tên, sđt, số nhà thay bằng giá trị dựng) · số câu · nhãn thật hoặc `synthetic`.
 - [ ] **Dataset 2 · Bảng chuyển đổi địa giới** (`data/chuyen-doi-dia-gioi.csv`): văn bản nguồn + ngày lấy (Cặp X cung cấp) · số dòng · chỉ 1–2 tỉnh · giới hạn: không đủ cả nước.
 - [ ] Ghi rõ: data tự dựng **không phải bằng chứng pain**.
 
-### Y5 · Hai người chấm thử *(30 phút, dùng output X3 hoặc output chạy tay ở Y1)*
+### Y5 · Hai người chấm thử *(Việt Anh, An · 30 phút, dùng output X3 hoặc output chạy tay ở Y1)*
 
 - [ ] Việt Anh và An chấm **độc lập** cùng 5 output theo `metric_spec.yaml`.
 - [ ] Lệch ≥2/5 → viết lại định nghĩa metric bị lệch rồi chấm lại. Khớp ≥4/5 thì ghi kết quả vào `eval/README.md` mục 3.
 
-### Y6 · `spec.md` §5 và §7 *(30 phút, chốt trước 18:00)*
+### Y6 · `spec.md` §5 và §7 *(§7: An, chốt trước 19:00 · §5: Việt Anh, sau CP2)*
 
 - [ ] §5: ≥6 kịch bản + 2 tấn công, mỗi dòng `tình huống | lớp 1–4 | hành vi mong muốn | mã câu thử`. Kịch bản "làm nhóm sợ khi demo": **phường cũ bị tách, AI tự tin chọn sai phường mới → giao nhầm**.
 - [ ] §7: điền số câu theo loại và **chép nguyên văn chuẩn "đạt" ở 1.4**. Cả nhóm đọc lại một lượt rồi commit `spec §7: chốt chuẩn đạt CP2`. **Sau 19:30 không sửa.**
 
 ---
 
-### Y7 · `eval/grade.py` — chấm bằng code *(Cặp Y · sau CP2, xong trước lượt 1 sáng Thứ Bảy)*
+### Y7 · `eval/grade.py` — chấm bằng code *(An · sau CP2, xong trước lượt 1 sáng Thứ Bảy)*
 
 Ba metric ghi `grader: code` (`khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `trich_dung_thong_tin`) phải có script chấm thật. Định nghĩa metric khoá ở CP2, script thì viết sau được.
 
@@ -376,13 +379,13 @@ Ba metric ghi `grader: code` (`khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `tric
 - [ ] Xin mỗi người 2–3 tin chốt đơn thật **đã che thông tin** → chuyển cho Cặp Y (Y1, Y3).
 - [ ] Ai chưa hẹn được: đào review Google Play của app GHN. Viết cách đếm vào `evidence/data-mining.md` **trước khi đếm**: 100 review mới nhất, mọi mức sao, nhãn *trả lời chậm / sai, thiếu thông tin nhận hàng / khác*.
 
-### E3 · Đếm bằng chứng + cập nhật canvas *(16:45–17:30, Sỹ)*
+### E3 · Đếm bằng chứng + cập nhật canvas *(16:30–17:15 · canvas: An · `evidence/summary.md`: Sỹ)*
 
 - [ ] `evidence/summary.md`: điền số đã có (x/3 người gặp H1, H2 · phút/đơn · số lượt hỏi lại · số review đã gắn nhãn) và ≥1 trích dẫn nguyên văn.
 - [ ] `canvas.md`: dòng 1 và 5 cập nhật lát cắt mới (có quy địa chỉ cũ sang mới) · dòng 4 ghi số đầu tiên + 1 trích dẫn · dòng "Đã đổi gì so với CP1": chốt workflow; thêm quy đổi địa chỉ cũ sang phường/xã mới vì đó là chỗ dễ giao nhầm nhất.
 - [ ] Bằng chứng chưa đạt ngưỡng thì **khai thật** đã làm đến đâu. Khai thật không bị trừ thêm.
 
-### F1 · Tự soát → nộp *(18:00–19:00, Sỹ)*
+### F1 · Tự soát → nộp *(18:15–19:00, Sỹ)*
 
 - [ ] `python3 -m unittest discover -s tests -v` → PASS cả 29 test (nếu X2, X3 làm trước CP2; không thì bỏ bước này, CP2 chỉ cần khung chạy với AI giả).
 - [ ] `python3 run.py check` → không cảnh báo nào cho mức CP2 (cảnh báo "CP3 cần 20–30 câu" được bỏ qua).
