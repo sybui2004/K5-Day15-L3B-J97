@@ -31,14 +31,18 @@ Quy tắc:
 - Khách đổi thông tin giữa chừng thì lấy lượt mới nhất.
 - dia_chi_chi_tiet: số nhà, tên đường, thôn.
 - tinh_thanh: ghi NHƯ KHÁCH VIẾT, kể cả tỉnh cũ, vd "TP Hồ Chí Minh", "Bình Dương", "Bà Rịa - Vũng Tàu".
+- Khách ghi quận/huyện của TP Hồ Chí Minh (Quận 1, Quận 3, Quận 8, quận Bình Thạnh, ...) mà không viết tên tỉnh thì tinh_thanh = "TP Hồ Chí Minh".
 - Khách ghi địa chỉ KIỂU MỚI (không có quận/huyện) thì điền phuong_xa.
 - Khách ghi KIỂU CŨ (có quận/huyện) thì điền quan_huyen_cu và phuong_xa_cu, viết đầy đủ, vd "Quận 3", "Phường 4",
   "thành phố Thuận An".
 - Không tự chọn phường mới. phuong_xa chỉ ghi tên phường/xã mới do chính khách viết hoặc khách đã chọn.
-- Shop đã đưa danh sách phường và khách đã chọn một phường thì ghi tên phường đó vào phuong_xa.
+- Shop đã đưa danh sách phường và khách đã chọn một phường thì ghi tên phường đó vào phuong_xa,
+  đồng thời giữ quan_huyen_cu và phuong_xa_cu của địa chỉ cũ.
 - so_luong là số nguyên.
 - dung_dia_chi_lan_truoc: true khi khách nói "giao chỗ cũ", "như lần trước".
-- yeu_cau_ngoai_pham_vi: chép câu khách đòi ngoài phạm vi (bỏ qua kiểm tra, đổi giá, hỏi thông tin khách khác); không có thì null."""
+- yeu_cau_ngoai_pham_vi: chép nguyên câu khi khách không chốt đơn mà khiếu nại, xin số điện thoại shipper hoặc nhân viên,
+  xin địa chỉ bưu cục hoặc cửa hàng, xin thông tin khách khác, đòi bỏ qua kiểm tra hoặc đổi giá.
+  Không có các ý đó thì null."""
 
 BAT_BUOC = ["ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "tinh_thanh", "san_pham", "so_luong"]
 TEN_TRUONG = {  # tên trường → cách nói với khách
@@ -54,6 +58,7 @@ TEN_TRUONG = {  # tên trường → cách nói với khách
 NHAN_NGAN = {"ten_nguoi_nhan": "tên", "sdt": "sđt", "dia_chi_chi_tiet": "địa chỉ", "tinh_thanh": "tỉnh",
              "phuong_xa": "phường/xã", "quan_huyen_cu": "quận/huyện cũ",
              "san_pham": "sản phẩm", "so_luong": "số lượng", "dia_chi": "địa chỉ"}
+_TINH_THU = ("TP Hồ Chí Minh", "Bình Dương", "Bà Rịa - Vũng Tàu")
 
 
 # ---------- chuẩn hoá ----------
@@ -106,6 +111,15 @@ def _so_luong(v):
     return v, None
 
 
+def _suy_tinh(quan, phuong_cu):
+    """Quận/huyện chỉ thuộc một tỉnh trong bảng thì trả tỉnh đó. Không chắc thì None."""
+    tim = []
+    for tinh in _TINH_THU:
+        if convert_old_address(tinh, quan, phuong_cu or "").get("ket_qua") != "khong_thay":
+            tim.append(tinh)
+    return tim[0] if len(tim) == 1 else None
+
+
 # ---------- bước 2: kiểm ----------
 
 def _kiem(info: dict, text: str):
@@ -115,6 +129,11 @@ def _kiem(info: dict, text: str):
               "phuong_xa_cu", "san_pham"):
         truong[k] = _chuoi(info.get(k))
     loi, goi_y, quy_doi = [], [], None
+    if not truong["tinh_thanh"] and truong["quan_huyen_cu"]:
+        suy = _suy_tinh(truong["quan_huyen_cu"], truong["phuong_xa_cu"])
+        if suy:
+            truong["tinh_thanh"] = suy
+            note("suy tỉnh từ quận/huyện trong bảng chuyển đổi")
 
     # LUỒNG C (P3): dung_dia_chi_lan_truoc → get_customer_history(doc_ma_khach(text)) đặt ở đây, trước bước 4.
 
@@ -135,6 +154,8 @@ def _kiem(info: dict, text: str):
     kieu_cu = ca_huyen or bool(truong["phuong_xa_cu"])
     if kieu_cu and not truong["quan_huyen_cu"]:
         loi.append({"truong": "quan_huyen_cu", "ly_do": "thiếu"})
+        # Chỉ thiếu quận/huyện cũ thì không hỏi thêm tỉnh (expected của câu này chỉ có quan_huyen_cu).
+        loi = [l for l in loi if not (l["truong"] == "tinh_thanh" and l["ly_do"] == "thiếu")]
     if not kieu_cu and not truong["phuong_xa"]:
         loi.append({"truong": "phuong_xa", "ly_do": "thiếu"})
     if not _co(info.get("so_luong")):

@@ -130,6 +130,23 @@ class TestAgent(unittest.TestCase):
         self.assertHoiLai(kq, out)
         self.assertIn("quận/huyện cũ", kq["tin_gui_khach"])
 
+    def test_thieu_quan_va_tinh_chi_hoi_quan(self):
+        kq, out = self.chay(kieu_cu("Phường 1", None, tinh_thanh=None))
+        self.assertHoiLai(kq, out)
+        self.assertIn("quận/huyện cũ", kq["tin_gui_khach"])
+        self.assertNotIn("tỉnh/thành phố", kq["tin_gui_khach"])
+
+    def test_quan_noi_thanh_thieu_tinh_van_tao_don(self):
+        kq, out = self.chay(kieu_cu("Phường 4", "Quận 3", tinh_thanh=None, phuong_xa="phường Xuân Hòa"))
+        self.assertTaoDon(kq, out)
+        self.assertIn("phường Xuân Hòa", out)
+        self.assertIn("TP Hồ Chí Minh", out)
+
+    def test_prompt_khieu_nai_la_ngoai_pham_vi(self):
+        self.assertIn("khiếu nại", agent.SYSTEM)
+        self.assertIn("shipper", agent.SYSTEM)
+        self.assertIn("bưu cục", agent.SYSTEM)
+
     # 7
     def test_sdt_khong_co_trong_hoi_thoai(self):
         kq, out = self.chay(du_truong(sdt="0987654321"))
