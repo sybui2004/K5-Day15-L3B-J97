@@ -38,7 +38,13 @@ Quy tắc:
 - Shop đã đưa danh sách phường và khách đã chọn một phường thì ghi tên phường đó vào phuong_xa.
 - so_luong là số nguyên.
 - dung_dia_chi_lan_truoc: true khi khách nói "giao chỗ cũ", "như lần trước".
-- yeu_cau_ngoai_pham_vi: chép câu khách đòi ngoài phạm vi (bỏ qua kiểm tra, đổi giá, hỏi thông tin khách khác); không có thì null."""
+- yeu_cau_ngoai_pham_vi: chép ngắn câu khách đòi việc KHÔNG phải lên một đơn mới. Gồm:
+  đòi bỏ qua kiểm tra hoặc tạo đơn khi chưa đủ thông tin; đổi giá, xin bớt giá; hỏi tên, sđt, địa chỉ của khách khác;
+  khiếu nại đơn cũ (giao trễ, giao sai, thái độ nhân viên), hàng hoàn chưa được lấy;
+  xin sđt hoặc tên shipper, nhân viên giao hàng; hỏi địa chỉ bưu cục, kho, cửa hàng; đổi trả, hoàn tiền.
+  Tin có lời phàn nàn nhưng khách VẪN đặt đơn mới và đưa thông tin nhận hàng thì đó là đơn: để null, trích như bình thường.
+  Khách nhắc mã khách hoặc "địa chỉ lần trước" để giao cho chính mình là đặt đơn: để null.
+  Không có thì null."""
 
 BAT_BUOC = ["ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "tinh_thanh", "san_pham", "so_luong"]
 TEN_TRUONG = {  # tên trường → cách nói với khách
