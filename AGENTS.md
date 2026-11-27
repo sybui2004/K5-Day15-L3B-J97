@@ -43,3 +43,5 @@ Khung chỉ dùng thư viện chuẩn của Python. Thêm thư viện thì ghi v
 - Ngôn ngữ trả lời người dùng: __
 - Phong cách code / đặt tên: __
 - Ai duyệt thay đổi do agent tạo trước khi commit: __
+- Commit message không có dòng `Co-Authored-By` hay dòng ghi công cho AI / agent.
+- Mô tả PR không có dòng "Generated with …" hay dòng ghi công tương tự cho AI / agent.
