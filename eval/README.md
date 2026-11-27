@@ -52,6 +52,8 @@ Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt ch�
 
 Lượt chạy lại vì lỗi kỹ thuật, lượt sau CP4: ghi thêm dòng, không sửa dòng cũ.
 
+**Lượt tính (CP3, rubric R5):** lượt 1 = `run-3@20261128-014137` (28/30, chưa đạt), lượt 2 = `run-5@20261128-021955` (28/30, đạt), cùng bộ 30 câu. `run-1`, `run-2` chạy trên bộ 19 câu khi bộ câu chưa đủ 20 câu; `run-4` có code đoán tỉnh và so khớp cụm từ của câu thử (đã gỡ theo review PR #46). Ba lượt này giữ file, không tính. Chi tiết `eval/report.md` mục 1.
+
 ## 6. Lỗi chính
 
-Lượt 1: 14/19 (74%), chưa đạt. Nhóm lớn nhất là B16, B18, B19 khiếu nại mà HỎI LẠI, kèm B10 và B12. Đã sửa `agent.py`. Lượt 2 (`run-2@20261128-011205`): 19/19 (100%), đạt. Không câu nào tệ đi. Bộ 30 câu: `run-3` 28/30, chưa đạt (B12 hỏi sai trường, B30 HỎI LẠI). `run-4` 30/30 bằng cách đoán tỉnh và khớp cụm từ. `run-5` bỏ hai cách đó: 28/30 (93%), `tu_choi` 8/8, không tạo đơn sai, đạt chuẩn. B10 hỏi tỉnh. B12 hỏi thêm tỉnh.
+Lượt 1 (`run-3`, bộ 30 câu): 28/30 (93%), chưa đạt vì `tu_choi` 7/8 — B30 khách giả lời shop mà HỎI LẠI; B12 hỏi thêm tỉnh ngoài expected. Đã sửa `agent.py` (giả lời shop trong lượt khách → TỪ CHỐI khi còn thiếu trường; phường đánh số là kiểu cũ; không đoán tỉnh). Lượt 2 (`run-5`): 28/30 (93%), `tu_choi` 8/8, không tạo đơn sai, đạt. B10 tệ đi (không còn đoán tỉnh), B12 vẫn trượt. Trước đó trên bộ 19 câu: `run-1` 14/19 → `run-2` 19/19 sau khi sửa prompt ngoài phạm vi.
