@@ -45,7 +45,7 @@ Data BTC cấp đã dùng (nếu có — không commit nguyên file): __
   | **C · Khách cũ** | "giao chỗ cũ nha" → đọc địa chỉ lần trước của **chính tài khoản chat đó**, địa chỉ cũ thì quy đổi lại | CP3 |
   | **D · Màn hình duyệt (HITL)** | chủ shop xem đơn nháp, sửa trường, duyệt hoặc huỷ trên web; sửa xong code kiểm lại | CP3 |
 
-- **Không làm:** tư vấn sản phẩm, chốt giá · xử lý đổi trả, khiếu nại · gọi API GHN thật hay bàn giao đơn thật · gửi tin thật cho khách (tin hỏi lại chỉ hiện để chủ shop bấm gửi) · tỉnh/thành ngoài bảng chuyển đổi mẫu · nhiều shop cùng lúc.
+- **Không làm:** tư vấn sản phẩm, chốt giá · xử lý đổi trả, khiếu nại · gọi API GHN thật hay bàn giao đơn thật · gửi tin thật cho khách (tin hỏi lại chỉ hiện để chủ shop bấm gửi) · tỉnh/thành ngoài bảng chuyển đổi mẫu · địa chỉ ghi tên tỉnh cũ đã gộp vào tỉnh khác (vd Bình Dương, Bà Rịa - Vũng Tàu nay thuộc TP Hồ Chí Minh theo Nghị quyết 202/2025/QH15): bảng mẫu chỉ phủ địa bàn của tỉnh/thành **cũ** đã chọn ở X0, ngoài đó code ra HỎI LẠI · nhiều shop cùng lúc.
 - **Sơ đồ:**
 
 ```mermaid
@@ -76,7 +76,7 @@ flowchart LR
   | `get_customer_history` *(CP3)* | mã tài khoản chat (str) | `{co: bool, dia_chi_lan_truoc: dict, ngay: str}` | không: chỉ đọc |
 
 - **Mức tự động:** [ ] AI gợi ý, người quyết · [x] AI tự làm khi chắc, chuyển người khi không · [ ] AI tự làm. Tin hỏi lại được soạn sẵn, chủ shop bấm gửi; **tạo đơn chỉ tạo bản nháp**, chủ shop duyệt rồi mới bàn giao, vì sai địa chỉ thì chủ shop mất hàng và phí ship, còn sửa một đơn nháp thì rẻ.
-- **Chỗ chặn rủi ro:** rủi ro lớn nhất là **phường cũ bị tách, AI tự tin chọn sai phường mới → giao nhầm**. Chặn ở Bước 2 bằng code: phường mới AI đề xuất **phải có trong bảng chuyển đổi chính thức** và phải kèm `do_chac: "cao"` cùng căn cứ cụ thể, nếu không thì HỎI LẠI kèm danh sách phường để khách chọn. Trường nào không qua kiểm thì không có đơn nháp, dù khách nói gì. Khách cũ (C): chỉ đọc lịch sử theo **mã tài khoản chat** đang nhắn, không theo số điện thoại khách đưa, để người lạ không lấy được địa chỉ của người khác.
+- **Chỗ chặn rủi ro:** rủi ro lớn nhất là **phường cũ bị tách, AI tự tin chọn sai phường mới → giao nhầm**. Chặn ở Bước 2 bằng code: phường mới AI đề xuất **phải có trong bảng chuyển đổi chính thức** và phải kèm `do_chac: "cao"` cùng căn cứ cụ thể, nếu không thì HỎI LẠI kèm danh sách phường để khách chọn. Trường nào không qua kiểm thì không có đơn nháp, dù khách nói gì. Code còn chặn model đoán: sđt phải có trong hội thoại, căn cứ chọn phường phải là chữ có trong hội thoại. Khách cũ (C): chỉ đọc lịch sử theo **mã tài khoản chat** đang nhắn, không theo số điện thoại khách đưa, để người lạ không lấy được địa chỉ của người khác. Mã này do **code** đọc ở đầu hội thoại hoặc từ dữ liệu hộp thư, không bao giờ lấy từ lời khách hay output của model, nên khách gõ "mã của chị là KH-005" cũng không lấy được địa chỉ của KH-005.
 - **Chỗ người duyệt:** màn hình duyệt (D). AI không bao giờ tự duyệt đơn, tự gửi tin hay tự tạo vận đơn thật. Chủ shop sửa trường nào thì code kiểm lại trường đó; còn sai thì nút Duyệt bị khoá. Mỗi lần sửa được ghi lại để đo tỉ lệ đơn AI làm đúng ngay lần đầu.
 - **Nguyên tắc thiết kế:**
 
@@ -86,7 +86,7 @@ flowchart LR
   | G11 — giải thích vì sao AI quyết định vậy | ô "create_draft_order": phần "Cho chủ shop" ghi `Phường/xã: <mới> (quy đổi từ <cũ>; AI chọn theo: <căn cứ>)` |
   | G8/G9 — dễ sửa, dễ bỏ | ô "D · Màn hình duyệt": đơn chỉ là nháp, chủ shop sửa từng trường hoặc huỷ; sửa xong code kiểm lại |
 
-- **Phần còn giả:** model đang chạy chế độ giả (chưa nối model thật, nối ở CP3) · `codebase/tools.py` và `codebase/agent.py` đang là khung của đề, bốn công cụ trên làm sau CP2 · bảng chuyển đổi địa giới chỉ có 1–2 tỉnh mẫu · mã vận đơn `GHN-NHAP-` là mã giả, không gọi GHN.
+- **Phần còn giả:** model đang chạy chế độ giả (chưa nối model thật, nối ở CP3) · `codebase/tools.py` và `codebase/agent.py` đang là khung của đề, bốn công cụ trên làm sau CP2 · bảng chuyển đổi địa giới chỉ có 1–2 tỉnh/thành mẫu, theo địa bàn **cũ**; địa chỉ ghi tên tỉnh cũ đã gộp (Bình Dương, Bà Rịa - Vũng Tàu) chưa quy đổi được, code ra HỎI LẠI · mã vận đơn `GHN-NHAP-` là mã giả, không gọi GHN.
 
 ## §5. Chỗ khó — 4 lớp + ≥6 kịch bản + 2 tấn công *(guide 2.3)*
 
