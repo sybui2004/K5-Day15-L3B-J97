@@ -350,7 +350,7 @@ Khi tạo đơn, phần "Cho chủ shop" có mã `DN-` (đơn nháp), `GHN-NHAP-
 
 ### F1 · Tự soát → nộp *(18:00–19:00, Sỹ)*
 
-- [ ] `python3 -m unittest discover -s tests -v` → PASS cả 20 test.
+- [ ] `python3 -m unittest discover -s tests -v` → PASS cả 24 test.
 - [ ] `python3 run.py check` → không cảnh báo nào cho mức CP2 (cảnh báo "CP3 cần 20–30 câu" được bỏ qua).
 - [ ] `python3 run.py` chạy hết với AI giả.
 - [ ] Đối chiếu guide 2.5: canvas · bằng chứng đã bắt đầu · sơ đồ §4 · benchmark ≥10 · metric spec · §7 · DATA_CARD · bản chạy khung.
