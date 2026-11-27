@@ -11,6 +11,7 @@ Chạy: python run.py  → mở http://127.0.0.1:8000 (chỉ máy này; bản d�
 - Mỗi lần chạy AI giữ trace (bước model / công cụ, token, thời gian, chi phí theo giá ở cost/personas.yaml).
 - Nhật ký duyệt và lần chạy: kho.py — Postgres khi có DATABASE_URL, không thì data/*.jsonl (không commit).
 
+Giao diện: codebase/static/ (index.html, app.css, app.js, fonts/), dữ liệu khách chỉ đưa vào DOM bằng textContent / value.
 Chỉ thư viện chuẩn (Postgres là tuỳ chọn, cần psycopg). Một luồng xử lý (tracing dùng biến toàn cục).
 """
 import copy
@@ -38,6 +39,9 @@ from tools import validate_phone, lookup_address, create_draft_order, _bang, HCM
 
 GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NHAT_KY = os.path.join(GOC, "data", "nhat-ky-duyet.jsonl")
+TINH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")  # giao diện: index.html, app.css, app.js, fonts/
+LOAI_TEP = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
+            ".js": "text/javascript; charset=utf-8", ".woff2": "font/woff2"}
 PERSONAS = os.path.join(GOC, "cost", "personas.yaml")
 MOI_TOI_DA_LUOT, MOI_TOI_DA_KY_TU = 30, 2000  # hội thoại gõ trên màn hình
 HOST, PORT = "127.0.0.1", 8000
@@ -380,6 +384,22 @@ def post_hop_le(headers) -> bool:
         (headers.get("Content-Type") or "").split(";")[0].strip() == "application/json"
 
 
+def tep_tinh(duong: str):
+    """Đường dẫn GET → (nội dung, loại) của một file trong codebase/static/, hoặc None.
+    Chỉ nhận tên gồm chữ, số, '-', '_', '.' và tối đa một thư mục con; không cho '..' hay ra ngoài static/."""
+    duong = duong.split("?", 1)[0].split("#", 1)[0]
+    if duong == "/":
+        duong = "/index.html"
+    if not re.fullmatch(r"/(?:[a-z0-9_-]+/)?[a-z0-9_-]+(?:\.[a-z0-9_-]+)*\.[a-z0-9]+", duong) or ".." in duong:
+        return None
+    loai = LOAI_TEP.get(os.path.splitext(duong)[1])
+    tep = os.path.realpath(os.path.join(TINH, duong.lstrip("/")))
+    if not loai or not tep.startswith(os.path.realpath(TINH) + os.sep) or not os.path.isfile(tep):
+        return None
+    with open(tep, "rb") as f:
+        return f.read(), loai
+
+
 def _phuong_moi():
     return sorted({r["phuong_xa_moi"] for r in _bang()})
 
@@ -400,7 +420,7 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         self.send_header("X-Frame-Options", "DENY")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Content-Security-Policy",
-                         "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; "
+                         "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; "
                          "base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
         self.end_headers()
         self.wfile.write(data)
@@ -408,10 +428,6 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
     def do_GET(self):
         if not host_hop_le(self.headers.get("Host")):
             return self._gui(403, {"loi": "Host không hợp lệ"})
-        if self.path == "/":
-            return self._gui(200, TRANG.encode("utf-8"), "text/html; charset=utf-8")
-        if self.path == "/app.js":
-            return self._gui(200, JS.encode("utf-8"), "text/javascript; charset=utf-8")
         if self.path == "/api/hop-thu":
             return self._gui(200, {"phien": self.man_hinh.danh_sach(), "phuong_moi": _phuong_moi(),
                                    "tong": self.man_hinh.tong()})
@@ -420,6 +436,9 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
                 return self._gui(200, self.man_hinh.nhat_ky())
             except LoiThaoTac as e:
                 return self._gui(503, {"loi": str(e)})
+        tep = tep_tinh(self.path)
+        if tep:
+            return self._gui(200, *tep)
         return self._gui(404, {"loi": "không có"})
 
     def do_POST(self):
@@ -495,376 +514,6 @@ def main() -> int:
     finally:
         server.server_close()
     return 0
-
-
-# ---------- giao diện (dữ liệu khách chỉ đưa vào bằng textContent / value, không dùng innerHTML) ----------
-
-TRANG = """<!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Duyệt đơn từ tin nhắn</title>
-<style>
-:root{
-  --nen:#E9EDF1;--giay:#FFFFFF;--chat:#F4F6F8;--muc:#1C2733;--mo:#5B6876;--vien:#CCD4DD;
-  --xanh:#17704A;--xanh-nhat:#E2F2EA;--vang:#9A5B00;--vang-nhat:#FFF1D2;--do:#B3261E;--do-nhat:#FBE4E2;
-  --da-quang:#FFE066;--bong-shop:#D9E8FF;
-  --chu-nhan:"Bahnschrift","DIN Alternate","Segoe UI",system-ui,sans-serif;
-  --chu-than:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
-}
-*{box-sizing:border-box}
-body{margin:0;font:15px/1.5 var(--chu-than);background:var(--nen);color:var(--muc)}
-:focus-visible{outline:3px solid #2F6FEB;outline-offset:2px}
-.phu{color:var(--mo);font-size:13px;margin:0}
-
-.dau{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:18px 28px 14px;background:var(--giay);border-bottom:1px solid var(--vien)}
-.dau h1{font:600 24px/1.2 var(--chu-nhan);margin:0 0 2px;letter-spacing:-.01em}
-#dem{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-
-main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;padding:20px 28px;align-items:start}
-
-.cot-hop-thu{background:var(--giay);border:1px solid var(--vien);border-radius:10px;overflow:hidden;position:sticky;top:20px}
-.tieu-de-cot{font:600 20px/1 var(--chu-nhan);padding:16px 16px 12px;margin:0}
-#loc{display:flex;gap:4px;flex-wrap:wrap;padding:0 10px 12px;border-bottom:1px solid var(--vien)}
-#loc button{font:600 13px/1 var(--chu-than);padding:8px 11px;border-radius:999px;border:0;background:transparent;color:var(--mo)}
-#loc button:hover{background:#EEF2F6;color:var(--muc)}
-#loc button[aria-pressed="true"]{background:#E3ECF8;color:var(--muc)}
-#loc .so{margin-left:5px;font:600 12px/1 var(--chu-nhan);color:var(--mo)}
-#hop-thu{list-style:none;margin:0;padding:6px}
-#hop-thu li{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;cursor:pointer}
-#hop-thu li:hover{background:#F2F5F8}
-#hop-thu li.chon{background:#E3ECF8}
-#hop-thu li.trong-loc{display:block;cursor:default;color:var(--mo);font-size:13px;text-align:center;padding:28px 10px}
-#hop-thu li.trong-loc:hover{background:transparent}
-.noi-dung{min-width:0;flex:1}
-.dong-1{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.ten-khach{font-weight:600}
-.xem-truoc{color:var(--mo);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ma-ht{font:12px var(--chu-nhan);color:var(--mo);margin-top:3px}
-.ma-ht .hoi-lai{margin-left:8px;color:var(--vang)}
-
-.avt{flex:none;width:46px;height:46px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;overflow:hidden}
-.avt svg{width:100%;height:100%;display:block}
-.avt.khach{background:#DDE3EA;color:#A3AFBC}
-.avt.shop{background:var(--muc);color:#fff}
-.avt.shop svg{width:56%;height:56%}
-.avt.vua{width:44px;height:44px}
-.avt.nho{width:30px;height:30px}
-
-.chip{font:600 12px/1 var(--chu-nhan);padding:5px 9px;border-radius:999px;white-space:nowrap}
-.cho_duyet{background:var(--xanh-nhat);color:var(--xanh)}
-.cho_khach{background:var(--vang-nhat);color:var(--vang)}
-.tu_choi,.da_huy{background:var(--do-nhat);color:var(--do)}
-.da_duyet{background:var(--muc);color:#fff}
-
-#chi-tiet{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,440px);gap:20px;align-items:start}
-.trong{grid-column:1/-1;background:var(--giay);border:1px dashed var(--vien);border-radius:10px;padding:48px;text-align:center;color:var(--mo)}
-
-.cot-chat{background:var(--chat);border:1px solid var(--vien);border-radius:10px;padding:16px 20px 22px;min-height:420px}
-.dau-chat{display:flex;gap:12px;align-items:center;padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--vien)}
-.cot-chat h2{font:600 18px/1.25 var(--chu-nhan);margin:0}
-.cot-chat .tai-khoan{margin:2px 0 0}
-.nhom{display:flex;gap:8px;align-items:flex-end;margin-top:14px}
-.nhom.shop{flex-direction:row-reverse}
-.cac-bong{display:flex;flex-direction:column;gap:3px;max-width:78%;min-width:0}
-.nhom.khach .cac-bong{align-items:flex-start}
-.nhom.shop .cac-bong{align-items:flex-end}
-.ten-nhom{font-size:12px;color:var(--mo);margin:0 6px 2px}
-.bong{padding:9px 13px;border-radius:18px;white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}
-.bong.khach{background:var(--giay);border:1px solid #DCE2E8}
-.bong.shop{background:var(--bong-shop)}
-.nhom.khach .bong{border-top-left-radius:6px;border-bottom-left-radius:6px}
-.nhom.khach .bong:nth-child(2){border-top-left-radius:18px}
-.nhom.shop .bong{border-top-right-radius:6px;border-bottom-right-radius:6px}
-.nhom.shop .bong:nth-child(2){border-top-right-radius:18px}
-
-.cot-phai{display:flex;flex-direction:column;gap:14px}
-.phieu{position:relative;background:var(--giay);border:2px solid var(--muc);border-radius:6px;padding:0 0 18px}
-.phieu.mo-nhat{border-color:var(--vien);color:var(--mo)}
-.dau-phieu{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 18px;border-bottom:2px dashed var(--muc)}
-.phieu.mo-nhat .dau-phieu{border-bottom-color:var(--vien)}
-.dau-phieu h3{font:600 16px/1.2 var(--chu-nhan);margin:0}
-.ma-don{font:600 15px/1 var(--chu-nhan);letter-spacing:.04em}
-.van-don{font:13px/1.45 var(--chu-nhan);color:var(--mo);padding:8px 150px 0 18px;margin:0}
-
-.quy-doi{margin:14px 18px 2px;padding:12px 14px;background:#FFFBEA;border-left:4px solid var(--da-quang);border-radius:4px}
-.quy-doi .cu{display:block;color:var(--mo);font-size:13.5px;text-decoration:line-through;text-decoration-thickness:1.5px}
-.quy-doi .moi{display:block;margin-top:4px;font-size:19px;line-height:1.3}
-.quy-doi .mui-ten{margin-right:8px;color:var(--mo)}
-.quy-doi mark{background:linear-gradient(transparent 40%,var(--da-quang) 40%,var(--da-quang) 94%,transparent 94%);color:var(--muc);font-weight:700;padding:0 3px}
-.quy-doi .can-cu{display:block;font:12.5px/1.4 var(--chu-nhan);color:var(--mo);margin-top:6px}
-
-.luoi{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 12px;align-items:start;padding:12px 18px 0}
-.luoi label,.luoi .nhan-o{padding-top:9px;color:var(--mo);font-size:13px}
-.luoi input{width:100%;font:inherit;color:var(--muc);padding:7px 2px 6px;border:0;border-bottom:1.5px solid var(--vien);background:transparent;border-radius:0}
-.luoi input:hover{border-bottom-color:#9AA6B2}
-.luoi input:focus{border-bottom-color:var(--muc);outline:none;background:#F7F9FC}
-.luoi input:focus-visible{outline:3px solid #2F6FEB;outline-offset:1px}
-.luoi input.sai{border-bottom-color:var(--do);background:#FFF7F6}
-.luoi .gia-tri{padding:8px 2px 6px;border-bottom:1.5px solid transparent}
-.loi{color:var(--do);font-size:12.5px;margin-top:3px}
-.loi:empty{display:none}
-
-.nut{display:flex;gap:10px;padding:16px 18px 0;align-items:center}
-button{font:600 14px/1 var(--chu-than);padding:10px 16px;border-radius:8px;border:1.5px solid var(--muc);background:var(--giay);color:var(--muc);cursor:pointer}
-button:hover{background:#F1F4F8}
-button.chinh{background:var(--xanh);border-color:var(--xanh);color:#fff;padding:10px 22px}
-button.chinh:hover{background:#125C3C}
-button.nhe{border-color:var(--vien);color:var(--mo)}
-button:disabled{opacity:.4;cursor:not-allowed}
-#bao{min-height:20px;font-size:13px;padding:10px 18px 0}
-
-.dau-moc{position:absolute;top:60px;right:18px;font:700 20px/1 var(--chu-nhan);padding:7px 12px;border:3px solid currentColor;border-radius:6px;transform:rotate(-8deg);color:var(--xanh);background:rgba(255,255,255,.85)}
-.dau-moc.huy{color:var(--do)}
-.an-dong{animation:dong-dau .38s cubic-bezier(.2,.9,.3,1.25)}
-@keyframes dong-dau{from{opacity:0;transform:rotate(-8deg) scale(1.7)}to{opacity:1;transform:rotate(-8deg) scale(1)}}
-
-.hop{background:var(--giay);border:1px solid var(--vien);border-radius:10px;padding:16px 18px 18px}
-.hop h3{font:600 16px/1.25 var(--chu-nhan);margin:0 0 4px}
-.hop.vang{border-top:4px solid var(--vang)}
-.hop.do{border-top:4px solid var(--do)}
-.ghi-chu{white-space:pre-wrap;font-size:13px;color:var(--mo);margin:6px 0 0}
-.nhan-tin{font-size:12px;color:var(--mo);margin:14px 0 6px}
-.tin{background:var(--bong-shop);border:1.5px dashed #8FB3E8;border-radius:16px 16px 4px 16px;padding:10px 13px;white-space:pre-wrap;overflow-wrap:anywhere}
-.hop .nut,.hop #bao{padding-left:0;padding-right:0}
-.hop label,.them-tin label{display:block;font-size:13px;color:var(--mo);margin:16px 0 6px}
-textarea{width:100%;font:inherit;padding:9px 11px;border:1.5px solid var(--vien);border-radius:8px;resize:vertical;background:var(--giay);color:var(--muc)}
-textarea:focus{border-color:var(--muc);outline:none}
-textarea:focus-visible{outline:3px solid #2F6FEB;outline-offset:1px}
-details.them-tin{margin:0 18px;padding-top:14px}
-details.them-tin summary{cursor:pointer;color:var(--mo);font-size:13px}
-details.them-tin .nut{padding-left:0}
-
-@media (max-width:1180px){#chi-tiet{grid-template-columns:1fr}}
-@media (max-width:760px){main{grid-template-columns:1fr;padding:14px}.cot-hop-thu{position:static}.dau{flex-direction:column;align-items:flex-start;padding:14px}#dem{justify-content:flex-start}}
-@media (prefers-reduced-motion:reduce){.an-dong{animation:none}}
-</style></head><body>
-<header class="dau"><div><h1>Duyệt đơn từ tin nhắn</h1>
-<p class="phu">Duyệt chỉ đổi trạng thái đơn nháp, không gọi GHN và không gửi tin cho khách.</p></div>
-<div id="dem" aria-live="polite"></div></header>
-<main><nav class="cot-hop-thu" aria-label="Hộp thư"><p class="tieu-de-cot">Hộp thư</p><div id="loc" role="group" aria-label="Lọc hội thoại theo loại"></div><ul id="hop-thu"></ul></nav>
-<section id="chi-tiet" aria-live="polite"><p class="trong">Chọn một hội thoại bên trái để xem đoạn chat và đơn nháp.</p></section></main>
-<datalist id="ds-phuong"></datalist>
-<script src="/app.js"></script></body></html>
-"""
-
-JS = r"""
-"use strict";
-const NHAN = {cho_duyet: "Đơn nháp", cho_khach: "Chờ khách", tu_choi: "Từ chối", da_duyet: "Đã duyệt", da_huy: "Đã huỷ"};
-const DEM = [["cho_duyet", "đơn nháp chờ duyệt"], ["cho_khach", "chờ khách trả lời"], ["tu_choi", "từ chối"], ["da_duyet", "đã duyệt"], ["da_huy", "đã huỷ"]];
-const TRUONG = [["ten_nguoi_nhan", "Người nhận"], ["sdt", "SĐT"], ["dia_chi_chi_tiet", "Địa chỉ"],
-                ["phuong_xa", "Phường/xã"], ["san_pham", "Sản phẩm"], ["so_luong", "Số lượng"]];
-const LOC = [["tat_ca", "Tất cả", () => true], ["cho_duyet", "Đơn nháp", p => p.trang_thai === "cho_duyet"],
-             ["cho_khach", "Chờ khách", p => p.trang_thai === "cho_khach"], ["tu_choi", "Từ chối", p => p.trang_thai === "tu_choi"],
-             ["xong", "Đã xử lý", p => p.trang_thai === "da_duyet" || p.trang_thai === "da_huy"]];
-let phien = [], chon = null, hen = null, vuaDong = null, loc = "tat_ca";
-
-// avatar vẽ bằng SVG dựng qua createElementNS (không tải ảnh, không dùng innerHTML)
-const SVG_NS = "http://www.w3.org/2000/svg";
-function hinh(tag, attrs) { const e = document.createElementNS(SVG_NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; }
-function avt(loai, co) {
-  const net = {fill: "none", stroke: "currentColor", "stroke-width": "1.7", "stroke-linejoin": "round", "stroke-linecap": "round"};
-  const s = loai === "shop"
-    ? hinh("svg", {viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false"})
-    : hinh("svg", {viewBox: "0 0 40 40", "aria-hidden": "true", focusable: "false"});
-  if (loai === "shop") s.append(hinh("path", Object.assign({d: "M4 9.5 5.6 4h12.8L20 9.5"}, net)),
-    hinh("path", Object.assign({d: "M4 9.5h16v1.2a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0 2.7 2.7 0 0 1-5.3 0z"}, net)),
-    hinh("path", Object.assign({d: "M5.5 13.2V20h13v-6.8"}, net)), hinh("path", Object.assign({d: "M10 20v-4h4v4"}, net)));
-  else s.append(hinh("circle", {cx: "20", cy: "15.5", r: "7.5", fill: "currentColor"}),
-    hinh("path", {d: "M4.5 41c1.4-8.6 7.6-12.8 15.5-12.8S34.1 32.4 35.5 41z", fill: "currentColor"}));
-  return el("span", {class: "avt " + loai + (co ? " " + co : "")}, s);
-}
-
-function el(tag, attrs, ...con) {
-  const e = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs || {})) {
-    if (k === "text") e.textContent = v; else if (k === "on") for (const [s, f] of Object.entries(v)) e.addEventListener(s, f);
-    else if (v !== null && v !== undefined && v !== false) e.setAttribute(k, v === true ? "" : v);
-  }
-  for (const c of con) if (c) e.append(c);
-  return e;
-}
-async function goi(duong, body) {
-  const r = await fetch(duong, body === undefined ? {} : {method: "POST",
-    headers: {"Content-Type": "application/json", "X-Man-Hinh-Duyet": "1"}, body: JSON.stringify(body)});
-  const d = await r.json();
-  if (!r.ok) { const e = new Error(d.loi || r.statusText); e.chi_tiet = d.chi_tiet; throw e; }
-  return d;
-}
-// `ma`: hội thoại phát ra thông báo — kết quả về muộn của hội thoại khác thì không hiện lên khung đang xem
-function bao(text, sai, ma) { if (ma && ma !== chon) return; const b = document.getElementById("bao"); if (b) { b.textContent = text; b.style.color = sai ? "var(--do)" : "var(--xanh)"; } }
-
-async function tai(giu) {
-  const d = await goi("/api/hop-thu");
-  phien = d.phien;
-  const dl = document.getElementById("ds-phuong"); dl.replaceChildren(...d.phuong_moi.map(p => el("option", {value: p})));
-  veHopThu();
-  if (giu && chon) veChiTiet(phien.find(p => p.ma_hoi_thoai === chon));
-}
-// cập nhật dữ liệu của p; chỉ vẽ lại khung chi tiết khi p vẫn là hội thoại đang chọn (kết quả có thể về muộn)
-function capNhat(p) { const i = phien.findIndex(x => x.ma_hoi_thoai === p.ma_hoi_thoai); if (i >= 0) phien[i] = p; veHopThu(); if (p.ma_hoi_thoai === chon) veChiTiet(p); }
-
-function cacLuot(text) {  // "Mã khách: KH-1 | Khách: … | Shop: …" → [{ai, nd}]
-  return (text ? text.split(" | ") : []).map(l => { const i = l.indexOf(": "); return i > 0 ? {ai: l.slice(0, i), nd: l.slice(i + 2)} : {ai: "", nd: l}; });
-}
-function tinKhachCuoi(p) { const k = cacLuot(p.text).filter(l => l.ai === "Khách"); return k.length ? k[k.length - 1].nd : ""; }
-
-function veHopThu() {
-  // vẽ lại cả danh sách thì phần tử đang focus bị thay: nhớ dòng / tab đang focus rồi trả focus về đó
-  const a = document.activeElement && document.activeElement.closest ? document.activeElement : null;
-  const maFocus = a && a.closest("#hop-thu li") ? a.closest("#hop-thu li").getAttribute("data-ma") : null;
-  const locFocus = a && a.closest("#loc button") ? a.closest("#loc button").getAttribute("data-loc") : null;
-  document.getElementById("dem").replaceChildren(...DEM.map(([t, chu]) => {
-    const n = phien.filter(p => p.trang_thai === t).length;
-    return n ? el("span", {class: "chip " + t, text: n + " " + chu}) : null;
-  }).filter(Boolean));
-  const tab = document.getElementById("loc");
-  tab.replaceChildren(...LOC.map(([k, ten, f]) => el("button", {type: "button", "data-loc": k, "aria-pressed": k === loc ? "true" : "false",
-      on: {click: () => { loc = k; veHopThu(); }}}, document.createTextNode(ten), el("span", {class: "so", text: String(phien.filter(f).length)}))));
-  const hien = phien.filter(LOC.find(x => x[0] === loc)[2]);
-  const ds = document.getElementById("hop-thu");
-  ds.replaceChildren(...(hien.length ? hien.map(p => el("li", {class: p.ma_hoi_thoai === chon ? "chon" : null, "data-ma": p.ma_hoi_thoai,
-      tabindex: "0", "aria-current": p.ma_hoi_thoai === chon ? "true" : null,
-      on: {click: () => chonHoiThoai(p.ma_hoi_thoai), keydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); chonHoiThoai(p.ma_hoi_thoai); } }}},
-    avt("khach"),
-    el("div", {class: "noi-dung"},
-      el("div", {class: "dong-1"}, el("span", {class: "ten-khach", text: p.ma_khach || "Khách mới"}), el("span", {class: "chip " + p.trang_thai, text: NHAN[p.trang_thai]})),
-      el("div", {class: "xem-truoc", text: p.loi_doc ? "Không đọc được hội thoại này" : tinKhachCuoi(p)}),
-      el("div", {class: "ma-ht"}, document.createTextNode(p.ma_hoi_thoai),
-        p.so_luot_hoi_lai ? el("span", {class: "hoi-lai", text: "hỏi lại " + p.so_luot_hoi_lai + " lần"}) : null))))
-    : [el("li", {class: "trong-loc", text: "Không có hội thoại nào ở mục này."})]));
-  if (maFocus) { const li = [...ds.children].find(x => x.getAttribute("data-ma") === maFocus); if (li) li.focus(); }
-  if (locFocus) { const b = [...tab.children].find(x => x.getAttribute("data-loc") === locFocus); if (b) b.focus(); }
-}
-function chonHoiThoai(ma) { clearTimeout(hen); chon = ma; veHopThu(); veChiTiet(phien.find(p => p.ma_hoi_thoai === ma)); }
-
-function quyDoi(kq) {  // dòng "Phường/xã: <mới> (quy đổi từ <cũ> theo khoản <N> Nghị quyết …[; khách chọn])"
-  const d = (kq.cho_chu_shop || "").split("\n").find(x => x.startsWith("Phường/xã:"));
-  const m = d && d.match(/^Phường\/xã: (.*) \(quy đổi từ (.*) theo (khoản .*?)(; khách chọn)?\)$/);
-  return m ? {moi: m[1], cu: m[2], can_cu: m[3], khach_chon: !!m[4]} : null;
-}
-function dongQuyDoi(q) {
-  return el("div", {class: "quy-doi", id: "qd"},
-    el("span", {class: "cu", text: q.cu}), el("span", {class: "moi"}, el("span", {class: "mui-ten", text: "→", "aria-hidden": "true"}), el("mark", {text: q.moi})),
-    el("span", {class: "can-cu", text: "Quy đổi theo " + q.can_cu + (q.khach_chon ? ", phường do khách chọn" : "")}));
-}
-
-function veChiTiet(p) {
-  const ct = document.getElementById("chi-tiet");
-  if (!p) { ct.replaceChildren(el("p", {class: "trong", text: "Chọn một hội thoại bên trái để xem đoạn chat và đơn nháp."})); return; }
-  const luot = cacLuot(p.text), tk = luot.find(l => l.ai === "Mã khách");
-  const chat = el("div", {class: "cot-chat"}, el("div", {class: "dau-chat"}, avt("khach", "vua"),
-    el("div", {}, el("h2", {text: "Hội thoại với " + (p.ma_khach || "khách mới")}),
-      el("p", {class: "phu tai-khoan", text: tk ? "Tài khoản chat " + tk.nd + ", mã hội thoại " + p.ma_hoi_thoai : "Khách chưa có tài khoản, mã hội thoại " + p.ma_hoi_thoai}))));
-  if (p.loi_doc) chat.append(el("p", {class: "loi", text: "Không đọc được dòng này trong hộp thư: " + p.loi_doc}));
-  let nhom = null, truoc = null;  // tin liền nhau của cùng một người gom thành một nhóm, avatar cạnh nhóm
-  for (const l of luot) {
-    if (l.ai === "Mã khách") continue;
-    const shop = l.ai === "Shop";
-    if (l.ai !== truoc) {
-      nhom = el("div", {class: "cac-bong"}, el("p", {class: "ten-nhom", text: shop ? "Shop" : (l.ai || "Tin nhắn")}));
-      chat.append(el("div", {class: "nhom " + (shop ? "shop" : "khach")}, avt(shop ? "shop" : "khach", "nho"), nhom));
-    }
-    nhom.append(el("div", {class: "bong " + (shop ? "shop" : "khach"), text: l.nd}));
-    truoc = l.ai;
-  }
-  const phai = el("div", {class: "cot-phai"});
-  if (p.trang_thai === "cho_duyet") phai.append(veDon(p));
-  else if (p.trang_thai === "da_duyet" || p.trang_thai === "da_huy") phai.append(veDaXong(p));
-  else phai.append(veChoKhach(p));
-  ct.replaceChildren(chat, phai);
-}
-
-function veDaXong(p) {
-  const duyet = p.trang_thai === "da_duyet", t = p.truong_duyet || p.kq.truong || {};
-  const phieu = el("article", {class: "phieu" + (duyet ? "" : " mo-nhat")},
-    el("div", {class: "dau-phieu"}, el("h3", {text: duyet ? "Phiếu giao hàng" : "Đơn nháp đã huỷ"}), el("span", {class: "ma-don", text: p.ma_don || ""})));
-  if (duyet) phieu.append(el("p", {class: "van-don", text: "Mã đơn " + p.ma_don + ", vận đơn nháp " + p.ma_van_don +
-    (p.truong_da_sua && p.truong_da_sua.length ? ", chủ shop đã sửa " + p.truong_da_sua.length + " trường" : ", duyệt không cần sửa")}));
-  const q = quyDoi(p.kq);  // giữ dải quy đổi khi chủ shop không sửa phường
-  if (duyet && q && !(p.truong_da_sua || []).includes("phuong_xa")) phieu.append(dongQuyDoi(q));
-  const luoi = el("div", {class: "luoi"});
-  for (const [k, nhan] of TRUONG) luoi.append(el("span", {class: "nhan-o", text: nhan}), el("div", {class: "gia-tri", text: t[k] == null ? "" : String(t[k])}));
-  luoi.append(el("span", {class: "nhan-o", text: "Tỉnh/thành"}), el("div", {class: "gia-tri", text: t.tinh_thanh || ""}));
-  const dau = el("div", {class: "dau-moc" + (duyet ? "" : " huy") + (vuaDong === p.ma_hoi_thoai ? " an-dong" : ""), text: duyet ? "Đã duyệt" : "Đã huỷ"});
-  vuaDong = null;
-  phieu.append(luoi, dau);
-  return phieu;
-}
-
-function veDon(p) {
-  const t = p.kq.truong, o = {}, q = quyDoi(p.kq);
-  const duyet = el("button", {class: "chinh", text: "Duyệt"}), huy = el("button", {class: "nhe", text: "Huỷ"});
-  const phieu = el("article", {class: "phieu", "aria-label": "Đơn nháp " + p.ma_don},
-    el("div", {class: "dau-phieu"}, el("h3", {text: "Phiếu giao hàng nháp"}), el("span", {class: "ma-don", text: p.ma_don})));
-  const dai = q ? dongQuyDoi(q) : null;  // giữ tham chiếu dải quy đổi của chính phiếu này
-  if (dai) phieu.append(dai);
-  let lanKiem = 0;  // chỉ áp kết quả của lần kiểm mới nhất
-  const luoi = el("div", {class: "luoi"});
-  for (const [k, nhan] of TRUONG) {
-    const inp = el("input", {id: "f-" + k, value: t[k] === null || t[k] === undefined ? "" : String(t[k]),
-      list: k === "phuong_xa" ? "ds-phuong" : null, inputmode: k === "sdt" || k === "so_luong" ? "numeric" : null, autocomplete: "off",
-      on: {input: () => { clearTimeout(hen); duyet.disabled = true; hen = setTimeout(kiem, 300); }}});
-    const loi = el("div", {class: "loi", "aria-live": "polite"});
-    o[k] = {inp, loi}; luoi.append(el("label", {for: "f-" + k, text: nhan}), el("div", {}, inp, loi));
-  }
-  luoi.append(el("span", {class: "nhan-o", text: "Tỉnh/thành"}), el("div", {class: "gia-tri", text: t.tinh_thanh || ""}));
-  const sua = () => Object.fromEntries(TRUONG.map(([k]) => [k, o[k].inp.value]));
-  async function kiem() {
-    const lan = ++lanKiem;
-    try {
-      const k = await goi("/api/kiem", {ma: p.ma_hoi_thoai, sua: sua()});
-      if (lan !== lanKiem) return;  // đã có lần kiểm mới hơn trên phiếu này
-      for (const [f] of TRUONG) {
-        const l = k.loi[f] || "", g = (k.goi_y[f] || []).length ? ". Gần giống: " + k.goi_y[f].join(", ") : "";
-        o[f].loi.textContent = l ? l + g : ""; o[f].inp.classList.toggle("sai", !!l);
-      }
-      if (dai) dai.hidden = k.truong_da_sua.includes("phuong_xa");
-      duyet.disabled = !k.duoc_duyet;
-      bao(k.duoc_duyet ? (k.truong_da_sua.length ? "Đã sửa " + k.truong_da_sua.length + " trường, đơn vẫn qua kiểm" : "") : "Còn trường chưa qua kiểm, chưa duyệt được", !k.duoc_duyet, p.ma_hoi_thoai);
-    } catch (e) { if (lan === lanKiem) bao(e.message, true, p.ma_hoi_thoai); }
-  }
-  duyet.addEventListener("click", async () => {
-    duyet.disabled = true;
-    try { const r = await goi("/api/duyet", {ma: p.ma_hoi_thoai, sua: sua()}); vuaDong = r.ma_hoi_thoai; capNhat(r); }
-    catch (e) { bao(e.message, true, p.ma_hoi_thoai); if (chon === p.ma_hoi_thoai) kiem(); }
-  });
-  huy.addEventListener("click", async () => {
-    if (!confirm("Huỷ đơn nháp " + p.ma_don + "?")) return;
-    try { const r = await goi("/api/huy", {ma: p.ma_hoi_thoai}); vuaDong = r.ma_hoi_thoai; capNhat(r); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); }
-  });
-  phieu.append(luoi, el("div", {class: "nut"}, duyet, huy), el("div", {id: "bao", role: "status"}));
-  phieu.append(el("details", {class: "them-tin"}, el("summary", {text: "Khách nhắn thêm sau khi chốt đơn"}), ...oTraLoi(p, "Dán tin khách vừa nhắn")));
-  setTimeout(kiem, 0);
-  return phieu;
-}
-
-function oTraLoi(p, goiY) {
-  const o = el("textarea", {rows: "2", id: "tra-loi", placeholder: goiY}), them = el("button", {text: "Thêm vào hội thoại"});
-  them.addEventListener("click", async () => {
-    if (!o.value.trim()) { bao("Câu khách trả lời đang trống", true); return; }
-    them.disabled = true; bao("Đang đọc lại cả hội thoại...");
-    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); them.disabled = false; }
-  });
-  return [el("label", {for: "tra-loi", text: "Khách trả lời"}), o, el("div", {class: "nut"}, them)];
-}
-
-function veChoKhach(p) {
-  const tuChoi = p.trang_thai === "tu_choi", tin = p.kq.tin_gui_khach || "";
-  const hop = el("section", {class: "hop " + (tuChoi ? "do" : "vang")},
-    el("h3", {text: tuChoi ? "Đã từ chối, chưa tạo đơn" : "Cần hỏi lại khách trước khi lên đơn"}),
-    el("p", {class: "ghi-chu", text: p.kq.cho_chu_shop}));
-  if (tin) {
-    const chep = el("button", {text: "Chép"});
-    chep.addEventListener("click", async () => { try { await navigator.clipboard.writeText(tin); bao("Đã chép tin gửi khách", false, p.ma_hoi_thoai); } catch (e) { bao("Không chép được: " + e.message, true, p.ma_hoi_thoai); } });
-    hop.append(el("p", {class: "nhan-tin", text: "Tin soạn sẵn, shop chép rồi tự gửi cho khách"}), el("div", {class: "tin", text: tin}), el("div", {class: "nut"}, chep));
-  } else {
-    hop.append(el("p", {class: "nhan-tin", text: "Không có tin soạn sẵn vì lỗi hệ thống. Shop tự nhắn khách."}));
-  }
-  hop.append(...oTraLoi(p, "Dán câu khách vừa trả lời"), el("div", {id: "bao", role: "status"}));
-  return hop;
-}
-
-tai(false).catch(e => { document.getElementById("chi-tiet").replaceChildren(el("p", {class: "trong", text: "Không tải được hộp thư: " + e.message})); });
-"""
 
 
 if __name__ == "__main__":

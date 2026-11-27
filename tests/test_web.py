@@ -349,6 +349,28 @@ class TestChiPhi(unittest.TestCase):
         self.assertIsNone(web.chi_phi("", 10, 10, self.GIA))
 
 
+class TestTepTinh(unittest.TestCase):
+    """Giao diện ở codebase/static/: chỉ phục vụ file trong thư mục đó, đúng loại nội dung."""
+
+    def test_trang_chinh_va_tai_nguyen(self):
+        for duong, loai in (("/", "text/html"), ("/app.js", "text/javascript"), ("/app.css", "text/css"),
+                            ("/fonts/fonts.css", "text/css"), ("/fonts/manrope-vietnamese.woff2", "font/woff2")):
+            with self.subTest(duong=duong):
+                tep = web.tep_tinh(duong)
+                self.assertIsNotNone(tep)
+                self.assertTrue(tep[1].startswith(loai))
+                self.assertTrue(tep[0])
+
+    def test_khong_ra_ngoai_thu_muc_static(self):
+        for duong in ("/../web.py", "/fonts/../../kho.py", "/%2e%2e/web.py", "/..\\web.py", "/khong-co.js",
+                      "/fonts/", "//etc/passwd", "/.env"):
+            with self.subTest(duong=duong):
+                self.assertIsNone(web.tep_tinh(duong))
+
+    def test_query_string_bi_bo_qua(self):
+        self.assertEqual(web.tep_tinh("/app.js?v=2")[1], web.tep_tinh("/app.js")[1])
+
+
 class TestKhoiChay(unittest.TestCase):
     def test_cong_ban_thi_khong_goi_model(self):
         import socket

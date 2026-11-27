@@ -16,8 +16,14 @@ Demo trước giám khảo (rubric R7): phải "chạy được câu thử lạ 
 - Giá model lấy từ `cost/personas.yaml`; model không có giá thì chỉ hiện token, ghi "chưa có giá" (không bịa số).
 - Postgres ghi lỗi: thao tác Duyệt/Huỷ báo lỗi, không đổi trạng thái (giữ hành vi hiện tại). Ghi lần chạy lỗi: chỉ in cảnh báo, không chặn demo.
 
-## Ngoài phạm vi (đợt sau, khi #45 đã merge)
-- Tách giao diện ra `static/` và thiết kế lại (design-taste-frontend): nút "+ Hội thoại mới", khung "AI đã làm gì", "Vì sao hỏi lại", chi phí phiên, tab Nhật ký, hộp thư cuộn riêng.
+## Đợt 2 (sau khi #45 merge): giao diện `codebase/static/`
+- `index.html`, `app.css`, `app.js`, `fonts/` (Manrope + JetBrains Mono có bộ chữ tiếng Việt, OFL, phục vụ cục bộ). `web.py` chỉ phục vụ file trong `static/` (`tep_tinh`), CSP chặt hơn: `style-src 'self'; font-src 'self'`.
+- Ba cột, mỗi cột cuộn riêng (hộp thư không kéo cả trang); ≤1180px hai cột, ≤820px một cột.
+- Nút *Hội thoại mới* → hộp thoại: mỗi dòng một tin (`Shop:` = shop), xem trước, 5 mẫu điền nhanh, đếm giây khi AI chạy.
+- *AI đã làm gì*: từng bước model / công cụ từ trace, tóm tắt kết quả công cụ, token, thời gian, chi phí; *Vì sao AI chưa lên đơn* từ `kq.loi`; tổng phiên demo ở đầu trang; tab *Nhật ký*.
+- Thiết kế theo design-taste-frontend phần dùng được cho công cụ nội bộ: bảng màu bốc `mint-pink-accounts` (lấy bảng thứ hai vì hồng đậm của bảng đầu trùng màu "Từ chối"), cặp chữ `manrope` (hai cặp đầu không có bộ chữ tiếng Việt), một cặp nút, hover/press theo motion.md, tắt chuyển động khi `prefers-reduced-motion`. Phần hero / landing page và cổng kiểm của skill không áp dụng.
+
+## Ngoài phạm vi
 - Khôi phục hội thoại tạo mới sau khi khởi động lại.
 
 ## Cách làm đã chọn
