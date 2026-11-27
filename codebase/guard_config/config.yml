@@ -1,0 +1,6 @@
+# Lớp chặn đầu vào (docs/superpowers/specs/2026-11-28-nemo-guardrails-design.md mục 6).
+# Không khai `models`: model truyền vào bằng LLMRails(config, llm=guard.ModelNoi()), đi qua ai.call_model.
+rails:
+  input:
+    flows:
+      - self check input
