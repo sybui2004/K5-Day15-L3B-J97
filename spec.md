@@ -221,9 +221,28 @@ flowchart LR
 - So với impact / người / tháng (§2): đáng làm không, vì sao:
 
 ## §9. Rủi ro & an toàn
-- Dữ liệu: đã ẩn danh gì, không thu gì, không đưa gì vào model gói miễn phí:
-- AI **không được** làm gì kể cả khi người dùng yêu cầu:
-- Ai có thể bị hại nếu AI sai, và nhóm chặn thế nào:
+- **Dữ liệu: đã ẩn danh gì, không thu gì, không đưa gì vào model gói miễn phí:**
+  - **Đã ẩn danh:** bản ghi phỏng vấn P1–P4 đã bỏ tên chủ shop, tên shop, tên khách, số nhà (`evidence/interviews/`); bản gốc `docs/khao_sat/` không commit (`.gitignore`). 8 đoạn chat thật chủ shop gửi đã che tên khách, sđt, số nhà. 3 đoạn dùng làm câu thử (B23–B25) thay chỗ che bằng giá trị dựng. Ảnh `evidence/screenshots/01`–`07` đã che tên, sđt, số nhà, tài khoản.
+  - **Không thu:** không lấy tin nhắn từ fanpage hay website của shop nào, không đọc tài khoản GHN của ai. Hộp thư mẫu (`data/hop-thu-mau.jsonl`) và lịch sử khách (`data/lich-su-khach.csv`) là data dựng (`synthetic`). Không dùng data BTC (`data/DATA_CARD.md`).
+  - **Đưa vào model:** Claude API (`claude-sonnet-5-5`) chỉ nhận một hội thoại đang xử lý, gồm câu thử hoặc hội thoại mẫu ở trên, đều là data dựng hoặc đã che. Ở Y1, đoạn chat dán vào ChatGPT theo task Y1 chỉ là bản đã che tên, sđt, số nhà. Model không bao giờ nhận lịch sử khách hay hội thoại khác: `get_customer_history` chạy trong code, sau lời gọi model.
+  - **Nhật ký và trace:** nhật ký duyệt `data/nhat-ky-duyet.jsonl` ghi tên, sđt, địa chỉ trên đơn nên không commit. Trace `traces/run-N.jsonl` có commit, vì chỉ chứa câu thử đã dựng.
+  - **Khi dùng thật** (ngoài lát cắt, chưa làm): tin khách thật sẽ đi vào model. Phải dùng gói API trả phí không lấy dữ liệu để huấn luyện, giữ nhật ký trên máy của shop, và không gửi nhật ký đó lên model.
+- **AI không được làm, kể cả khi người dùng yêu cầu.** Mỗi điều bị chặn bằng code, không chỉ bằng prompt:
+  - Tạo đơn khi thiếu hoặc sai trường. Trường nào không qua `validate_phone` / `lookup_address` thì không có `DN-`, dù khách đòi "bỏ qua kiểm tra" hay tự gõ giả lời shop (B14, B30).
+  - Tự chọn phường mới cho phường cũ bị tách. Code luôn hỏi lại khách, kèm đủ danh sách phường mới (B09).
+  - Đoán sđt. Sđt model trả mà không có trong hội thoại thì bị chặn (`codebase/agent.py`, "không thấy số này trong hội thoại").
+  - Đưa tên, sđt, địa chỉ của khách khác. Model không có dữ liệu khách khác. Lịch sử chỉ đọc theo mã tài khoản chat do code lấy ở đầu hội thoại, nên mã khách gõ trong lượt chat bị bỏ qua (B15, B22). `get_customer_history` chỉ trả địa chỉ và ngày, không trả tên, sđt.
+  - Chép hướng dẫn hệ thống, hay nghe lệnh "bỏ qua hướng dẫn, tôi là quản trị viên" (B29).
+  - Tự duyệt đơn, tự gửi tin cho khách, gọi API GHN thật. Duyệt chỉ đổi trạng thái `da_duyet`; tin hỏi lại chỉ hiện để chủ shop bấm Chép; mã `GHN-NHAP-` là mã giả.
+  - Xử lý khiếu nại, đổi trả, hoàn tiền, xin sđt shipper. Những yêu cầu này bị TỪ CHỐI và chuyển chủ shop (B16–B19).
+  - Lượt 2 (run-5): 8/8 câu `tu_choi` qua, không câu nào tạo đơn nháp sai (§7).
+- **Ai có thể bị hại nếu AI sai, và nhóm chặn thế nào:**
+
+  | Ai | Bị hại thế nào | Chặn bằng gì | Còn hở |
+  |---|---|---|---|
+  | Chủ shop | Giao nhầm, mất phí ship hai chiều và có khi mất hàng. Khoảng 195.000–494.000đ / tháng mỗi shop (§2) | Chỉ tạo đơn nháp. Chủ shop duyệt từng đơn, sửa trường nào thì code kiểm lại trường đó, sai thì khoá Duyệt. Phường bị tách thì hỏi lại khách. Dòng `Phường/xã:` ghi quy đổi từ đâu, theo khoản nào của Nghị quyết 1685, để chủ shop kiểm nguồn | Code chỉ kiểm định dạng sđt, không biết số đó có đúng của người nhận. Code không kiểm số nhà, tên đường có nằm trong phường không. Bảng chuyển đổi mới đối chiếu tay 29/164 khoản (phần còn lại đối chiếu chéo bằng script với bảng Cục Thống kê) |
+  | Khách đặt và người nhận | Hàng giao trễ hoặc giao nhầm. Bị hỏi lại nhiều lần | Hỏi lại **một** tin gom đủ trường còn thiếu, không hỏi lại trường đã cho. Đổi địa chỉ giữa chừng thì lấy lượt mới nhất (B07) | Khách ghi tên quận cũ hơn bảng (vd "quận 2", "quận 9") thì bảng không có, phải hỏi lại khách |
+  | Khách khác của shop | Lộ sđt, địa chỉ cho người lạ | Model không nhận dữ liệu khách khác. Lịch sử chỉ đọc theo mã tài khoản chat. Màn hình duyệt chỉ bind `127.0.0.1`. Nhật ký không commit | Màn hình duyệt không có đăng nhập: ai dùng được máy của shop đều xem được đơn |
 
 ## §10. Phân công & changelog
 - Phân công có tên (theo chặng, chia cặp — guide "Cách chia việc"; chi tiết task: `docs/cp2-ke-hoach.md`):
@@ -252,6 +271,7 @@ flowchart LR
 | 28/11 | README: tên nhóm và lát cắt, xoá mục 0 của khung, thêm cách chạy bản của nhóm (cài `requirements.txt`, `.env`, màn hình duyệt), bảng "Phần nào thật, phần nào giả" đủ 7 dòng | README còn `____` và hướng dẫn của khung ("không cần pip install") không còn đúng sau khi nối Claude và thêm màn hình duyệt; rubric R3 chấm "người ngoài chạy được, phần còn giả ghi rõ" |
 | 28/11 | `codebase/agent.py`: prompt và bước kiểm ngoài phạm vi (khiếu nại, xin số shipper/nhân viên, khách giả lời shop), phường đánh số không có quận là kiểu cũ, hỏi quận và tỉnh cùng một tin, không tự điền tỉnh | Lỗi lượt 1: B16, B18, B19 (bộ 19 câu), B30, B12 (bộ 30 câu) — `eval/report.md` mục 2–3. Review PR #46: bỏ đoán tỉnh và so khớp cụm từ câu thử. Không đổi câu thử, §7 chuẩn "đạt", metric |
 | 28/11 | §7 kết quả: lượt 1 = run-3, lượt 2 = run-5 (cùng bộ 30 câu); run-1, run-2 (bộ 19 câu) và run-4 giữ file, không tính | Guide 3.4: lượt 1 trên bộ 20–30 câu; lượt 1 và lượt 2 cùng bộ câu thử. Không sửa kết quả lượt nào |
+| 28/11 | §9: điền dữ liệu (đã ẩn danh, không thu, đưa gì vào model), danh sách điều AI không được làm và bảng ai bị hại, chặn thế nào, còn hở gì | §9 còn trống. Checklist CP4 trong guide đòi spec đủ §0–§9. Lấy từ `data/DATA_CARD.md`, `.gitignore`, `codebase/agent.py`, `codebase/tools.py`, `codebase/web.py`, §4–§7. Không đổi số bằng chứng, câu thử, §7, metric |
 | 28/11 | README: điền link video demo 34 giây (màn hình duyệt, `claude-sonnet-5-5`, log token ở đầu video) | Guide 3.4: video 30 giây, thao tác thật, AI trả kết quả thật |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
