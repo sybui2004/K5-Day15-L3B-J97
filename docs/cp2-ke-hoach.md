@@ -204,6 +204,36 @@ git push -u origin <tên nhánh>   # mở PR vào develop
 | | `feature/cp3-y7-grade` | Y7 `eval/grade.py` | `eval/grade.py`, `tests/test_grade.py`, `eval/README.md` | — |
 | | `feature/cp3-p4-luot-1` | P4 lượt 1 | `eval/run-1.csv`, `traces/run-1.jsonl`, `eval/report.md` | X3, X4, Y7 |
 
+**Thứ tự merge vào `develop`** (người duyệt là người merge; trước khi merge: `git rebase develop`, chạy `python3 -m unittest discover -s tests -v` nếu có test, và `python3 run.py check`):
+
+*Trước CP2 — mọi PR merge xong trước **18:30**:*
+
+| # | Nhánh | Người làm → người duyệt, merge | Hạn | Vì sao ở vị trí này |
+|---|---|---|---|---|
+| 1 | `feature/cp2-run-app` (PR #10, kế hoạch này) | Sỹ | ngay | mọi người cần bảng nhánh |
+| 2 | `feature/cp2-x0-bang-chuyen-doi` | Hưng → Sỹ | 17:15 | Cặp Y cần tên phường để viết câu địa chỉ cũ |
+| 3 | `feature/cp2-e3-bang-chung` | Sỹ → Hưng | 18:00 | canvas lấy số và trích dẫn từ đây |
+| 4 | `feature/cp2-e3-canvas` | An → Việt Anh | 18:15 | sau #3 |
+| 5 | `feature/cp2-y-cau-thu` | Việt Anh, An → Hưng | 18:30 | merge cuối: có số câu ở §7, `run.py check` phải sạch trên `develop` sau khi merge |
+| 6 | PR `develop` → `main` | Sỹ | 18:45 | F1, rồi nộp CP2 |
+
+*CP2 → CP3 — xong trước **9:45 Thứ Bảy**:*
+
+| # | Nhánh | Người làm → người duyệt, merge | Hạn | Vì sao ở vị trí này |
+|---|---|---|---|---|
+| 7 | `feature/cp3-x2-tools` | Hưng → Sỹ | 22:00 | X3, P2, P3 đều dùng công cụ |
+| 8 | `feature/cp3-x3-agent` | Sỹ → Hưng | 23:30 | rebase sau #7, thay stub bằng công cụ thật |
+| 9 | `feature/cp3-x4-chay-khung` | Sỹ → Hưng | 0:00 | sau #8 |
+| 10 | `feature/cp3-y7-grade` | An → Việt Anh | 0:00 | không phụ thuộc ai, merge lúc nào xong cũng được |
+| 11 | `feature/cp3-p1-hop-thu` | Sỹ → Hưng | 7:30 | sau #8 |
+| 12 | `feature/cp3-p3-khach-cu` | Việt Anh → An | 7:30 | sau #7, #8; sửa cuối `tools.py` nên rebase trước khi merge |
+| 13 | `feature/cp3-y-cau-thu-30` | Việt Anh → An | 8:00 | bộ 20–30 câu phải xong trước lượt 1 |
+| 14 | `feature/cp3-p2-man-hinh-duyet` | Hưng → Sỹ | 8:00 | sau #7, #8, #11; quá 23:00 chưa chạy thì bỏ D (xem mốc cắt ở trên) |
+| 15 | `feature/cp3-p4-luot-1` | An → Việt Anh | 9:30 | chạy lượt 1 trên `develop` đã có #8–#13 |
+| 16 | PR `develop` → `main` | Sỹ | 9:45 | nộp CP3 |
+
+#11 và #12 không phụ thuộc nhau, xong trước thì merge trước. Một PR bị trễ thì các PR không phụ thuộc nó (cột "Vì sao") vẫn merge bình thường.
+
 **Tránh xung đột:**
 - `feature/cp2-y-cau-thu` là nhánh chung: Việt Anh tạo và push trước. An `git fetch && git checkout feature/cp2-y-cau-thu`. Mỗi người chỉ thêm dòng trong khoảng `id` của mình, **`git pull --rebase` trước mỗi lần push**. Xung đột ở cuối `benchmark.csv` thì giữ cả hai phía.
 - `spec.md`: An sửa §7, Việt Anh sửa §5 (sau CP2). Mục khác trong `spec.md` chỉ sửa §10 changelog, mỗi người thêm một dòng.
