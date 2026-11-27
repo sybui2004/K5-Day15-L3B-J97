@@ -1,6 +1,6 @@
 # Canvas — J97 · Track D
 
-| # | Mục | Nhóm điền |
+| # | Mục | Nội dung |
 |---|---|---|
 | 1 | Track + lát cắt dự kiến | Track D — Thương mại điện tử. Lát cắt: một chủ shop, khách đồng ý mua trên Facebook hoặc website, tạo đơn và vận đơn GHN sau khi khách xác nhận. |
 | 2 | Người dùng chính (một vai cụ thể — không phải "học viên nói chung") | Chủ một shop bán lẻ, tự bán trên một trang Facebook và một website. |
