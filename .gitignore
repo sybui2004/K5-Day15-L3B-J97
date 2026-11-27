@@ -40,3 +40,5 @@ docs/khao_sat/
 # Nhật ký duyệt của màn hình duyệt (P2): chỉ commit số tổng hợp vào validation/log.md hoặc eval/report.md
 data/nhat-ky-duyet.jsonl
 data/lan-chay-web.jsonl
+# Cấu hình IDE
+.idea/
