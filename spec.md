@@ -34,7 +34,7 @@ Data BTC cấp đã dùng (nếu có — không commit nguyên file): __
 
 ## §4. Thiết kế *(guide 2.2, 3.2)*
 - **Lát cắt MỘT CÂU:** Một chủ shop bán lẻ · khách đã đồng ý mua qua tin nhắn Facebook hoặc website · AI xác định thông tin nhận hàng, kể cả quy địa chỉ cũ sang phường/xã mới, đã đủ và chắc để tạo đơn nháp, hay phải hỏi lại khách · chủ shop nhận đơn nháp kèm vận đơn GHN chờ duyệt.
-- **Vì sao chỗ khó nằm ở địa chỉ:** từ 1/7/2025 không còn cấp huyện, nhiều phường/xã đã gộp hoặc đổi tên. Khách vẫn quen ghi kiểu cũ ("P.7, Q.3", "xã X, huyện Y"). Quy sai là giao nhầm, đúng pain H2 (chép sai thông tin nhận hàng).
+- **Vì sao chỗ khó nằm ở địa chỉ:** từ 1/7/2025 không còn cấp huyện, nhiều phường/xã đã gộp hoặc đổi tên. Khách vẫn quen ghi kiểu cũ ("P.4, Q.3", "phường X, thành phố Thuận An, Bình Dương"). Quy sai là giao nhầm, đúng pain H2 (chép sai thông tin nhận hàng).
 - **Các luồng trong lát cắt** (cùng **một** quyết định AI, chỉ khác cách đi vào và đi ra):
 
   | Luồng | Là gì | Làm khi nào |
@@ -45,13 +45,13 @@ Data BTC cấp đã dùng (nếu có — không commit nguyên file): __
   | **C · Khách cũ** | "giao chỗ cũ nha" → đọc địa chỉ lần trước của **chính tài khoản chat đó**, địa chỉ cũ thì quy đổi lại | CP3 |
   | **D · Màn hình duyệt (HITL)** | chủ shop xem đơn nháp, sửa trường, duyệt hoặc huỷ trên web; sửa xong code kiểm lại | CP3 |
 
-- **Không làm:** tư vấn sản phẩm, chốt giá · xử lý đổi trả, khiếu nại · gọi API GHN thật hay bàn giao đơn thật · gửi tin thật cho khách (tin hỏi lại chỉ hiện để chủ shop bấm gửi) · tỉnh/thành ngoài bảng chuyển đổi mẫu · địa chỉ ghi tên tỉnh cũ đã gộp vào tỉnh khác (vd Bình Dương, Bà Rịa - Vũng Tàu nay thuộc TP Hồ Chí Minh theo Nghị quyết 202/2025/QH15): bảng mẫu chỉ phủ địa bàn của tỉnh/thành **cũ** đã chọn ở X0, ngoài đó code ra HỎI LẠI · nhiều shop cùng lúc.
+- **Không làm:** tư vấn sản phẩm, chốt giá · xử lý đổi trả, khiếu nại · gọi API GHN thật hay bàn giao đơn thật · gửi tin thật cho khách (tin hỏi lại chỉ hiện để chủ shop bấm gửi) · địa chỉ ngoài TP Hồ Chí Minh (sau sắp xếp, gồm cả địa bàn Bình Dương và Bà Rịa - Vũng Tàu cũ) · tự đoán phường mới cho phường cũ bị tách (luôn hỏi lại khách) · nhiều shop cùng lúc.
 - **Sơ đồ:**
 
 ```mermaid
 flowchart LR
     IN["A · Hộp thư<br/>nhiều hội thoại"] --> A[Một hội thoại]
-    A --> B["Bước 1 · AI đọc hội thoại<br/>tách thông tin, giải nghĩa địa chỉ cũ,<br/>đề xuất phường mới + độ chắc<br/>(1 lần gọi model, trả JSON)"]
+    A --> B["Bước 1 · AI đọc hội thoại<br/>tách thông tin, giải nghĩa địa chỉ cũ,<br/>(1 lần gọi model, trả JSON)"]
     B --> C{"Bước 2 · Code kiểm<br/>get_customer_history (C)<br/>đủ trường? validate_phone<br/>convert_old_address · lookup_address"}
     C -- "yêu cầu ngoài phạm vi" --> R[TỪ CHỐI + nói shop làm được gì]
     C -- "thiếu / sai / không chắc" --> H[HỎI LẠI một lần, gom đủ các trường]
@@ -64,29 +64,30 @@ flowchart LR
 ```
 
 - **Hình dạng:** [x] workflow cố định · [ ] một agent · [ ] nhiều agent. Lát cắt luôn đi đúng một chuỗi bước: AI đọc → code kiểm → quyết định. Mỗi câu chỉ gọi model 1 lần nên rẻ và dễ đo. **Không chọn agent** vì không bước nào cần AI tự chọn đường đi; để AI tự gọi công cụ thì khó chặn chuyện AI bỏ qua bước kiểm và tạo đơn khi chưa đủ thông tin.
-- **AI quyết định gì:** đọc hội thoại lộn xộn (nhiều lượt, viết tắt, sửa đi sửa lại) để xác định người nhận, số điện thoại và địa chỉ cuối cùng; giải nghĩa địa chỉ kiểu cũ; khi một phường cũ bị tách thành nhiều phường mới thì đề xuất phường mới kèm độ chắc và căn cứ. Thứ tự kiểm trong code: `docs/cp2-ke-hoach.md` mục 1.3 (d).
+- **AI quyết định gì:** đọc hội thoại lộn xộn (nhiều lượt, viết tắt, sửa đi sửa lại) để xác định người nhận, số điện thoại và địa chỉ cuối cùng; giải nghĩa địa chỉ kiểu cũ (phường, quận/huyện, tỉnh cũ) để code tra bảng chuyển đổi. **AI không tự chọn phường mới**: phường cũ bị tách thì code hỏi lại khách.
+- Nguồn sự thật cho địa giới: **Nghị quyết 1685/NQ-UBTVQH15** (Ủy ban Thường vụ Quốc hội thông qua 16/6/2025, hiệu lực từ ngày thông qua, phường/xã mới hoạt động từ 01/7/2025), toàn văn trên Cổng TTĐT Chính phủ: https://xaydungchinhsach.chinhphu.vn/toan-van-nghi-quyet-so-1685-nq-ubtvqh15-sap-xep-cac-dvhc-cap-xa-cua-thanh-pho-ho-chi-minh-nam-2025-119250616211341304.htm. Văn bản phủ toàn TP Hồ Chí Minh sau sắp xếp, kể cả địa bàn Bình Dương và Bà Rịa - Vũng Tàu cũ, và **không nói đường nào thuộc phần nào** của một phường cũ bị tách. Thứ tự kiểm trong code: `docs/cp2-ke-hoach.md` mục 1.3 (d).
 - **AI dựa vào đâu** — mỗi công cụ (sẽ có trong `codebase/tools.py`):
 
   | Công cụ | Input | Output | Tác động ra ngoài? |
   |---|---|---|---|
   | `validate_phone` | sđt (str) | `{ok, sdt_chuan, ly_do}` | không |
-  | `convert_old_address` | tỉnh, quận/huyện cũ, phường/xã cũ | `{ket_qua: mot/nhieu/khong_thay, phuong_moi: [..]}` | không |
+  | `convert_old_address` | tỉnh, quận/huyện cũ, phường/xã cũ | `{ket_qua: mot/nhieu/khong_thay, phuong_moi: [..], tinh_moi, khoan: [..]}` | không |
   | `lookup_address` | tỉnh, phường/xã mới | `{ok, khop, goi_y, ly_do}` | không |
   | `create_draft_order` | thông tin đã kiểm (dict, kèm mã hội thoại) | `{ma_don, ma_van_don, trang_thai: "cho_duyet"}` | không: chỉ bản nháp, không gọi GHN |
   | `get_customer_history` *(CP3)* | mã tài khoản chat (str) | `{co: bool, dia_chi_lan_truoc: dict, ngay: str}` | không: chỉ đọc |
 
 - **Mức tự động:** [ ] AI gợi ý, người quyết · [x] AI tự làm khi chắc, chuyển người khi không · [ ] AI tự làm. Tin hỏi lại được soạn sẵn, chủ shop bấm gửi; **tạo đơn chỉ tạo bản nháp**, chủ shop duyệt rồi mới bàn giao, vì sai địa chỉ thì chủ shop mất hàng và phí ship, còn sửa một đơn nháp thì rẻ.
-- **Chỗ chặn rủi ro:** rủi ro lớn nhất là **phường cũ bị tách, AI tự tin chọn sai phường mới → giao nhầm**. Chặn ở Bước 2 bằng code: phường mới AI đề xuất **phải có trong bảng chuyển đổi chính thức** và phải kèm `do_chac: "cao"` cùng căn cứ cụ thể, nếu không thì HỎI LẠI kèm danh sách phường để khách chọn. Trường nào không qua kiểm thì không có đơn nháp, dù khách nói gì. Code còn chặn model đoán: sđt phải có trong hội thoại, căn cứ chọn phường phải là chữ có trong hội thoại. Khách cũ (C): chỉ đọc lịch sử theo **mã tài khoản chat** đang nhắn, không theo số điện thoại khách đưa, để người lạ không lấy được địa chỉ của người khác. Mã này do **code** đọc ở đầu hội thoại hoặc từ dữ liệu hộp thư, không bao giờ lấy từ lời khách hay output của model, nên khách gõ "mã của chị là KH-005" cũng không lấy được địa chỉ của KH-005.
+- **Chỗ chặn rủi ro:** rủi ro lớn nhất là **phường cũ bị tách, chọn sai phường mới → giao nhầm**. Nghị quyết 1685/NQ-UBTVQH15 không nói đường nào thuộc phần nào của phường bị tách, nên Bước 2 **luôn hỏi lại khách** kèm đủ danh sách phường mới, và chỉ nhận phường khách chọn có trong danh sách. Mọi phường mới đều lấy từ bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15. Trường nào không qua kiểm thì không có đơn nháp, dù khách nói gì. Code còn chặn model đoán: sđt phải có trong hội thoại. Khách cũ (C): chỉ đọc lịch sử theo **mã tài khoản chat** đang nhắn, không theo số điện thoại khách đưa, để người lạ không lấy được địa chỉ của người khác. Mã này do **code** đọc ở đầu hội thoại hoặc từ dữ liệu hộp thư, không bao giờ lấy từ lời khách hay output của model, nên khách gõ "mã của chị là KH-005" cũng không lấy được địa chỉ của KH-005.
 - **Chỗ người duyệt:** màn hình duyệt (D). AI không bao giờ tự duyệt đơn, tự gửi tin hay tự tạo vận đơn thật. Chủ shop sửa trường nào thì code kiểm lại trường đó; còn sai thì nút Duyệt bị khoá. Mỗi lần sửa được ghi lại để đo tỉ lệ đơn AI làm đúng ngay lần đầu.
 - **Nguyên tắc thiết kế:**
 
   | Nguyên tắc | Chỗ cụ thể trên sơ đồ / trong bản chạy thử |
   |---|---|
   | G10 — thu hẹp phạm vi khi không chắc | ô "HỎI LẠI một lần, gom đủ các trường": không chắc phường mới thì không đoán, gợi ý sẵn tối đa 3 phường để khách chọn |
-  | G11 — giải thích vì sao AI quyết định vậy | ô "create_draft_order": phần "Cho chủ shop" ghi `Phường/xã: <mới> (quy đổi từ <cũ>; AI chọn theo: <căn cứ>)` |
+  | G11 — giải thích vì sao AI quyết định vậy | ô "create_draft_order": phần "Cho chủ shop" ghi `Phường/xã: <mới> (quy đổi từ <cũ> theo khoản <N> Nghị quyết 1685/NQ-UBTVQH15[; khách chọn])` |
   | G8/G9 — dễ sửa, dễ bỏ | ô "D · Màn hình duyệt": đơn chỉ là nháp, chủ shop sửa từng trường hoặc huỷ; sửa xong code kiểm lại |
 
-- **Phần còn giả:** model đang chạy chế độ giả (chưa nối model thật, nối ở CP3) · `codebase/tools.py` và `codebase/agent.py` đang là khung của đề, bốn công cụ trên làm sau CP2 · bảng chuyển đổi địa giới chỉ có 1–2 tỉnh/thành mẫu, theo địa bàn **cũ**; địa chỉ ghi tên tỉnh cũ đã gộp (Bình Dương, Bà Rịa - Vũng Tàu) chưa quy đổi được, code ra HỎI LẠI · mã vận đơn `GHN-NHAP-` là mã giả, không gọi GHN.
+- **Phần còn giả:** model đang chạy chế độ giả (chưa nối model thật, nối ở CP3) · `codebase/tools.py` và `codebase/agent.py` đang là khung của đề, bốn công cụ trên làm sau CP2 · bảng chuyển đổi địa giới (`data/chuyen-doi-dia-gioi.csv`) đang dựng từ Nghị quyết 1685/NQ-UBTVQH15 cho toàn TP Hồ Chí Minh; khoản nào văn bản không ghi quận cũ thì phải tra nguồn chính thức khác, chưa tra được thì để trống · mã vận đơn `GHN-NHAP-` là mã giả, không gọi GHN.
 
 ## §5. Chỗ khó — 4 lớp + ≥6 kịch bản + 2 tấn công *(guide 2.3)*
 
