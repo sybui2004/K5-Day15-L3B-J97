@@ -20,6 +20,8 @@ import zipfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "cuc-thong-ke-hcm.csv")
 NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+R_ID = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+REL = "{http://schemas.openxmlformats.org/package/2006/relationships}"
 SHEET_NAME = "Tổng hợp_không merge"
 
 
@@ -35,11 +37,18 @@ def read_sheet(path, sheet_name):
     shared = []
     if "xl/sharedStrings.xml" in z.namelist():
         for si in ET.fromstring(z.read("xl/sharedStrings.xml")).iter(NS + "si"):
-            shared.append("".join(t.text or "" for t in si.iter(NS + "t")))
+            # chỉ lấy <t> nằm trực tiếp dưới <si> hoặc dưới <r>; bỏ <rPh> (phiên âm)
+            ts = si.findall(NS + "t") + [t for r in si.findall(NS + "r") for t in r.findall(NS + "t")]
+            shared.append("".join(t.text or "" for t in ts))
+    # tên sheet -> r:id (workbook.xml) -> file part (workbook.xml.rels); không dựa vào thứ tự sheet
     wb = ET.fromstring(z.read("xl/workbook.xml"))
-    names = [s.get("name").strip() for s in wb.iter(NS + "sheet")]
-    idx = names.index(sheet_name.strip())
-    root = ET.fromstring(z.read(f"xl/worksheets/sheet{idx + 1}.xml"))
+    sheets = {s.get("name").strip(): s.get(R_ID) for s in wb.iter(NS + "sheet")}
+    if sheet_name.strip() not in sheets:
+        sys.exit(f"LỖI: không có sheet {sheet_name!r}. Các sheet: {list(sheets)}")
+    rels = ET.fromstring(z.read("xl/_rels/workbook.xml.rels"))
+    target = {r.get("Id"): r.get("Target") for r in rels.iter(REL + "Relationship")}[sheets[sheet_name.strip()]]
+    part = target.lstrip("/") if target.startswith("/") else "xl/" + target
+    root = ET.fromstring(z.read(part))
     for row in root.iter(NS + "row"):
         vals = {}
         for c in row.iter(NS + "c"):
@@ -58,6 +67,8 @@ def read_sheet(path, sheet_name):
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     src = sys.argv[1]
     out = []
     for r in read_sheet(src, SHEET_NAME):

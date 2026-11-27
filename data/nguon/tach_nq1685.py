@@ -18,6 +18,7 @@ Chỉ dùng thư viện chuẩn.
 import csv, os, re, sys, unicodedata, collections
 
 sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEXT = os.path.join(HERE, "nq1685-dieu1.txt")
 NSO = os.path.join(HERE, "cuc-thong-ke-hcm.csv")
@@ -66,7 +67,11 @@ next(_nso_rows)  # tiêu đề
 for r in _nso_rows:
     _, moi, _, cu, _, ghichu, quan, tinh = r
     moi = re.sub(r"\s+", " ", moi).strip()
-    nso[(key(moi), key(cu))] = (fmt_quan(quan), fmt_tinh(tinh), ghichu)
+    k_ = (key(moi), key(cu))
+    if k_ in nso:  # không cho dòng sau đè dòng trước
+        sys.exit(f"LỖI: bảng Cục Thống kê có 2 dòng cùng (phường mới, phường cũ) = {k_}: "
+                 f"{nso[k_]} và {(quan, tinh, ghichu)}")
+    nso[k_] = (fmt_quan(quan), fmt_tinh(tinh), ghichu)
     nso_by_new[key(moi)].append(cu)
     quan_tinh[key(fmt_quan(quan))] = fmt_tinh(tinh)
 
@@ -97,6 +102,9 @@ SAU_KHI = re.compile(r"\s*sau khi sắp xếp theo quy định tại khoản [\d
 TYPE_RE = re.compile(r"^(?:(các)\s+)?(phường|xã|thị trấn)\s+(.*)$")
 
 rows, report = [], []
+thieu = sorted(set(range(1, 165)) - set(khoan))
+if thieu or max(khoan, default=0) != 164:
+    report.append(f"THIẾU KHOẢN: {thieu} (đọc được {len(khoan)} khoản, lớn nhất {max(khoan, default=0)})")
 for k in sorted(khoan):
     t = khoan[k]
     if k == 164:
@@ -107,10 +115,18 @@ for k in sorted(khoan):
         continue
     body, _, moi = m.groups()
     moi = moi.strip()
-    if k == 163:  # huyện Côn Đảo -> đặc khu Côn Đảo: đơn vị cũ là cả huyện
-        q, tinh, _ = nso.get((key(moi), key("")), ("huyện Côn Đảo", "Bà Rịa - Vũng Tàu", ""))
-        rows.append(dict(tinh_cu=tinh, quan_huyen_cu="huyện Côn Đảo", phuong_xa_cu="",
+    mh = re.fullmatch(r"toàn bộ diện tích tự nhiên, quy mô dân số của (huyện \S.*)", body.strip())
+    if mh:  # khoản 163: cả huyện Côn Đảo -> đặc khu; tên huyện có trong văn bản, đối chiếu Cục TK
+        huyen = mh.group(1).strip()
+        hit = nso.get((key(moi), key("")))
+        if not hit:
+            report.append(f"NQ CÓ, CỤC TK KHÔNG: khoản {k} {huyen} -> {moi}")
+        elif key(hit[0]) != key(huyen):
+            report.append(f"LỆCH QUẬN khoản {k}: văn bản '{huyen}', Cục TK '{hit[0]}'")
+        rows.append(dict(tinh_cu=hit[1] if hit else "", quan_huyen_cu=huyen, phuong_xa_cu="",
                          phuong_xa_moi=moi, kieu="toan_bo", khoan=k, nguon_quan="van_ban"))
+        if not hit:
+            report.append(f"CHƯA RÕ TỈNH khoản {k}: {huyen}")
         continue
     body = SAU_KHI.sub("", body)
     parts = MARK.split(body)
@@ -178,17 +194,21 @@ for k in sorted(khoan):
                          kieu=kieu, khoan=k, nguon_quan=nguon))
 
 # khoản 164: 05 đơn vị không thực hiện sắp xếp -> giữ nguyên tên
-t164 = khoan[164]
-m = re.search(r"không thực hiện sắp xếp là (.*)\.$", t164)
-toks = [x.strip() for x in re.split(r",|\s+và\s+", m.group(1)) if x.strip()]
+m = re.search(r"không thực hiện sắp xếp là (.*)\.$", khoan.get(164, ""))
+if not m:
+    report.append(f"KHÔNG TÁCH ĐƯỢC khoản 164: {khoan.get(164, '(không có)')}")
+toks = [x.strip() for x in re.split(r",|\s+và\s+", m.group(1)) if x.strip()] if m else []
 cur = None
 for tok in toks:
     mt = TYPE_RE.match(tok)
     if mt:
         cur = mt.group(2)
         name = f"{cur} {mt.group(3)}"
-    else:
+    elif cur:
         name = f"{cur} {tok}"
+    else:
+        report.append(f"khoản 164: không rõ loại đơn vị: {tok!r}")
+        continue
     hit = nso.get((key(name), key(name)))
     rows.append(dict(tinh_cu=hit[1] if hit else "", quan_huyen_cu=hit[0] if hit else "",
                      phuong_xa_cu=name, phuong_xa_moi=name, kieu="khong_sap_xep", khoan=164,
@@ -205,6 +225,23 @@ for r in rows:
     if (key(r["phuong_xa_moi"]), key(r["phuong_xa_cu"])) not in nso:
         report.append(f"NQ CÓ, CỤC TK KHÔNG: khoản {r['khoan']} {r['phuong_xa_cu']} -> {r['phuong_xa_moi']}")
 
+# ---------- phường bị tách: ≥1 dòng mot_phan và đúng 1 dòng phan_con_lai ----------
+theo_cu = collections.defaultdict(list)
+for r in rows:
+    if r["phuong_xa_cu"]:
+        theo_cu[(r["quan_huyen_cu"], r["phuong_xa_cu"])].append(r["kieu"])
+for (q, p), ks in theo_cu.items():
+    tach = [x for x in ks if x in ("mot_phan", "phan_con_lai")]
+    if tach and (ks.count("phan_con_lai") != 1 or ks.count("mot_phan") < 1 or len(tach) != len(ks)):
+        report.append(f"PHƯỜNG TÁCH KHÔNG KHỚP: {p} ({q}): {ks}")
+    if not tach and len(ks) > 1:
+        report.append(f"PHƯỜNG XUẤT HIỆN NHIỀU LẦN MÀ KHÔNG TÁCH: {p} ({q}): {ks}")
+
+if report:  # có lỗi thì không ghi đè file cũ, thoát mã 1
+    print("--- LỖI, KHÔNG GHI", OUT, "---")
+    print("\n".join(report))
+    sys.exit(1)
+
 cols = ["tinh_cu", "quan_huyen_cu", "phuong_xa_cu", "phuong_xa_moi", "kieu", "khoan", "nguon_quan"]
 with open(OUT, "w", encoding="utf-8", newline="") as f:
     w = csv.DictWriter(f, fieldnames=cols, lineterminator="\n")
@@ -218,5 +255,4 @@ print("đơn vị mới (Điều 1, khoản 1-163):", len(moi_set),
 print("kiểu:", collections.Counter(r["kieu"] for r in rows))
 print("nguon_quan:", collections.Counter(r["nguon_quan"] for r in rows))
 print("tinh_cu:", collections.Counter(r["tinh_cu"] for r in rows))
-print("--- báo cáo ---")
-print("\n".join(report) or "(không có)")
+print("--- báo cáo: không có lỗi, đã ghi", OUT, "---")
