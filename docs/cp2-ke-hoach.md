@@ -175,7 +175,39 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 - **23:00 Thứ Sáu — mốc cắt:** P2 (web) chưa chạy được thì bỏ D, giữ B (B đo được bằng câu hội thoại dài trong benchmark), ghi `spec.md` §10 là thu hẹp lát cắt.
 - **Từ 19:30:** `spec.md` là bản chính. File này chỉ còn là danh sách task; spec đổi gì thì sửa `spec.md` trước.
 
-**Cách làm git:** mỗi người tạo nhánh từ `develop` (`feature/cp2-x-…`, `feature/cp2-y-…`), PR vào `develop`, người cặp kia duyệt. Commit message không có dòng `Co-Authored-By` hay ghi công AI (AGENTS.md).
+**Cách làm git:** mỗi task một nhánh tạo từ `develop` mới nhất, PR vào `develop`, **người cặp kia duyệt** (Cặp X: Sỹ ↔ Hưng · Cặp Y: Việt Anh ↔ An). Commit message không có dòng `Co-Authored-By` hay ghi công AI (AGENTS.md). Tạo nhánh:
+
+```
+git checkout develop && git pull
+git checkout -b <tên nhánh ở bảng dưới>
+# làm, commit, rồi:
+git push -u origin <tên nhánh>   # mở PR vào develop
+```
+
+**Nhánh của từng người** (làm theo thứ tự từ trên xuống; xong nhánh trước, merge rồi mới tạo nhánh sau từ `develop` mới):
+
+| Người | Nhánh | Task | File chính | Chờ ai |
+|---|---|---|---|---|
+| **Sỹ** | `feature/cp2-e3-bang-chung` | E3 tổng hợp bằng chứng | `evidence/interviews/P1.md`–`P4.md`, `evidence/summary.md` | — |
+| | *(không nhánh)* | F1 tự soát, PR `develop` → `main`, nộp CP2 | — | mọi PR CP2 đã merge |
+| | `feature/cp3-x3-agent` | X3 luồng chính | `codebase/agent.py`, `tests/test_agent.py` | X2 (dùng stub đến khi X2 merge, rồi `git rebase develop`) |
+| | `feature/cp3-x4-chay-khung` | X4 chạy hết luồng, gọi thử model | `README.md` (lệnh chạy) | X3 |
+| | `feature/cp3-p1-hop-thu` | P1 hộp thư (luồng A) | `codebase/inbox.py`, `data/hop-thu-mau.jsonl`, `tests/test_inbox.py` | X3 |
+| **Hưng** | `feature/cp2-x0-bang-chuyen-doi` | X0 bảng chuyển đổi địa giới | `data/chuyen-doi-dia-gioi.csv` | — (**merge sớm nhất**, Cặp Y đang chờ) |
+| | `feature/cp3-x2-tools` | X2 bốn công cụ | `codebase/tools.py`, `tests/test_tools.py` | X0 |
+| | `feature/cp3-p2-man-hinh-duyet` | P2 màn hình duyệt (D + B), sửa `run_app()` | `codebase/web.py`, `run.py`, `AGENTS.md`, `tests/test_web.py` | X2, X3, P1 |
+| **Việt Anh** | `feature/cp2-y-cau-thu` *(chung với An)* | Y3 câu thử `B01`–`B09` · Y4 DATA_CARD · Y5 chấm thử | `eval/benchmark.csv`, `data/DATA_CARD.md`, `eval/README.md` | X0 (câu địa chỉ cũ) |
+| | `feature/cp3-p3-khach-cu` | P3 luồng C | `codebase/tools.py` (thêm `get_customer_history`), `data/lich-su-khach.csv`, `tests/` | X3 |
+| | `feature/cp3-y-cau-thu-30` | mở rộng bộ câu thử lên 20–30 · `spec.md` §5 | `eval/benchmark.csv`, `spec.md` §5 | — |
+| **An** | `feature/cp2-e3-canvas` | E3 canvas | `canvas.md` | ghi chép phỏng vấn |
+| | `feature/cp2-y-cau-thu` *(chung với Việt Anh)* | Y3 câu thử `B10`–`B19` (câu `nguoi_dung`) · số câu ở `spec.md` §7 · Y5 chấm thử | `eval/benchmark.csv`, `spec.md` §7 | Việt Anh tạo nhánh trước |
+| | `feature/cp3-y7-grade` | Y7 `eval/grade.py` | `eval/grade.py`, `tests/test_grade.py`, `eval/README.md` | — |
+| | `feature/cp3-p4-luot-1` | P4 lượt 1 | `eval/run-1.csv`, `traces/run-1.jsonl`, `eval/report.md` | X3, X4, Y7 |
+
+**Tránh xung đột:**
+- `feature/cp2-y-cau-thu` là nhánh chung: Việt Anh tạo và push trước. An `git fetch && git checkout feature/cp2-y-cau-thu`. Mỗi người chỉ thêm dòng trong khoảng `id` của mình, **`git pull --rebase` trước mỗi lần push**. Xung đột ở cuối `benchmark.csv` thì giữ cả hai phía.
+- `spec.md`: An sửa §7, Việt Anh sửa §5 (sau CP2). Mục khác trong `spec.md` chỉ sửa §10 changelog, mỗi người thêm một dòng.
+- `codebase/tools.py`: Hưng sở hữu. Việt Anh thêm `get_customer_history` **sau khi X2 merge**, thêm ở cuối file.
 
 ---
 
