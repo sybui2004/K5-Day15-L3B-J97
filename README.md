@@ -18,7 +18,7 @@
 | Chấm cột `pass` theo metric spec | Chạy cả bộ một lệnh, có run ID, model, token từng câu (`run.py eval`) · tính % đạt (`run.py score`) |
 | Persona, số người dùng thật, giá model (`cost/personas.yaml`) | Sinh ~50 phiên, chạy thật qua bản chạy thử, tính chi phí / phiên, / task thành công, / tháng 3 kịch bản (`run.py simulate`) |
 
-*Ví dụ track A (ví dụ cỡ, không phải lời giải):* nhóm viết công cụ `search_lesson` tra bài pre-class đã đánh mã đoạn, luồng "tra đoạn → model trả lời kèm mã đoạn, không có thì nói không có", metric "mọi khẳng định có mã đoạn đúng", persona "ôn dồn trước kiểm tra". Khung chạy 25 câu thử ra `run-1.csv`, nhóm chấm `pass`, `score` in % đạt; `simulate` chạy 50 phiên ra chi phí / task thành công cho hai model.
+*Ở J97:* nhóm viết 5 công cụ kiểm sđt, quy đổi và tra phường/xã, tạo đơn nháp, đọc lịch sử khách (`codebase/tools.py`); luồng "model đọc hội thoại trả JSON → code kiểm từng trường → TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI" (`codebase/agent.py`); 30 câu thử, 5 metric; persona theo số đơn của 4 chủ shop đã phỏng vấn.
 
 ## Chạy bản chạy thử của nhóm J97
 
@@ -30,13 +30,14 @@ python run.py                               # mở màn hình duyệt ở http:/
 ```
 
 - **Màn hình duyệt** (`codebase/web.py`): hộp thư 10 hội thoại mẫu (`data/hop-thu-mau.jsonl`). Bấm từng hội thoại để xem đơn nháp, sửa trường, Duyệt hoặc Huỷ; hội thoại đang chờ khách thì dán câu trả lời của khách để chạy lại (luồng B). Chỉ mở trên máy này (`127.0.0.1`).
+- **Lần đầu mở web phải chờ khoảng 1 phút:** trước khi mở cổng, bản chạy thử gọi model cho cả 10 hội thoại (khoảng 6 giây / hội thoại với model thật). Terminal in `Màn hình duyệt — đang xử lý 10 hội thoại…` rồi `Mở trình duyệt: http://127.0.0.1:8000`; thoát bằng Ctrl+C.
 - **Bản dòng lệnh dự phòng:** `python codebase/app.py`, gõ một hội thoại, nhận QUYẾT ĐỊNH (TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI).
 - **Chưa có `.env`:** chạy chế độ giả (model giả, không cần `pip install`). Luồng vẫn đi hết, nhưng model giả không trả JSON nên mọi hội thoại ra HỎI LẠI.
 - Chạy bộ câu thử, chấm, mô phỏng chi phí: xem mục "Lệnh" bên dưới.
 
 ## Chạy trong 3 phút
 
-Bộ khung cần **Python 3.10 trở lên** (Python 3.9 có sẵn trên macOS vẫn chạy được, chỉ in một dòng nhắc). **Không cần `pip install`.**
+Bộ khung cần **Python 3.10 trở lên** (Python 3.9 có sẵn trên macOS vẫn chạy được, chỉ in một dòng nhắc). **Chế độ giả không cần `pip install`**; gọi model thật cần `python -m pip install -r requirements.txt` (SDK `anthropic`), thiếu thì báo `ModuleNotFoundError: No module named 'anthropic'`.
 
 **Bước 1 — Mở cửa sổ lệnh ngay trong thư mục repo**
 
@@ -51,13 +52,13 @@ Gõ `dir` (Windows) hoặc `ls` (macOS / Linux): thấy `run.py` và `README.md`
 | Việc | Windows (PowerShell) | macOS / Linux |
 |---|---|---|
 | Kiểm Python | `python --version` (không được thì `py --version`) | `python3 --version` |
-| Chạy bản chạy thử (chế độ giả, chưa gọi model) | `python run.py` | `python3 run.py` |
+| Chạy bản chạy thử (chế độ giả, chưa gọi model) → mở http://127.0.0.1:8000 | `python run.py` | `python3 run.py` |
 | Kiểm bộ câu thử | `python run.py check` | `python3 run.py check` |
 | Tạo file `.env` để nối model | `copy .env.example .env` | `cp .env.example .env` |
 
 - Windows: gõ `python` mà mở Microsoft Store hoặc báo không có lệnh → dùng `py`. Chưa có Python: cài từ python.org, **tick "Add python.exe to PATH"**, mở lại PowerShell.
 - macOS: báo `command not found: python` là bình thường → dùng `python3`.
-- `python run.py` in ra "[câu trả lời giả — chưa nối model] …" là khung chạy đúng. Nối model thật: [docs/connect-model.md](docs/connect-model.md).
+- `python run.py` in ra `Mở trình duyệt: http://127.0.0.1:8000` là chạy đúng: mở link đó trong trình duyệt, thoát bằng Ctrl+C. Nối model thật: [docs/connect-model.md](docs/connect-model.md).
 
 Trong README này lệnh viết là `python …`; máy nhóm cần `python3` hay `py` thì gõ thay.
 
@@ -65,7 +66,7 @@ Trong README này lệnh viết là `python …`; máy nhóm cần `python3` hay
 
 | Lệnh | Làm gì |
 |---|---|
-| `python run.py` | Chạy bản chạy thử (gõ đầu vào, nhận kết quả, kèm số lần gọi model / token) |
+| `python run.py` | Mở màn hình duyệt (web http://127.0.0.1:8000, hộp thư 10 hội thoại mẫu). Bản dòng lệnh (gõ đầu vào, nhận kết quả, kèm số lần gọi model / token): `python codebase/app.py` |
 | `python run.py check` | Kiểm `eval/benchmark.csv` (6 cột, số câu, `kho` / `tu_choi`, mã `source`, ô trống, dòng mẫu) `eval/metric_spec.yaml` (≥3 metric điền đủ) và `TEAMS.md` (đúng format để BTC quét). Chỉ cảnh báo, không sửa file |
 | `python run.py eval --try` | **Thử nối model:** chạy 3 câu đầu (`--try 5` = 5 câu) → `eval/run-try.csv`. Thấy "Nối model được" là xong. Không tính là một lượt |
 | `python run.py eval` | Chạy cả bộ qua `codebase/agent.py` → `eval/run-1.csv` (lần sau `run-2.csv`…) + `traces/run-1.jsonl`. Mỗi dòng có run ID, model, số lần gọi model / công cụ, token. Model còn giả → chỉ ghi `run-mock.csv`; mọi câu lỗi → `run-error.csv`; Ctrl+C → `run-stopped.csv` — đều **không** được đánh số |
@@ -85,14 +86,14 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 | File | Viết gì | Bước guide |
 |---|---|---|
-| `codebase/agent.py` | `answer(text)` — luồng chính, đúng hình dạng ở `spec.md` §4. Khung có sẵn một workflow 2 bước *ví dụ* | 3.2 |
+| `codebase/agent.py` | `answer(text)` — luồng chính, đúng hình dạng ở `spec.md` §4: workflow 3 bước (model đọc hội thoại → code kiểm → TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI) | 3.2 |
 | `codebase/tools.py` | Công cụ của bài toán, mỗi công cụ một hàm có `@tool` | 2.2, 3.2 |
 | `codebase/ai.py` | `call_model(system, user)` — chỗ duy nhất gọi model. Chưa điền `.env` thì chạy **chế độ giả** | 3.3 |
 | `codebase/inbox.py` | *(J97)* luồng A: chạy cả hộp thư, xếp TẠO ĐƠN NHÁP → HỎI LẠI → TỪ CHỐI | 3.2 |
 | `codebase/web.py` | *(J97)* luồng D + B: màn hình duyệt, sửa trường thì code kiểm lại, hỏi lại nhiều lượt | 3.2 |
 
-- **Trước CP2:** để chế độ giả, công cụ trả dữ liệu giả — `python run.py` đi hết luồng là đủ.
-- **Trước CP3:** nối model thật theo [docs/connect-model.md](docs/connect-model.md), `eval --try` thấy token > 0 rồi mới `eval`.
+- **Hiện tại (CP3):** đã nối Claude (`claude-sonnet-5-5`); `.env` trống thì vẫn chạy chế độ giả để thử luồng.
+- Trước mỗi lượt đánh giá: `python run.py eval --try` thấy token > 0 rồi mới `python run.py eval`.
 - Bộ chạy gửi **nguyên ô `input`** của câu thử vào `answer(text)`. Dữ liệu nền (bài học, thông báo, lịch…) để trong `data/`, đọc qua công cụ.
 
 ## Phần nào thật, phần nào giả
