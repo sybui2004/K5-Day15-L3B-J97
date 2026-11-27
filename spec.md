@@ -252,6 +252,7 @@ flowchart LR
 | 28/11 | README: tên nhóm và lát cắt, xoá mục 0 của khung, thêm cách chạy bản của nhóm (cài `requirements.txt`, `.env`, màn hình duyệt), bảng "Phần nào thật, phần nào giả" đủ 7 dòng | README còn `____` và hướng dẫn của khung ("không cần pip install") không còn đúng sau khi nối Claude và thêm màn hình duyệt; rubric R3 chấm "người ngoài chạy được, phần còn giả ghi rõ" |
 | 28/11 | `codebase/agent.py`: prompt và bước kiểm ngoài phạm vi (khiếu nại, xin số shipper/nhân viên, khách giả lời shop), phường đánh số không có quận là kiểu cũ, hỏi quận và tỉnh cùng một tin, không tự điền tỉnh | Lỗi lượt 1: B16, B18, B19 (bộ 19 câu), B30, B12 (bộ 30 câu) — `eval/report.md` mục 2–3. Review PR #46: bỏ đoán tỉnh và so khớp cụm từ câu thử. Không đổi câu thử, §7 chuẩn "đạt", metric |
 | 28/11 | §7 kết quả: lượt 1 = run-3, lượt 2 = run-5 (cùng bộ 30 câu); run-1, run-2 (bộ 19 câu) và run-4 giữ file, không tính | Guide 3.4: lượt 1 trên bộ 20–30 câu; lượt 1 và lượt 2 cùng bộ câu thử. Không sửa kết quả lượt nào |
+| 28/11 | README: điền link video demo 34 giây (màn hình duyệt, `claude-sonnet-5-5`, log token ở đầu video) | Guide 3.4: video 30 giây, thao tác thật, AI trả kết quả thật |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
