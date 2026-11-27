@@ -7,30 +7,84 @@ Track: [ ] A · [ ] B · [ ] C · [x] D · [ ] E — bài toán: chủ shop nh�
 Data BTC cấp đã dùng (nếu có — không commit nguyên file): __
 
 ## §0. Hiện tại việc này diễn ra thế nào *(guide 1.1)*
-- Luồng hiện tại của việc này, trong khoá hoặc trên app thật (3–5 bước; ảnh chụp từ tài khoản của mình, đã che thông tin):
-- Công cụ / AI đang được dùng cho việc này (nếu có) + nguồn. Không kiểm được thì ghi "chưa kiểm":
+- Luồng hiện tại trên app thật, theo lời kể của 4 chủ shop P1–P4 (`evidence/interviews/`), chưa có ảnh chụp:
+  1. Khách xem mẫu, hỏi rồi chốt mua qua Messenger của fanpage hoặc khung chat website.
+  2. Shop xin họ tên, sđt và địa chỉ. Mỗi đơn mất 3–6 lượt nhắn, vì khách nhắn tách nhiều tin, thiếu số nhà hoặc thiếu phường (P1–P4, câu 2).
+  3. Shop copy-paste hoặc gõ tay từng trường sang trang tạo đơn GHN. P3 chép ra sổ trước, cuối buổi mới gõ vào GHN.
+  4. Khách ghi địa chỉ kiểu cũ thì shop tự đổi sang phường/xã mới: P1 tra Google, P2 dùng tab tra cứu đơn vị hành chính, P4 dùng bảng quy đổi lưu trên máy, P3 nhắn hỏi lại khách. Có lúc GHN không nhận tên phường cũ, phải dò đúng tên mới mới tạo được mã vận đơn (P2).
+  5. Shop chọn cân nặng, tạo vận đơn, in mã. Tổng cộng 4–8 phút cho một đơn (P3 tính cả thời gian tư vấn).
+  - Đoạn chat thật đã che thông tin: `evidence/interviews/P1.md`, mục "Tư liệu nhận được". **Chưa có ảnh chụp màn hình.**
+- Công cụ / AI đang được dùng cho việc này:
+  - Trả lời nhanh của Facebook, gồm bảng size và mẫu tin xin thông tin (P1, P4). Mẫu câu lưu trong ghi chú máy tính (P2). Sổ ghi chép và tin nhắn ghim (P3).
+  - Chatbot: P2 thử đầu năm rồi bỏ, vì bot trả lời máy móc khi khách hỏi thông số. P1, P3, P4 chưa dùng chatbot.
+  - Phần mềm quản lý đơn: cả 4 shop chưa dùng. Lý do: tốn phí hằng tháng (P1, P4), khách thích người thật tư vấn (P1), rắc rối và ngại học khi làm một mình (P3), muốn tự kiểm soát từng tin nhắn (P4).
+  - GHN có tự đoán phường mới từ địa chỉ cũ không: **chưa kiểm**. Hiện chỉ có lời P2 kể là GHN "không nhận tên phường cũ".
 
 ## §1. Người dùng & bằng chứng *(guide 1.1, 1.2)*
-- Người dùng chính (một vai cụ thể):
-- Việc họ cố làm xong (`động từ + đối tượng + bối cảnh`, không có chữ AI):
-- Hôm nay họ giải bằng gì, hỏng ở đâu, vì sao chưa bỏ:
-- Pain (KHÔNG chữ AI): ai — đang làm gì — vướng đâu — hậu quả gì:
-- Bằng chứng — số chính + kết luận (chi tiết: `evidence/summary.md`): __
+- **Người dùng chính:** chủ một shop bán lẻ ở TP HCM, tự bán qua một fanpage Facebook và một website, tự trực tin nhắn, tự lên đơn và tạo vận đơn GHN. Mỗi tháng chốt khoảng 260–650 đơn qua tin nhắn (P1–P4).
+- **Việc họ cố làm xong:** lên đơn giao hàng đúng người nhận, đúng sđt và đúng phường/xã mới từ đoạn chat khách vừa chốt mua, trong lúc vẫn đang trả lời những khách khác.
+- **Hôm nay họ giải bằng gì, hỏng ở đâu, vì sao chưa bỏ:**
+  - Giải bằng tay: copy-paste hoặc gõ lại từng trường sang GHN, tự tra phường mới (§0).
+  - Hỏng ở 3 chỗ:
+    - Lúc đông khách, shop lấy nhầm dòng hoặc nhầm khách: P1 copy sđt của khách này sang đơn của khách kia, P4 lấy nhầm tên người đặt làm người nhận.
+    - Shop gõ nhầm số: P3 nhìn số 8 thành số 3.
+    - Shop tự chọn nhầm phường mới giáp ranh: P1 2 lần / tháng, P3 và P4 mỗi người 1 lần.
+  - Chưa bỏ cách làm này vì phần mềm tốn phí, khó học, còn chatbot trả lời máy móc (§0). Shop cũng tránh hỏi lại khách vì sợ khách bỏ: P2 kể khoảng 30% khách không trả lời sau lần hỏi lại thứ hai.
+- **Pain:** chủ shop nhỏ vừa trả lời tin tư vấn vừa chép thông tin nhận hàng từ chat sang GHN. Khi khách nhắn dồn, nhắn tách nhiều tin hoặc ghi địa chỉ kiểu cũ, shop chép nhầm sđt hoặc người nhận, thiếu số nhà, hoặc đổi sai phường. Hậu quả là đơn bị hoàn, shop mất 38.000–60.000đ phí ship mỗi vụ, và trong 3/4 vụ gần nhất khách huỷ hoặc mua chỗ khác.
+- **Bằng chứng** (phỏng vấn 4 chủ shop bán lẻ ở TP HCM ngày 27/11; n = 4 nên không ghi %; chi tiết ở `evidence/summary.md`):
+  - **H2 đúng:** 4/4 shop chép sai hoặc thiếu thông tin nhận hàng trong 1 tháng qua, mỗi shop 1–4 lần.
+  - **Địa chỉ kiểu cũ:** 4/4 shop nói khách vẫn ghi, khoảng 20–45% số đơn, mỗi đơn mất thêm 1–3 phút. 4/4 shop từng quy đổi sai hoặc bị GHN từ chối phường cũ.
+  - **H1 phải đổi:** chỉ 1/4 shop kể rõ khách bỏ vì shop trả lời chậm. 3/4 kể khách bỏ khi bị hỏi lại nhiều lần.
+  - **Chưa có** nguồn kiểm chéo: đếm review Google Play của app GHN mới viết cách đếm, chưa đếm.
 
 ## §2. Impact & quyết định chọn *(guide 1.3)*
 
-| Hướng | Bao nhiêu người gặp | Bao nhiêu lần / tháng | Mỗi lần tốn gì | Impact / tháng | Làm kịp không | Chọn? |
-|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |
+Số trong bảng lấy từ phỏng vấn P1–P4 (n = 4, `evidence/interviews/`). Chưa có số chủ shop trên toàn thị trường, nên cột "Bao nhiêu người gặp" chỉ tính 4 shop đã hỏi.
 
-- **Impact / tháng** của hướng chọn = __ người × __ lần × __ phút = __ — nguồn từng thừa số: __ (không có nguồn thì ghi rõ *(tự ước tính)*)
-- Hướng ĐÃ LOẠI + vì sao (giữ lại, đừng xoá):
-- Số lần / tháng của từng kiểu người dùng (dùng cho persona ở §8):
+| Hướng | Bao nhiêu người gặp | Bao nhiêu lần / tháng | Mỗi lần tốn gì | Impact / tháng (4 shop) | Làm kịp không | Chọn? |
+|---|---|---|---|---|---|---|
+| **Lên đơn từ tin nhắn chốt mua** (kiểm sđt, người nhận, quy địa chỉ cũ sang phường mới, hỏi lại một lần) | 4/4 (H2) | Vụ chép sai: P1 3 · P2 4 · P3 2 · P4 1. Đơn có địa chỉ cũ: 20–45% của 260–650 đơn | Mỗi vụ chép sai: 38.000–60.000đ phí ship, 3/4 vụ khách huỷ. Mỗi đơn địa chỉ cũ: thêm 1–3 phút | **≈ 494.000đ phí ship + ≈ 855 phút (≈ 14 giờ)** (tính ở dưới) | Kịp: workflow cố định, 1 lần gọi model, công cụ đều đọc bảng có sẵn | **Chọn** |
+| Trả lời tư vấn nhanh lúc đông khách (H1) | 1/4 kể rõ (P4) | P4: 2 lần khách bỏ vì shop trả lời chậm 15–20 phút | Mất đơn; giá trị đơn: chưa hỏi | Thấp, chưa tính được thành tiền: 2 đơn mất ở 1 shop | Không kịp: cần danh mục sản phẩm, giá, tồn kho của từng shop; chốt giá là cam kết với khách | Loại |
+| Xử lý khiếu nại, hoàn đơn vì giao nhầm | 4/4 có vụ hoàn | 1–4 vụ hoàn / shop (cùng các vụ ở hướng 1) | Thời gian xử lý khiếu nại: chưa hỏi | Chưa tính được: không có số phút hay số tiền cho việc xử lý | Không nên: hoàn tiền khó đảo nếu AI sai; chưa có bằng chứng về bước này | Loại |
+
+- **Impact / tháng của hướng chọn** gồm hai phần, đều tính cho 4 shop đã phỏng vấn:
+  - **Phí ship mất vì chép sai** = 4 shop × 2,5 vụ / shop / tháng × ≈ 49.000đ / vụ ≈ **494.000đ / tháng**.
+    - Nguồn số vụ: câu 7, P1 3, P2 4, P3 2, P4 1, cộng lại 10 vụ.
+    - Nguồn tiền mỗi vụ: câu 6, P1 52.000đ, P2 45.000đ, P3 60.000đ, P4 38.000đ. Cộng theo từng shop: 3×52 + 4×45 + 2×60 + 1×38 = 494 nghìn đồng.
+    - *(Tự ước tính:)* coi mọi vụ trong tháng đều tốn bằng vụ gần nhất. Chưa tính tiền hàng mất khi khách huỷ, như đơn 420.000đ của P1.
+  - **Thời gian đổi địa chỉ cũ** = Σ(đơn / tháng × tỉ lệ đơn địa chỉ cũ × phút thêm mỗi đơn) ≈ **855 phút / tháng (≈ 14 giờ)**.
+    - P1: 480 × 37,5% × 1,5 = 270 phút.
+    - P2: 650 × 45% × 1 = 293 phút.
+    - P3: 320 × 30% × 2,5 = 240 phút.
+    - P4: 260 × 20% × 1 = 52 phút.
+    - Nguồn: câu 4, 9, 10. Khoảng thì lấy điểm giữa *(tự ước tính)*.
+  - Bối cảnh: chính việc lên đơn tốn ≈ 8.800 phút / tháng ở 4 shop (đơn / tháng × 4–8 phút, câu 2 và câu 4). Nhóm **không** tính phần này vào impact, vì chưa đo được AI tiết kiệm bao nhiêu phút mỗi đơn.
+- **Vì sao chọn hướng này:** có bằng chứng mạnh nhất (4/4 cho H2, 4/4 cho địa chỉ cũ). Sai thì mất tiền thật (phí ship, hàng, khách). Làm kịp trong khoảng 10 giờ.
+- **Hướng ĐÃ LOẠI + vì sao:**
+  - **Tư vấn nhanh lúc đông khách:** H1 chỉ 1/4 kể rõ, dưới ngưỡng ≥2/3 của giả thuyết. Muốn làm phải có danh mục và giá của từng shop, mà chốt giá là cam kết với khách.
+  - **Khiếu nại giao nhầm:** chưa có bằng chứng về bước này (chưa hỏi thời gian xử lý). Hoàn tiền khó đảo nếu AI sai. Lên đơn đúng ngay từ đầu cũng làm giảm khiếu nại.
+- **Số lần / tháng của từng kiểu người dùng (dùng cho persona ở §8):**
+
+  | Kiểu shop | Ví dụ | Đơn chốt qua tin nhắn / tháng | Đơn địa chỉ cũ | Lượt nhắn / đơn |
+  |---|---|---|---|---|
+  | Lớn | P2 | ≈ 650 (ngày đông nhất 48) | ≈ 45% | 3 |
+  | Vừa | P1, P3 | ≈ 320–480 (ngày đông nhất 22–35) | 30–40% | 5–6 |
+  | Nhỏ | P4 | ≈ 260 (ngày đông nhất 19) | ≈ 20% | 4 |
 
 ## §3. Giải pháp tương tự *(guide 2.1)*
-- [sản phẩm / tính năng gần giống]: một điều đáng học · một điều đáng né · mình khác gì
+- **Trả lời nhanh / mẫu tin của Facebook** (P1, P4 đang dùng; P2 lưu mẫu trong ghi chú):
+  - Đáng học: một tin xin đủ tên, sđt, địa chỉ ngay từ đầu.
+  - Đáng né: mẫu tin không kiểm gì, khách trả thiếu thì shop vẫn phải tự đọc và hỏi lại.
+  - Mình khác: code kiểm từng trường, và khi thiếu thì soạn sẵn **một** tin gom đủ các trường còn thiếu.
+- **Chatbot trả lời tự động** (P2 thử đầu năm rồi bỏ):
+  - Đáng học: khách cần được trả lời ngay.
+  - Đáng né: bot trả lời máy móc phần tư vấn, khách thoát chat.
+  - Mình khác: không tư vấn, không nhắn thẳng cho khách. Chỉ đọc đoạn chat đã chốt, tạo đơn nháp, và mọi tin gửi đi đều do chủ shop bấm.
+- **Tự tra quy đổi địa chỉ** bằng Google, tab tra cứu đơn vị hành chính, bảng lưu trên máy (P1, P2, P4):
+  - Đáng học: lấy phường mới từ một bảng tra.
+  - Đáng né: phường cũ bị tách thì người tra tự chọn một phường, dẫn tới nhầm phường giáp ranh (P1 2 lần / tháng, P3, P4).
+  - Mình khác: bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15; phường bị tách thì luôn hỏi lại khách kèm danh sách phường mới.
+- **Phần mềm quản lý bán hàng đa kênh:** nhóm **chưa thử**, nên chưa ghi điều đáng học / đáng né. Bằng chứng duy nhất là cả 4 shop chưa dùng, vì tốn phí, rắc rối, muốn tự kiểm soát (§0).
 
 ## §4. Thiết kế *(guide 2.2, 3.2)*
 - **Lát cắt MỘT CÂU:** Một chủ shop bán lẻ · khách đã đồng ý mua qua tin nhắn Facebook hoặc website · AI xác định thông tin nhận hàng, kể cả quy địa chỉ cũ sang phường/xã mới, đã đủ và chắc để tạo đơn nháp, hay phải hỏi lại khách · chủ shop nhận đơn nháp kèm vận đơn GHN chờ duyệt.
@@ -110,8 +164,27 @@ flowchart LR
 (1) nguồn sự thật · (2) mơ hồ / thiếu thông tin · (3) ngoài phạm vi / thẩm quyền · (4) đặc thù lĩnh vực (sai thì người dùng mất gì đắt nhất)
 
 ## §6. Bốn đường đi của trải nghiệm
-- Mọi thứ suôn sẻ: · Không chắc (lớp 2): · Không có căn cứ (lớp 1): · Người dùng sửa:
-- Bị đòi ngoài phạm vi (lớp 3): · Trường hợp đặc thù lĩnh vực (lớp 4):
+- **Mọi thứ suôn sẻ** (B02, B04):
+  - Hội thoại đủ người nhận, sđt và địa chỉ; phường cũ gộp gọn vào một phường mới.
+  - Kết quả: TẠO ĐƠN NHÁP kèm mã vận đơn nháp `GHN-NHAP-`. Phần "Cho chủ shop" ghi phường mới và nguồn quy đổi (khoản nào của Nghị quyết 1685).
+  - Đơn hiện ở đầu hộp thư, chờ chủ shop bấm Duyệt.
+- **Không chắc (lớp 2)** (B05, B06, B09, B12):
+  - Các trường hợp: thiếu sđt, sđt sai độ dài, phường cũ bị tách, tên phường cũ trùng giữa nhiều quận.
+  - Kết quả: HỎI LẠI, không tạo đơn. Code soạn **một** tin gom đủ mọi trường còn thiếu; phường bị tách thì liệt kê tối đa 3 phường mới để khách chọn.
+  - Chủ shop bấm Chép để gửi. Khách trả lời thì dán vào ô "Khách trả lời", hệ thống chạy lại cả hội thoại (luồng B).
+- **Không có căn cứ (lớp 1)** (B13):
+  - Phường không có trong bảng dựng từ Nghị quyết 1685, vd "Phường 99, Quận 3".
+  - Kết quả: HỎI LẠI địa chỉ, kèm gợi ý gần đúng nếu có. Không bịa phường mới, không tạo đơn.
+- **Người dùng sửa** (luồng D):
+  - Chủ shop sửa người nhận, sđt hoặc phường trên đơn nháp; code kiểm lại đúng trường vừa sửa (`validate_phone`, `lookup_address`).
+  - Còn sai thì hiện lý do và khoá nút Duyệt; đúng thì cho Duyệt.
+  - Duyệt chỉ đổi trạng thái thành `da_duyet`, không gọi GHN, không gửi tin. Mỗi lần sửa được ghi lại để đếm số đơn AI làm đúng ngay lần đầu.
+- **Bị đòi ngoài phạm vi (lớp 3)** (B14–B19):
+  - Các yêu cầu: khiếu nại, xin sđt shipper, xin địa chỉ của khách khác, đòi "bỏ qua kiểm tra".
+  - Kết quả: TỪ CHỐI. Nói shop chỉ hỗ trợ lên đơn ở đây và việc kia chủ shop xử lý. Không tạo đơn, không lộ thông tin của ai.
+- **Trường hợp đặc thù lĩnh vực (lớp 4)** (B09, B10, B11):
+  - Phường cũ bị tách, hoặc địa chỉ còn ghi tỉnh cũ (Bình Dương, Bà Rịa - Vũng Tàu).
+  - AI không tự chọn phường. Khách chọn một phường trong danh sách thì mới TẠO ĐƠN NHÁP, ghi "khách chọn". Tỉnh cũ đã gộp thì ghi `TP Hồ Chí Minh`.
 
 ## §7. Đánh giá & chuẩn "đạt" *(guide 2.4, 4.1)*
 - Data card: `data/DATA_CARD.md` · bộ câu thử: `eval/benchmark.csv` — 19 câu (thuong 4 · kho 9 · tu_choi 6) · metric: `eval/metric_spec.yaml` (5 metric)
@@ -142,6 +215,7 @@ flowchart LR
 |---|---|---|
 | 27/11 sau khi nộp CP2 | `data/DATA_CARD.md` Dataset 1: ghi đúng mức trích review B16–B19 (chỉ B16 nguyên văn). `spec.md` §4 "Phần còn giả": cập nhật theo code hiện có | Review sau CP2: data card ghi "nguyên văn" cho cả 4 câu trong khi B17–B19 đã rút gọn; §4 còn ghi `tools.py`, `agent.py` là khung dù đã viết xong. Không đổi câu thử, §7, metric |
 | 27/11 sau khi nộp CP2 | §5: điền 10 kịch bản + 3 tấn công, mỗi dòng trỏ về câu thử B01–B19 (dòng tấn công luồng C chưa có câu thử, thêm khi làm P3) | Y6 trong `docs/cp2-ke-hoach.md`; kịch bản "phường cũ bị tách, AI tự tin chọn sai" lấy từ chạy tay Y1 (ChatGPT quy đổi phường và nêu căn cứ khách không hề nói). Không đổi câu thử, §7, metric |
+| 27/11 sau khi nộp CP2 | §0–§3 và §6: điền luồng hiện tại, người dùng và bằng chứng, bảng 3 hướng kèm công thức impact, giải pháp tương tự, bốn đường đi | Lấy từ phỏng vấn P1–P4 (`evidence/summary.md`, `evidence/interviews/`) và §5. Không đổi số bằng chứng, câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
