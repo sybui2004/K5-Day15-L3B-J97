@@ -270,20 +270,21 @@ class ManHinh:
                 "nguon": nguon, "trace": None}
 
     def tai(self, hoi_thoai: list):
-        """Chạy AI cho cả hộp thư. Nhật ký ghi theo đúng thứ tự chạy; chỉ danh sách hiển thị được sắp lại."""
-        ra = []
+        """Chạy AI cho cả hộp thư. Nhật ký ghi theo đúng thứ tự chạy; chỉ danh sách hiển thị được sắp lại.
+        Mã trùng trong file được cấp mã riêng (HT-1, HT-1*) TRƯỚC khi chạy, dùng chung cho trace, nhật ký, hộp thư."""
+        ra, da_cap = [], set()
         with self._khoa:
             for h in hoi_thoai:
-                [kq], trace = self._chay_va_luu(h.get("ma_hoi_thoai"), "hop_thu", xu_ly_hop_thu, [h])
-                self._luu_lan_chay(kq["ma_hoi_thoai"], kq["quyet_dinh"], trace)  # ghi ngay khi chạy xong
-                ra.append((h, kq, trace))
-            ra.sort(key=lambda x: THU_TU.get(x[1]["quyet_dinh"], THU_TU["HOI_LAI"]))  # chỉ thứ tự hiển thị
-            self._phien = {}
-            for h, kq, trace in ra:
-                ma = str(kq["ma_hoi_thoai"])
-                while ma in self._phien:  # mã trùng trong file: giữ cả hai
+                ma = str(h.get("ma_hoi_thoai"))
+                while ma in da_cap:  # mã trùng trong file: giữ cả hai
                     ma += "*"
-                self._phien[ma] = dict(self._phien_moi(ma, h, kq, "hop_thu"), trace=trace)
+                da_cap.add(ma)
+                h = dict(h, ma_hoi_thoai=ma)
+                [kq], trace = self._chay_va_luu(ma, "hop_thu", xu_ly_hop_thu, [h])
+                self._luu_lan_chay(ma, kq["quyet_dinh"], trace)  # ghi ngay khi chạy xong
+                ra.append((ma, h, kq, trace))
+            ra.sort(key=lambda x: THU_TU.get(x[2]["quyet_dinh"], THU_TU["HOI_LAI"]))  # chỉ thứ tự hiển thị
+            self._phien = {ma: dict(self._phien_moi(ma, h, kq, "hop_thu"), trace=trace) for ma, h, kq, trace in ra}
 
     def tao_moi(self, luot, ma_khach=None):
         """Hội thoại gõ trên màn hình (vd câu thử lạ giám khảo đưa lúc demo): kiểm, chạy AI, đưa lên đầu hộp thư."""

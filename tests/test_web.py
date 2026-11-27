@@ -373,6 +373,18 @@ class TestTaoMoiVaTrace(unittest.TestCase):
         self.assertEqual([d["ma_hoi_thoai"] for d in mh.nhat_ky()["lan_chay"]], ["HT-B", "HT-A"])  # mới nhất trước
         self.assertEqual([d["quyet_dinh"] for d in mh.nhat_ky()["lan_chay"]], ["TAO_DON_NHAP", "HOI_LAI"])
 
+    def test_ma_trung_dung_cung_ma_o_hop_thu_va_nhat_ky(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        mh = web.ManHinh(nhat_ky=os.path.join(tmp.name, "nhat-ky.jsonl"))
+        mh.tai([{"ma_hoi_thoai": "HT-1", "ma_khach": None, "text": "Khách: Lan 0900000005"},  # HỎI LẠI
+                {"ma_hoi_thoai": "HT-1", "ma_khach": None,
+                 "text": "Khách: Mai 0900000001, 12 hẻm 5, phường Bàn Cờ, HCM, lấy 1 áo size M"}])  # ĐƠN NHÁP
+        hop_thu = {p["ma_hoi_thoai"]: p["kq"]["quyet_dinh"] for p in mh.danh_sach()}
+        self.assertEqual(hop_thu, {"HT-1": "HOI_LAI", "HT-1*": "TAO_DON_NHAP"})
+        nhat_ky = {d["ma_hoi_thoai"]: d["quyet_dinh"] for d in mh.nhat_ky()["lan_chay"]}
+        self.assertEqual(nhat_ky, hop_thu)
+
 
 class TestChiPhi(unittest.TestCase):
     GIA = [{"model": "claude-sonnet-5-5", "input": 3, "output": 15}, {"model": "x", "input": None, "output": 1}]

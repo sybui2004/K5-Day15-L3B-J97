@@ -313,7 +313,7 @@ function oTraLoi(p, goiY) {
   them.addEventListener("click", async () => {
     if (!o.value.trim()) { bao("Câu khách trả lời đang trống", true); return; }
     them.disabled = true; bao("AI đang đọc lại cả hội thoại…");
-    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); them.disabled = false; }
+    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); them.disabled = false; taiTong(); }  // lần lỗi vẫn được tính
   });
   return [el("label", {for: "tra-loi", text: "Khách trả lời"}), o, el("div", {class: "hang-nut"}, them)];
 }
@@ -382,6 +382,7 @@ async function guiMoi(e) {
   } catch (err) {
     clearInterval(dem); dangTaoMoi = false;
     trangThaiMoi(err.message, "sai");
+    taiTong();  // lần AI lỗi vẫn được cộng vào tổng phiên
   } finally {
     $("gui-moi").disabled = false; $("huy-moi").disabled = false;
   }
