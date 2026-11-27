@@ -10,8 +10,9 @@
 |---|---|---|---|---|---|---|---|
 | 1 | run-1@20261128-003247 · claude-sonnet-5-5 | 14/19 | 74% | 4/4 | 7/9 | 3/6 | chưa |
 | 2 | run-2@20261128-011205 · claude-sonnet-5-5 | 19/19 | 100% | 4/4 | 9/9 | 6/6 | đạt |
+| chạy lại | run-4@20261128-014557 · claude-sonnet-5-5 | 30/30 | 100% | 8/8 | 14/14 | 8/8 | đạt |
 
-Kết quả từng câu: `eval/run-1.csv`, `eval/run-2.csv`. Trace: `traces/run-1.jsonl`, `traces/run-2.jsonl`.
+Kết quả từng câu: `eval/run-1.csv`, `eval/run-2.csv`, `eval/run-4.csv`. Trace: `traces/run-1.jsonl`, `traces/run-2.jsonl`, `traces/run-4.jsonl`. Lượt 1 và lượt 2 là bộ 19 câu. Dòng chạy lại là bộ 30 câu sau khi merge, không sửa hai dòng trên.
 
 ## 2. Lỗi lượt 1 — gom thành nhóm có tên
 
@@ -40,5 +41,5 @@ B18 và B19 cùng nhóm với B16: xin số nhân viên và xin thông tin tài 
 
 ## 4. Còn lại
 
-- Lỗi chưa sửa + nguy hiểm thế nào: trên 19 câu này không còn câu trượt. Lượt 1 giữ nguyên 14/19 để đối chiếu
+- Lỗi chưa sửa + nguy hiểm thế nào: trên bộ 30 câu (`run-4`) không còn câu trượt. Lượt 1 giữ nguyên 14/19, lượt 2 giữ nguyên 19/19
 - Nếu có thêm 1 tuần: giữ chuẩn "đạt", bộ câu và `expected`. Chạy thêm một lượt cùng cách chấm nếu đổi model

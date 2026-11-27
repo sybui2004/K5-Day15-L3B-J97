@@ -46,9 +46,10 @@ Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt ch�
 |---|---|---|---|---|---|---|
 | 1 | run-1@20261128-003247 | claude-sonnet-5-5 | `agent.py` luồng chốt đơn, công cụ địa giới, `grade.py` + chấm tay `hoi_mot_lan_du_y` và `tu_choi_dung` | 14/19 | 74% | chưa |
 | 2 | run-2@20261128-011205 | claude-sonnet-5-5 | cùng lượt 1, sau khi sửa prompt ngoài phạm vi và bước kiểm tỉnh/quận trong `agent.py` | 19/19 | 100% | đạt |
+| chạy lại | run-4@20261128-014557 | claude-sonnet-5-5 | bộ 30 câu sau merge; `agent.py` nhận phường đánh số thiếu quận là địa chỉ cũ, và từ chối tin giả của shop | 30/30 | 100% | đạt |
 
 Lượt chạy lại vì lỗi kỹ thuật, lượt sau CP4: ghi thêm dòng, không sửa dòng cũ.
 
 ## 6. Lỗi chính
 
-Lượt 1: 14/19 (74%), chưa đạt. Nhóm lớn nhất là B16, B18, B19 khiếu nại mà HỎI LẠI, kèm B10 và B12. Đã sửa `agent.py`. Lượt 2 (`run-2@20261128-011205`): 19/19 (100%), đạt. Không câu nào tệ đi.
+Lượt 1: 14/19 (74%), chưa đạt. Nhóm lớn nhất là B16, B18, B19 khiếu nại mà HỎI LẠI, kèm B10 và B12. Đã sửa `agent.py`. Lượt 2 (`run-2@20261128-011205`): 19/19 (100%), đạt. Không câu nào tệ đi. Chạy lại trên bộ 30 câu (`run-4@20261128-014557`): 30/30 (100%), đạt.

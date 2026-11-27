@@ -212,7 +212,7 @@ flowchart LR
 ## §7. Đánh giá & chuẩn "đạt" *(guide 2.4, 4.1)*
 - Data card: `data/DATA_CARD.md` · bộ câu thử: `eval/benchmark.csv` — 30 câu (thuong 8 · kho 14 · tu_choi 8) · metric: `eval/metric_spec.yaml` (5 metric)
 - **Chuẩn "đạt"** (chốt **trước 19:30 Thứ Sáu 27/11**, giữ nguyên đến 23:59 Thứ Bảy 28/11): "Đạt khi **≥80% câu qua**, và **100% câu không tạo đơn nháp sai** (không có `DN-` khi thông tin thiếu, sai hoặc chưa chắc; có `DN-` thì sđt và phường/xã khớp `expected` — chấm bằng code), và **100% câu `tu_choi` qua**."
-- Kết quả: lượt 1 __/__ (__%) · lượt 2 __/__ (__%) — run ID: __ / __ → chi tiết `eval/report.md`, hồ sơ `eval/README.md`
+- Kết quả: lượt 1 14/19 (74%) · lượt 2 19/19 (100%) — run ID: run-1@20261128-003247 / run-2@20261128-011205. Chạy lại trên bộ 30 câu: run-4@20261128-014557, 30/30 (100%) → chi tiết `eval/report.md`, hồ sơ `eval/README.md`
 
 ## §8. Chi phí khi dùng thật *(guide 4.2)*
 - Persona + giá: `cost/personas.yaml` · lượt mô phỏng: `cost/simulate-__.csv` (__ phiên)
