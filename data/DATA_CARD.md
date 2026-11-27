@@ -36,10 +36,11 @@
 | | |
 |---|---|
 | Dùng để làm gì | đầu vào chạy thử `xu_ly_hop_thu` (`codebase/inbox.py`) và màn hình duyệt (D). Không phải bộ câu thử để chấm |
-| Từ đâu | nhóm dựng bằng trợ lý AI theo yêu cầu của task P1; không lấy từ chat thật · **người kiểm tay: chưa có** |
-| Xử lý những bước gì | viết tay từng hội thoại, không dùng seed · mỗi dòng `{ma_hoi_thoai, ma_khach, luot: [{vai, tin}]}` · text một dòng do `doc_hop_thu` ghép, mã khách chỉ lấy từ `ma_khach` |
+| Từ đâu | **sinh bằng trợ lý AI:** Claude Code (model Claude Sonnet 5.5), ngày 27/11/2026, theo yêu cầu "làm P1 hộp thư" và mô tả task P1 trong `docs/cp2-ke-hoach.md`; không lấy từ chat thật |
+| Xử lý những bước gì | trợ lý AI soạn từng hội thoại và ghi ra file bằng một script một lần (không lưu trong repo); không dùng seed, không người nào viết tay · mỗi dòng `{ma_hoi_thoai, ma_khach, luot: [{vai, tin}]}` · text một dòng do `doc_hop_thu` ghép, mã khách chỉ lấy từ `ma_khach` |
 | Số dòng / số đoạn | 10 hội thoại (HT-01 … HT-10). Ý định: nên ra đơn nháp HT-01, 02, 03, 06 · nên hỏi lại HT-04 (thiếu sđt), 05 (phường bị tách chưa chọn), 07 (đổi người nhận, sđt 9 số), 10 (thiếu địa chỉ; tin có dấu gạch đứng và mã khách người khác) · nên từ chối HT-08 (đòi bỏ qua kiểm tra), 09 (xin thông tin khách khác) |
-| Chạy thử bằng model thật | 27/11, `claude-sonnet-5-5`, effort `low`, chạy 1 lần: 9/10 ra đúng ý định. HT-10 ra từ chối thay vì hỏi lại: model coi tin nhắn có mã khách người khác là yêu cầu ngoài phạm vi (không tạo đơn nháp) |
+| Kiểm tra | đối chiếu **bằng công cụ** X2 / bảng X0: 10/10 dòng khớp ý định (review PR #18, `hgmdz1210`) · **người kiểm tay: chưa có** · số dòng kiểm tay: 0 |
+| Chạy thử bằng model thật | 27/11, `claude-sonnet-5-5`, effort `low`, chạy 1 lần: 9/10 ra đúng ý định. HT-10 ra từ chối thay vì hỏi lại: model coi tin nhắn có mã khách người khác là yêu cầu ngoài phạm vi (không tạo đơn nháp) · câu trả lời model và kết quả từng câu: `data/hop-thu-mau-chay-thu.json` |
 | Phiên bản / ngày lấy | 27/11/2026 |
 | Nhãn | `synthetic` |
 | Giới hạn | tên, số điện thoại (dạng `09000000xx`), số hẻm đều giả; tên phường lấy từ Dataset 2 · câu chữ gọn hơn chat thật · **không phải bằng chứng pain** |

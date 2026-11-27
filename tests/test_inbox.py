@@ -70,6 +70,17 @@ class TestXuLyHopThu(unittest.TestCase):
         # đủ khoá như kết quả bình thường, để màn hình duyệt đọc được
         self.assertEqual(set(loi), set(ra[0]))
 
+    def test_quyet_dinh_la_khong_lam_hong_sap_xep(self):
+        goc = inbox.xu_ly
+        inbox.xu_ly = lambda text, ma: {"quyet_dinh": text}
+        try:
+            ra = inbox.xu_ly_hop_thu([{"ma_hoi_thoai": str(i), "text": q} for i, q in
+                                      enumerate(["TU_CHOI", "LOAI_MOI", "TAO_DON_NHAP"])])
+        finally:
+            inbox.xu_ly = goc
+        # loại chưa biết xếp cùng nhóm HỎI LẠI, không ném KeyError
+        self.assertEqual([r["quyet_dinh"] for r in ra], ["TAO_DON_NHAP", "LOAI_MOI", "TU_CHOI"])
+
     def test_json_hong_van_du_ket_qua(self):
         ra = inbox.xu_ly_hop_thu([hoi_thoai("HT-1", "HONG"), hoi_thoai("HT-2", "DU")])
         self.assertEqual([r["quyet_dinh"] for r in ra], ["TAO_DON_NHAP", "HOI_LAI"])
@@ -78,10 +89,11 @@ class TestXuLyHopThu(unittest.TestCase):
 
 class TestDocHopThu(unittest.TestCase):
     def doc(self, *dong):
+        """Mỗi phần tử là dict (ghi thành JSON) hoặc chuỗi (ghi nguyên, để dựng dòng hỏng)."""
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "hop-thu.jsonl")
             with open(p, "w", encoding="utf-8") as f:
-                f.write("\n".join(json.dumps(x, ensure_ascii=False) for x in dong) + "\n\n")
+                f.write("\n".join(x if isinstance(x, str) else json.dumps(x, ensure_ascii=False) for x in dong) + "\n\n")
             return inbox.doc_hop_thu(p)
 
     def test_dung_text_mot_dong_ma_khach_tu_du_lieu(self):
@@ -98,9 +110,42 @@ class TestDocHopThu(unittest.TestCase):
         self.assertIsNone(agent.doc_ma_khach(khong_ma["text"]))
         self.assertEqual(co_ma["text"].count(" | "), 1)
 
-    def test_vai_la_thi_bao_loi_ro_dong(self):
-        with self.assertRaisesRegex(ValueError, "dòng 1"):
-            self.doc({"ma_hoi_thoai": "HT-1", "ma_khach": None, "luot": [{"vai": "admin", "tin": "x"}]})
+    def test_dong_hong_khong_lam_hong_ca_hop_thu(self):
+        tot = {"ma_hoi_thoai": "HT-1", "ma_khach": None, "luot": [{"vai": "khach", "tin": "DU · Mai 0900 000 001"}]}
+        hong = [  # (dòng hỏng, mã hội thoại mong đợi)
+            ("{không phải JSON", "dong-2"),
+            ("[1, 2]", "dong-3"),
+            ({"ma_hoi_thoai": "HT-4", "ma_khach": None, "luot": [{"vai": "admin", "tin": "x"}]}, "HT-4"),
+            ({"ma_hoi_thoai": "HT-5", "ma_khach": "KH-x", "luot": []}, "HT-5"),
+            ({"ma_hoi_thoai": "HT-6"}, "HT-6"),
+        ]
+        ra = self.doc(tot, *(d for d, _ in hong))
+        self.assertEqual([h["ma_hoi_thoai"] for h in ra], ["HT-1"] + [m for _, m in hong])
+        self.assertNotIn("loi_doc", ra[0])
+        for so, h in enumerate(ra[1:], 2):
+            self.assertIn("dòng %d" % so, h["loi_doc"])
+            self.assertEqual(h["text"], "")
+
+    def test_dong_hong_ra_muc_loi_va_khong_goi_model(self):
+        da_goi = []
+
+        def model_gia(system, user):
+            da_goi.append(user)
+            return {"text": json.dumps(DU, ensure_ascii=False)}
+
+        goc, agent.call_model = agent.call_model, model_gia
+        try:
+            ra = inbox.xu_ly_hop_thu(self.doc(
+                "{hỏng", {"ma_hoi_thoai": "HT-2", "ma_khach": None,
+                          "luot": [{"vai": "khach", "tin": "Mai 0900 000 001"}]}))
+        finally:
+            agent.call_model = goc
+        self.assertEqual(len(da_goi), 1)
+        self.assertEqual([(r["ma_hoi_thoai"], r["quyet_dinh"]) for r in ra],
+                         [("HT-2", "TAO_DON_NHAP"), ("dong-1", "HOI_LAI")])
+        self.assertIn("dòng 1", ra[1]["loi"][0]["ly_do"])
+        self.assertEqual(ra[1]["tin_gui_khach"], "")
+        self.assertIsNone(ra[1]["ma_don"])
 
 
 class TestHopThuMau(unittest.TestCase):

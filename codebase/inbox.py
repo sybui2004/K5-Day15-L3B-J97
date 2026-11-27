@@ -33,24 +33,27 @@ def _dung_text(dong: dict) -> str:
 
 
 def doc_hop_thu(path: str = HOP_THU_MAU) -> list:
-    """Đọc file .jsonl, mỗi dòng {"ma_hoi_thoai", "ma_khach", "luot": [{"vai", "tin"}]}. Bỏ qua dòng trống."""
+    """Đọc file .jsonl, mỗi dòng {"ma_hoi_thoai", "ma_khach", "luot": [{"vai", "tin"}]}. Bỏ qua dòng trống.
+    Dòng hỏng không làm hỏng cả file: phần tử đó có text rỗng và "loi_doc" ghi file, số dòng, lý do."""
     ra = []
     with open(path, encoding="utf-8") as f:
         for so, line in enumerate(f, 1):
             if not line.strip():
                 continue
+            dong = None
             try:
                 dong = json.loads(line)
                 ra.append({"ma_hoi_thoai": dong["ma_hoi_thoai"], "ma_khach": dong.get("ma_khach"),
                            "text": _dung_text(dong)})
-            except (ValueError, KeyError, TypeError) as e:
-                raise ValueError("%s, dòng %d: %s" % (os.path.basename(path), so, e)) from e
+            except (ValueError, KeyError, TypeError, AttributeError) as e:
+                ma = dong.get("ma_hoi_thoai") if isinstance(dong, dict) else None
+                ra.append({"ma_hoi_thoai": ma or "dong-%d" % so, "ma_khach": None, "text": "",
+                           "loi_doc": "%s, dòng %d: %s: %s" % (os.path.basename(path), so, type(e).__name__, e)})
     return ra
 
 
-def _ket_qua_loi(e: Exception) -> dict:
+def _ket_qua_loi(ly_do: str) -> dict:
     """Cùng hình dạng với xu_ly (1.3 (e)). Không soạn tin gửi khách: lỗi là của hệ thống, shop xử lý tay."""
-    ly_do = "lỗi xử lý: %s: %s" % (type(e).__name__, e)
     return {"quyet_dinh": "HOI_LAI", "truong": {}, "loi": [{"truong": "tat_ca", "ly_do": ly_do}],
             "goi_y_phuong": [], "tin_gui_khach": "",
             "cho_chu_shop": "Cho chủ shop: %s · shop xử lý tay hội thoại này · chưa tạo đơn nháp" % ly_do,
@@ -62,10 +65,15 @@ def xu_ly_hop_thu(hoi_thoai: list) -> list:
     Thứ tự ra: TẠO ĐƠN NHÁP, rồi HỎI LẠI, rồi TỪ CHỐI; trong mỗi nhóm giữ thứ tự vào."""
     ra = []
     for h in hoi_thoai:
-        try:
-            kq = xu_ly(h["text"], h["ma_hoi_thoai"])
-        except Exception as e:  # model lỗi, mất mạng…
-            note("hộp thư: hội thoại %s lỗi %s" % (h.get("ma_hoi_thoai"), type(e).__name__))
-            kq = _ket_qua_loi(e)
+        if h.get("loi_doc"):  # dòng hỏng từ doc_hop_thu: không gọi model
+            note("hộp thư: " + h["loi_doc"])
+            kq = _ket_qua_loi("không đọc được dữ liệu hội thoại: " + h["loi_doc"])
+        else:
+            try:
+                kq = xu_ly(h["text"], h["ma_hoi_thoai"])
+            except Exception as e:  # model lỗi, mất mạng…
+                note("hộp thư: hội thoại %s lỗi %s" % (h.get("ma_hoi_thoai"), type(e).__name__))
+                kq = _ket_qua_loi("lỗi xử lý: %s: %s" % (type(e).__name__, e))
         ra.append({"ma_hoi_thoai": h.get("ma_hoi_thoai"), **kq})
-    return sorted(ra, key=lambda r: THU_TU[r["quyet_dinh"]])  # sorted giữ thứ tự trong cùng nhóm
+    # sorted giữ thứ tự trong cùng nhóm; quyết định chưa biết xếp cùng nhóm HỎI LẠI
+    return sorted(ra, key=lambda r: THU_TU.get(r["quyet_dinh"], THU_TU["HOI_LAI"]))
