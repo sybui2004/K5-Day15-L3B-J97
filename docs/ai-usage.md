@@ -6,13 +6,8 @@ README của nhóm có mục "Dùng AI vào việc gì" (2–3 dòng, bắt bu�
 
 | Việc | Công cụ AI | AI làm gì | Người kiểm/sửa gì | Ai phụ trách |
 |---|---|---|---|---|
-| Code bản chạy thử | | | | |
-| Prompt / thiết kế lời gọi mô hình | | | | |
-| Đào data (viết script đếm, gợi ý nhãn) | | | Kiểm tay __ dòng, khớp __ | |
-| Rà câu hỏi phỏng vấn / khảo sát | | Chỉ rà câu dẫn dắt | | |
-| Viết câu thử (benchmark) | | | Mỗi câu thử có `source`; câu thử AI viết được ghi rõ | |
-| Sinh data `synthetic` (nếu có) | | | Seed __ · kiểm tay __ dòng | |
-| Chấm cột `pass` bằng LLM (nếu có) | | | Kiểm tra thủ công __ câu thử, khớp __/__ | |
-| Slide, văn bản | | | | |
+| Prompt / thiết kế lời gọi mô hình | Claude | `SYSTEM` trong `codebase/agent.py`: model chỉ đọc hội thoại, trả JSON; code kiểm từng trường | Prompt có test chống chép câu thử (`test_system_prompt_khong_chep_cau_thu`); chạy thử hộp thư mẫu bằng model thật | Sỹ |
+| Rà câu hỏi phỏng vấn / khảo sát | Codex | Chỉ rà câu dẫn dắt | Chỉ dùng để rà lại văn phong câu hỏi | Sỹ |
+| Viết câu thử (benchmark) | ChatGPT (Việt Anh, task Y1) · Claude Code (Sỹ: B29, B30) | Y1: chạy tay đoạn chat chốt đơn qua ChatGPT, ghi lỗi để viết tiêu chí, tìm ra kịch bản "phường cũ bị tách, model chọn sai mà vẫn nói chắc" (§5). B29, B30: Claude Code soạn câu tấn công injection theo thiết kế NeMo | Mỗi câu có `source`; Sỹ duyệt B29, B30 và chạy thử bằng model thật trước khi merge (PR #41) | Việt Anh (Y1), Sỹ (B29, B30) |
 
 **Không dùng AI để:** tạo người được phỏng vấn, trích dẫn, câu trả lời khảo sát; sửa kết quả các lượt đã chạy (`eval/run-*.csv`, `cost/simulate-*.csv`, `traces/`).
