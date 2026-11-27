@@ -229,7 +229,7 @@ flowchart LR
 - Phân công có tên (theo chặng, chia cặp — guide "Cách chia việc"; chi tiết task: `docs/cp2-ke-hoach.md`):
   - **Đến CP2:** Sỹ — sơ đồ §4, tổng hợp bằng chứng, tự soát và nộp · Hưng — bảng chuyển đổi địa giới · Việt Anh — bộ câu thử, data card, metric · An — bộ câu thử (câu từ người dùng), canvas, chuẩn "đạt" §7 · Việt Anh + An — hai người chấm thử.
   - **CP2 → CP3:** Sỹ — luồng chính `agent.py`, hộp thư (A) · Hưng — công cụ `tools.py`, màn hình duyệt (D + B) · Việt Anh — khách cũ (C), mở rộng bộ câu thử, §5 · An — `eval/grade.py`, chạy lượt 1.
-- Dùng AI vào việc gì (2–3 dòng; chi tiết `docs/ai-usage.md`):
+- Dùng AI vào việc gì (2–3 dòng; chi tiết `docs/ai-usage.md`): Claude Code (Sỹ, Việt Anh) viết code luồng chính, hộp thư, luồng khách cũ, data tự dựng và các mục spec, README; người cặp kia duyệt mọi PR. ChatGPT (Việt Anh) chạy tay ở Y1 để tìm lỗi trước khi viết tiêu chí. Chấm `pass` bằng code, không dùng LLM. Phần của Hưng, An chờ xác nhận.
 - Nhật ký thay đổi — **mọi thay đổi sau CP2 19:30 Thứ Sáu 27/11 phải có dòng ở đây**:
 
 **CP2 → CP4** (vd thu hẹp lát cắt, hỏi thêm người dùng, lần cải tiến trước lượt 2)
@@ -249,6 +249,7 @@ flowchart LR
 | 28/11 (P3) | Luồng C · khách cũ: `data/lich-su-khach.csv` (6 khách dựng), công cụ `get_customer_history` (cuối `codebase/tools.py`, chỉ đọc), bước 3 trong `_kiem` (`codebase/agent.py`), 9 test `tests/test_khach_cu.py` · `eval/benchmark.csv` thêm B20–B22 (`kho`, `tu_viet`) → 28 câu, nguồn thật 10/28 · §5: dòng tấn công luồng C trỏ về B22, thêm dòng khách cũ (B20, B21) · `data/DATA_CARD.md`: Dataset 4, số câu Dataset 1 | Task P3 trong `docs/cp3-ke-hoach.md`. B22 để `kho` (HỎI LẠI), không `tu_choi`, theo review PR #30. Mã khách chỉ đọc ở đầu hội thoại, nên mã gõ trong lượt chat không lấy được địa chỉ người khác. Không đổi câu thử cũ, §7, metric |
 | 28/11 | §3: thay dòng "phần mềm quản lý bán hàng: chưa thử" bằng kết quả thử Sapo Chat OmniAI trên fanpage của nhóm, kèm 3 ảnh đã che thông tin (`evidence/screenshots/05`–`07`) | Guide 2.1: mỗi giải pháp tương tự phải được thử. Sapo vẫn dùng phường cũ và lấy tên người nhắn làm người nhận, đúng hai chỗ lát cắt nhắm vào. Không đổi số bằng chứng, câu thử, §7, metric |
 | 28/11 | Thêm câu thử B29, B30 (tấn công injection), §5 thêm 2 dòng tấn công, DATA_CARD cập nhật số câu (30), §7 dòng "bộ câu thử" sửa số câu từ 19 thành 30 (chỉ dòng mô tả, không đổi chuẩn "đạt") | Đo lớp chặn trước và sau NeMo Guardrails (`docs/superpowers/specs/2026-11-28-nemo-guardrails-design.md`, PR #42): lượt 1 chạy chưa có lớp chặn, lượt 2 có. Chỉ thêm câu, không sửa câu cũ, §7, metric |
+| 28/11 | README: tên nhóm và lát cắt, xoá mục 0 của khung, thêm cách chạy bản của nhóm (cài `requirements.txt`, `.env`, màn hình duyệt), bảng "Phần nào thật, phần nào giả" đủ 7 dòng | README còn `____` và hướng dẫn của khung ("không cần pip install") không còn đúng sau khi nối Claude và thêm màn hình duyệt; rubric R3 chấm "người ngoài chạy được, phần còn giả ghi rõ" |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
