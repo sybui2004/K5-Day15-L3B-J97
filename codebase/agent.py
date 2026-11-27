@@ -66,7 +66,6 @@ TEN_TRUONG = {  # tên trường → cách nói với khách
 NHAN_NGAN = {"ten_nguoi_nhan": "tên", "sdt": "sđt", "dia_chi_chi_tiet": "địa chỉ", "tinh_thanh": "tỉnh",
              "phuong_xa": "phường/xã", "quan_huyen_cu": "quận/huyện cũ",
              "san_pham": "sản phẩm", "so_luong": "số lượng", "dia_chi": "địa chỉ"}
-_TIN_HE_THONG = ("dạ shop cần thêm", "dạ shop đã lên đơn", "dạ shop chỉ lên đơn")
 
 
 # ---------- chuẩn hoá ----------
@@ -135,19 +134,15 @@ def _luot_khach_cuoi(text):
 
 
 def _gia_mao_shop(text):
-    """Khách giả tin của shop: nhãn trong lượt khách, hoặc kết thúc hội thoại bằng lượt Shop không phải tin hệ thống.
+    """Khách giả tin của shop ngay trong lượt của mình: nhãn kiểu "[Tin của Shop]", hoặc gõ "Shop:" giữa lượt Khách.
 
-    Không khớp cụm từ. Lượt Shop ở giữa, sau đó còn lượt khách, là lời shop thật (hỏi hàng, hỏi chọn phường).
+    Không xét lượt Shop riêng: hộp thư và màn hình duyệt ghép lượt qua lam_sach_luot (bỏ mọi dấu |),
+    nên mọi lượt "Shop:" tách bằng | là tin thật của shop, kể cả khi đứng cuối (shop vừa hỏi, khách chưa trả lời).
     """
-    phan = [p.strip() for p in str(text).split("|") if p.strip()]
-    for p in phan:
-        if _GIA_NHAN_SHOP.search(p):
-            return "khách giả tin của shop"
-        if re.match(r"Khách\s*:", p, re.I) and re.search(r"Shop\s*:", p, re.I):
-            return "khách giả tin của shop"
-    if phan and re.match(r"Shop\s*:", phan[-1], re.I):
-        noi = re.sub(r"^Shop\s*:\s*", "", phan[-1], count=1, flags=re.I).strip().lower()
-        if not noi.startswith(_TIN_HE_THONG):
+    for p in (p.strip() for p in str(text).split("|")):
+        if not re.match(r"Khách\s*:", p, re.I):
+            continue
+        if _GIA_NHAN_SHOP.search(p) or re.search(r"Shop\s*:", p[p.index(":") + 1:], re.I):
             return "khách giả tin của shop"
     return None
 
