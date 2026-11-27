@@ -99,7 +99,12 @@ Số trong bảng lấy từ phỏng vấn P1–P4 (n = 4, `evidence/interviews/
   - Đáng học: lấy phường mới từ một bảng tra.
   - Đáng né: phường cũ bị tách thì người tra tự chọn một phường, dẫn tới nhầm phường giáp ranh (P1 2 lần / tháng, P3, P4).
   - Mình khác: bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15; phường bị tách thì luôn hỏi lại khách kèm danh sách phường mới.
-- **Phần mềm quản lý bán hàng đa kênh:** nhóm **chưa thử**, nên chưa ghi điều đáng học / đáng né. Bằng chứng duy nhất là cả 4 shop chưa dùng, vì tốn phí, rắc rối, muốn tự kiểm soát (§0).
+- **Sapo Chat OmniAI** (nhóm thử trên fanpage J97-Hihi, đêm 27–28/11/2026, tài khoản dùng thử; ảnh [`05`](evidence/screenshots/05_sapo_tao_don_canh_chat.png), [`06`](evidence/screenshots/06_sapo_goi_y_dia_chi_phuong_cu.png), [`07`](evidence/screenshots/07_sapo_goi_y_ten_facebook.png), đã che tên và sđt thật của người nhắn thử):
+  - Đáng học: shop mở được biểu mẫu tạo đơn ngay cạnh đoạn chat Facebook, nên đối chiếu được từng trường với lời khách dặn. Khách gửi đủ 10 chữ số thì Sapo nhận diện được sđt. Shop sửa và lưu được tên người nhận trước khi bấm "Tạo và xác nhận".
+  - Đáng né:
+    - Khách ghi rõ "người nhận Minh An", nhưng ô "Gợi ý địa chỉ bằng AI" ban đầu lấy tên Facebook của người nhắn (ô bị che ở ảnh 07); shop phải sửa lại thành "Minh An".
+    - Với "P.4, Q.3", Sapo viết đầy đủ thành "Phường 4, Quận 3, TP Hồ Chí Minh" và cho lưu nguyên. Ô địa chỉ vẫn chọn theo "TP Hồ Chí Minh – Quận 3", danh sách phường là phường cũ (Phường 1–10, Phường Võ Thị Sáu, ảnh 06). Ở bước này nhóm chưa thấy gợi ý quy đổi sang phường mới.
+  - Mình khác: đọc đoạn chat đã chốt, tạo đơn nháp và kiểm từng trường. Thiếu thông tin thì soạn **một** tin hỏi đủ các mục còn thiếu. Phường cũ bị tách thì tin hỏi lại liệt kê các phường mới theo bảng tra từ Nghị quyết 1685/NQ-UBTVQH15 để khách xác nhận. Chủ shop đọc lại và bấm gửi.
 
 ## §4. Thiết kế *(guide 2.2, 3.2)*
 - **Lát cắt MỘT CÂU:** Một chủ shop bán lẻ · khách đã đồng ý mua qua tin nhắn Facebook hoặc website · AI xác định thông tin nhận hàng, kể cả quy địa chỉ cũ sang phường/xã mới, đã đủ và chắc để tạo đơn nháp, hay phải hỏi lại khách · chủ shop nhận đơn nháp kèm vận đơn GHN chờ duyệt.
@@ -237,6 +242,7 @@ flowchart LR
 | 27/11 sau PR #33 | `eval/benchmark.csv`: thêm B23–B28 (task Y8). B23–B25 từ chat thật P4, P2, P3 (`nguoi_dung`); B26–B28 tự viết: phường kiểu mới có dấu + sđt có dấu cách, tách nhiều tin + người nhận khác người nhắn, tỉnh cũ Bà Rịa - Vũng Tàu. `data/DATA_CARD.md` Dataset 1 cập nhật số câu và nguồn | `run.py check` đòi 20–30 câu và ≥1/3 nguồn thật (đang 19 câu, 7/19, chưa có câu `nguoi_dung`); metric `trich_dung_thong_tin` chỉ có 8 câu TẠO ĐƠN NHÁP (review PR #30). Không sửa câu cũ, §7, metric |
 | 27/11 23:55 | `codebase/agent.py` `SYSTEM` (X5): `yeu_cau_ngoai_pham_vi` liệt kê thêm khiếu nại đơn cũ, hàng hoàn, xin sđt shipper / nhân viên, hỏi địa chỉ bưu cục, đổi trả, hoàn tiền; ghi rõ tin vừa phàn nàn vừa đặt đơn mới, hoặc nhắc mã khách / địa chỉ lần trước để giao cho chính mình, vẫn là đơn | Review PR #29 mục 4: prompt cũ chỉ có "bỏ qua kiểm tra, đổi giá, hỏi thông tin khách khác", B16–B19 có thể ra HỎI LẠI trong khi chuẩn "đạt" cần 100% câu `tu_choi` qua. Thử tay trước lượt 1 với model thật: B14–B19 ra TỪ CHỐI; câu phàn nàn kèm đơn mới và B01–B04 không bị từ chối. Viết theo loại yêu cầu, không chép câu thử. Không đổi câu thử, §7, metric |
 | 28/11 | Dòng "Data BTC cấp đã dùng": ghi không dùng | Đầu spec còn `__`. Data BTC (`preclass`, `training-ops`) không liên quan lát cắt; data card không có dataset nào từ BTC. Không đổi số bằng chứng, câu thử, §7, metric |
+| 28/11 | §3: thay dòng "phần mềm quản lý bán hàng: chưa thử" bằng kết quả thử Sapo Chat OmniAI trên fanpage của nhóm, kèm 3 ảnh đã che thông tin (`evidence/screenshots/05`–`07`) | Guide 2.1: mỗi giải pháp tương tự phải được thử. Sapo vẫn dùng phường cũ và lấy tên người nhắn làm người nhận, đúng hai chỗ lát cắt nhắm vào. Không đổi số bằng chứng, câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
