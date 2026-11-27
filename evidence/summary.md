@@ -7,23 +7,24 @@
 
 | Nguồn | Đạt ngưỡng? | File |
 |---|---|---|
-| Đào data (x/N, %, cách đếm chạy lại được, ≥5 ví dụ) | ☐ | `evidence/data-mining.md` |
-| Phỏng vấn (≥3 người ngoài nhóm, đúng người dùng) | ☐ | `evidence/interviews/P1.md`… |
-| Khảo sát (≥20 người ngoài nhóm, đúng người dùng) | ☐ | `evidence/survey/` |
+| Đào data (x/N, %, cách đếm chạy lại được, ≥5 ví dụ) | ☐ nguồn kiểm chéo: review Google Play app GHN · **đã viết cách đếm, chưa đếm** | `evidence/data-mining.md` |
+| Phỏng vấn (≥3 người ngoài nhóm, đúng người dùng) | ☐ nguồn chính · **đã hẹn 4 chủ shop ngoài nhóm (27/11), đang phỏng vấn** | `evidence/interviews/P1.md`–`P4.md` · câu hỏi: `docs/question.md` |
+| Khảo sát (≥20 người ngoài nhóm, đúng người dùng) | — không làm | — |
 
 ## 2. Số chính
 
 - Đào data: __/__ (__%) …
-- Phỏng vấn: __/3 người gặp *(n nhỏ không ghi %)* · số lần / tháng: P1 __, P2 __, P3 __ · mỗi lần mất __–__ phút
-- Khảo sát: n = __ · __/__ (__%) …
+- Phỏng vấn: H1 __/4 người gặp · H2 __/4 người gặp *(n nhỏ không ghi %)* · số lần / tháng: P1 __, P2 __, P3 __, P4 __ · mỗi đơn mất __–__ phút · địa chỉ kiểu cũ: __/4 người nói khách còn ghi
+- Khảo sát: không làm.
 
 Phỏng vấn nhiều vai thì đếm theo từng vai, không cộng chung.
 
 | | Vai | Gặp pain? | Số lần / 1 tháng qua | Lần gần nhất mất | Đang xoay xở bằng |
 |---|---|---|---|---|---|
-| P1 | | | | | |
-| P2 | | | | | |
-| P3 | | | | | |
+| P1 | chủ shop bán lẻ | | | | |
+| P2 | chủ shop bán lẻ | | | | |
+| P3 | chủ shop bán lẻ | | | | |
+| P4 | chủ shop bán lẻ | | | | |
 
 ## 3. ≥5 trích dẫn hoặc ví dụ nguyên văn (có nguồn, bỏ tên)
 
@@ -45,4 +46,9 @@ Giả thuyết ở `evidence/hypothesis.md`: **đúng / sai / phải đổi** �
 
 | Vai | Giờ hẹn | Đã xong? |
 |---|---|---|
-| | | |
+| P1 · chủ shop bán lẻ qua tin nhắn | 27/11, chiều | ☐ |
+| P2 · chủ shop bán lẻ qua tin nhắn | 27/11, chiều | ☐ |
+| P3 · chủ shop bán lẻ qua tin nhắn | 27/11, chiều | ☐ |
+| P4 · chủ shop bán lẻ qua tin nhắn | 27/11, chiều | ☐ |
+
+**Tình trạng lúc CP2:** đã viết giả thuyết trước khi hỏi (`evidence/hypothesis.md`, commit `555b0aa`) · đã hẹn 4 chủ shop ngoài nhóm, bộ 15 câu hỏi ở `docs/question.md` · đã viết cách đếm review Google Play trước khi đếm. Số và trích dẫn điền sau khi phỏng vấn xong, xong trước CP3.
