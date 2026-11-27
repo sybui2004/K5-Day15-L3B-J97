@@ -111,7 +111,9 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 2–3 dòng (bắt buộc): nhóm dùng công cụ AI nào để làm gì, người kiểm lại phần nào. Chi tiết: [docs/ai-usage.md](docs/ai-usage.md). Coding agent đọc [AGENTS.md](AGENTS.md).
 
-____
+- **Claude Code** (Sỹ, Việt Anh): viết code luồng chính, hộp thư, luồng khách cũ; soạn data tự dựng (`hop-thu-mau.jsonl`, `lich-su-khach.csv`); viết các mục spec và README. Mọi PR có người cặp kia duyệt, 119 test chạy trước khi merge.
+- **ChatGPT** (Việt Anh, task Y1): chạy tay đoạn chat chốt đơn để tìm lỗi trước khi viết tiêu chí chấm. Chấm `pass` bằng code (`eval/grade.py`), không dùng LLM.
+- Số liệu, trích dẫn phỏng vấn không do AI tạo. Phần của Hưng, An: *chờ xác nhận*.
 
 ## File mẫu — điền ở bước nào
 
