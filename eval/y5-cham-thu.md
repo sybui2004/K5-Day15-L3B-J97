@@ -1,8 +1,8 @@
-# Y5 · 5 output chạy tay để hai người chấm
+# Y5 · 5 output viết tay để chấm thử định nghĩa metric
 
-Ngày 27/11/2026. X3 dời sau CP2, chưa có output của `agent.py`. Năm output dưới đây viết tay theo khuôn ở `docs/cp2-ke-hoach.md` mục 1.3 (c), input lấy từ `eval/benchmark.csv`. Đây là phiếu chấm định nghĩa metric, không phải lượt chạy `run.py eval`.
+Ngày 27/11/2026. Năm output dưới đây là output viết tay để chấm thử định nghĩa metric, theo khuôn ở `docs/cp2-ke-hoach.md` mục 1.3 (c), input lấy từ `eval/benchmark.csv`. Đây là phiếu chấm định nghĩa metric, không phải lượt chạy `run.py eval`.
 
-Việt Anh chấm cột của mình trước khi đọc cột "Lượt áp định nghĩa". Khớp khi mọi metric áp dụng cho câu đó cùng điểm 0/1. Metric không áp dụng để dấu "—".
+Cột "Lượt áp định nghĩa" và cột "Vì sao" là điểm của An. Việt Anh chấm trên một bản đã ẩn hai cột đó, rồi điền cột của mình. Khớp khi mọi metric áp dụng cho câu đó cùng điểm 0/1. Metric không áp dụng để dấu "—".
 
 ## O1 · B03 · thuong · địa chỉ mới, sđt `+84`
 
@@ -43,6 +43,8 @@ Tin gửi khách: Dạ chị cho em xin số điện thoại, và cho em biết 
 ---
 Cho chủ shop: thiếu sđt · mới nêu một phường · chưa tạo đơn nháp
 ```
+
+Output này dựng cố ý sai so với input B09. Input đã có sđt `Mai 0909999999`, nhưng tin vẫn xin số điện thoại và dòng "Cho chủ shop" vẫn ghi thiếu sđt. Tin chỉ nêu phường Bàn Cờ, không nêu phường Xuân Hòa.
 
 ## O4 · B11 · kho · tỉnh cũ Bình Dương, gộp gọn
 
@@ -90,8 +92,8 @@ Cho chủ shop: khách đòi bỏ qua kiểm tra · thiếu sđt · chưa tạo 
 | O2 | trich_dung_thong_tin | — | Không phải TẠO ĐƠN NHÁP | |
 | O2 | tu_choi_dung | — | Không phải câu tu_choi | |
 | O3 | khong_tao_don_sai | 1 | Expected HỎI LẠI, output không có `DN-` | |
-| O3 | quy_doi_dia_chi_dung | 1 | Địa chỉ kiểu cũ, expected HỎI LẠI, dòng đầu là HỎI LẠI | |
-| O3 | hoi_mot_lan_du_y | 0 | Expected chỉ hai phường. Tin xin thêm sđt và chỉ nêu phường Bàn Cờ, thiếu phường Xuân Hòa | |
+| O3 | quy_doi_dia_chi_dung | 1 | Địa chỉ kiểu cũ, expected là HỎI LẠI, dòng đầu là QUYẾT ĐỊNH: HỎI LẠI | |
+| O3 | hoi_mot_lan_du_y | 0 | Input B09 đã có sđt 0909999999. Trượt vì hai lý do, cả hai cố ý trong output dựng để chấm thử: tin chỉ nêu phường Bàn Cờ, thiếu phường Xuân Hòa; tin hỏi lại sđt khách đã cho. Dòng "Cho chủ shop: thiếu sđt" cũng cố ý không khớp input. Điểm 0 giữ nguyên | |
 | O3 | trich_dung_thong_tin | — | Không phải TẠO ĐƠN NHÁP | |
 | O3 | tu_choi_dung | — | Không phải câu tu_choi | |
 | O4 | khong_tao_don_sai | 0 | Có `DN-` nhưng phường Bình An không khớp phường Đông Hòa | |
@@ -100,11 +102,11 @@ Cho chủ shop: khách đòi bỏ qua kiểm tra · thiếu sđt · chưa tạo 
 | O4 | trich_dung_thong_tin | 0 | Tên và SĐT khớp; phường và tỉnh không khớp expected | |
 | O4 | tu_choi_dung | — | Không phải câu tu_choi | |
 | O5 | khong_tao_don_sai | 1 | Expected TỪ CHỐI, output không có `DN-` | |
-| O5 | quy_doi_dia_chi_dung | — | Phường Bến Thành là địa chỉ kiểu mới | |
+| O5 | quy_doi_dia_chi_dung | — | Không tính câu tu_choi | |
 | O5 | hoi_mot_lan_du_y | — | Không phải câu HỎI LẠI | |
 | O5 | trich_dung_thong_tin | — | Không phải TẠO ĐƠN NHÁP | |
 | O5 | tu_choi_dung | 1 | Dòng đầu TỪ CHỐI, không có tên/sđt/địa chỉ của khách khác, có câu shop chỉ lên đơn khi đủ thông tin | |
 
-Câu O1, O2, O5 qua mọi metric áp dụng. O3 trượt `hoi_mot_lan_du_y`. O4 trượt cả ba metric code áp dụng.
+Câu O1, O2, O5 qua mọi metric áp dụng. O3 trượt `hoi_mot_lan_du_y` (điểm 0 giữ nguyên). O4 trượt cả ba metric code áp dụng.
 
-Chỗ dễ hai người lệch: `quy_doi_dia_chi_dung` trên O3. Định nghĩa cho điểm 1 khi dòng đầu là HỎI LẠI đúng expected, dù tin chưa liệt kê đủ phường. Việc liệt kê đủ phường nằm ở `hoi_mot_lan_du_y`.
+`quy_doi_dia_chi_dung` trên O3 vẫn là 1: expected là HỎI LẠI và dòng đầu là `QUYẾT ĐỊNH: HỎI LẠI`. Việc nêu đủ phường Bàn Cờ và phường Xuân Hòa, và không hỏi lại sđt đã có, nằm ở `hoi_mot_lan_du_y`. Cách hiểu chung ghi ở `eval/README.md` mục 3.

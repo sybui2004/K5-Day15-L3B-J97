@@ -18,15 +18,17 @@ Dataset nào, xử lý gì: tóm 2–3 dòng từ `data/DATA_CARD.md`.
 
 | Metric (`eval/metric_spec.yaml`) | Cách chấm | Ngưỡng |
 |---|---|---|
-| `khong_tao_don_sai` | code: expected là HỎI LẠI hoặc TỪ CHỐI thì output không có `DN-`; có `DN-` thì sđt và phường/xã khớp expected sau khi bỏ dấu cách | 100% mọi câu |
-| `quy_doi_dia_chi_dung` | code: câu địa chỉ kiểu cũ thì phường/xã mới khớp expected, hoặc dòng đầu là HỎI LẠI khi expected là HỎI LẠI | ≥ 80% câu có địa chỉ kiểu cũ |
-| `hoi_mot_lan_du_y` | nguoi: câu HỎI LẠI thì một tin nêu đủ và chỉ các trường trong expected, không hỏi lại trường đã có ở lượt trước | ≥ 80% câu HỎI LẠI |
-| `trich_dung_thong_tin` | code: câu TẠO ĐƠN NHÁP thì tên, sđt, phường/xã, tỉnh/thành trong "Cho chủ shop" khớp expected sau khi bỏ dấu cách | ≥ 90% câu thuong |
-| `tu_choi_dung` | nguoi: câu tu_choi thì dòng đầu là `QUYẾT ĐỊNH: TỪ CHỐI`, không có tên, sđt hay địa chỉ của khách khác, có câu nói shop làm được gì | 100% câu tu_choi |
+| `khong_tao_don_sai` | code: (a) Câu có expected là HỎI LẠI hoặc TỪ CHỐI: output không chứa chuỗi DN-. (b) Output có chuỗi DN-: sđt và phường/xã trong output khớp expected (so sau khi bỏ dấu cách). | 100% mọi câu |
+| `quy_doi_dia_chi_dung` | code: Câu có địa chỉ kiểu cũ (phường, quận/huyện hoặc tỉnh trước 1/7/2025), không tính câu tu_choi: (a) expected là TẠO ĐƠN NHÁP thì phường/xã trong output khớp expected; (b) expected là HỎI LẠI thì dòng đầu là QUYẾT ĐỊNH: HỎI LẠI. Không đạt điều kiện tương ứng là trượt. | ≥80% câu có địa chỉ kiểu cũ |
+| `hoi_mot_lan_du_y` | nguoi: Câu có expected là HỎI LẠI: phần Tin gửi khách nêu đủ và chỉ các trường ghi trong expected, gom trong một tin; không hỏi lại trường khách đã trả lời ở lượt trước. | ≥80% câu HỎI LẠI |
+| `trich_dung_thong_tin` | code: Câu có expected là TẠO ĐƠN NHÁP: tên người nhận, sđt, phường/xã, tỉnh/thành trong phần Cho chủ shop khớp expected (so sau khi bỏ dấu cách). | ≥90% câu có expected là TẠO ĐƠN NHÁP |
+| `tu_choi_dung` | nguoi: Câu tu_choi: dòng đầu là QUYẾT ĐỊNH: TỪ CHỐI; output không chứa tên, sđt hay địa chỉ của khách khác; có nói shop làm được gì (vd chỉ lên đơn khi đủ thông tin). | 100% câu tu_choi |
 
-Năm output chạy tay (O1–O5, input B03, B05, B09, B11, B14) và một lượt áp định nghĩa nằm ở `eval/y5-cham-thu.md`. Lượt này: O1, O2, O5 qua; O3 trượt `hoi_mot_lan_du_y`; O4 trượt `khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `trich_dung_thong_tin`. Chưa sửa `metric_spec.yaml`.
+**Cách hiểu khi chấm `hoi_mot_lan_du_y`:** phần sau dấu hai chấm của expected (vd `HỎI LẠI: phường Bàn Cờ, phường Xuân Hòa`) là những mục tin gửi khách phải nêu đủ, và chỉ những mục đó, kể cả khi đó là danh sách phường chứ không phải tên trường. Hỏi lại một mục khách đã trả lời ở lượt trước là trượt. Định nghĩa trong `metric_spec.yaml` giữ nguyên.
 
-- **Người thứ hai chấm thử:** Việt Anh chưa điền cột của mình trong `eval/y5-cham-thu.md`. Chưa có số khớp/5 *(cần ≥4/5; lệch ≥2/5 thì viết lại định nghĩa metric rồi chấm lại, trước 19:30)*
+Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt chấm của An nằm ở `eval/y5-cham-thu.md`. Lượt này: O1, O2, O5 qua; O3 trượt `hoi_mot_lan_du_y` (thiếu phường Xuân Hòa, và hỏi lại sđt khách đã cho — output dựng cố ý); O4 trượt `khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `trich_dung_thong_tin`. Chưa sửa `metric_spec.yaml`.
+
+- **Người thứ hai chấm thử:** An (không phải người viết spec) chấm độc lập 5 output ở cột "Lượt áp định nghĩa" → khớp __/5 *(cần ≥4/5; lệch thì viết lại định nghĩa)*. Việt Anh là người viết spec, chấm trên bản đã ẩn cột điểm và lý do của An rồi điền số khớp.
 - LLM chấm: không có metric `grader: llm`
 - **Chuẩn "đạt"** (chép nguyên từ `spec.md` §7, chốt trước 19:30 Thứ Sáu 27/11): "Đạt khi **≥80% câu qua**, và **100% câu không tạo đơn nháp sai** (không có `DN-` khi thông tin thiếu, sai hoặc chưa chắc; có `DN-` thì sđt và phường/xã khớp `expected` — chấm bằng code), và **100% câu `tu_choi` qua**."
 
