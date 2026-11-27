@@ -167,7 +167,7 @@ Không quy đổi thì dòng `Phường/xã:` chỉ có tên. **Câu nào không
 | Giờ | Sỹ | Hưng | Việt Anh | An |
 |---|---|---|---|---|
 | 16:30–17:15 | Cả nhóm đọc lại §7 + metric ở PR #9 rồi merge · E3 `evidence/summary.md`: đã hỏi / đã hẹn / đã đào đến đâu | **X0** bảng chuyển đổi (TP HCM, địa bàn cũ) | **Y3** câu không cần bảng: thiếu sđt, sđt 9 số, `+84`, đổi ý giữa chừng, giao người khác, 2 câu `tu_choi` | **E3** canvas: dòng 4 (số đầu + 1 trích dẫn), dòng 5 lát cắt mới, "Đã đổi gì so với CP1" · gom tin chủ shop đã ẩn danh để làm câu `nguoi_dung` |
-| 17:15–18:15 | Lấy key, gọi thử model 1 câu (guide 3.3) · hỏi lab coach chuyện `run_app()` (P2) | Gửi Cặp Y danh sách phường cũ bị tách · bắt đầu **X2** (không bắt buộc CP2) | **Y3** câu địa chỉ cũ: gộp gọn, bị tách có / không căn cứ, tỉnh cũ đã gộp · **Y4** DATA_CARD | **Y3** câu từ lời người dùng (≥1/3 bộ) · điền số câu theo loại ở §7 |
+| 17:15–18:15 | Lấy key, gọi thử model 1 câu (guide 3.3) | Gửi Cặp Y danh sách phường cũ bị tách · bắt đầu **X2** (không bắt buộc CP2) | **Y3** câu địa chỉ cũ: gộp gọn, bị tách có / không căn cứ, tỉnh cũ đã gộp · **Y4** DATA_CARD | **Y3** câu từ lời người dùng (≥1/3 bộ) · điền số câu theo loại ở §7 |
 | 18:15–18:45 | **F1** tự soát theo guide 2.5 | Review chéo `eval/benchmark.csv` | **Y5** chấm thử 5 output chạy tay cùng An · `run.py check` sạch | **Y5** chấm thử cùng Việt Anh |
 | 18:45–19:00 | Merge `develop` → `main`, mở repo bằng cửa sổ ẩn danh, **nộp CP2** | | | |
 | Tối → 10:00 Thứ Bảy | **X3** → **X4** → **P1** | **X2** → **P2** | **P3** · mở rộng bộ câu thử lên 20–30 · `spec.md` §5 | **Y7** `eval/grade.py` → **P4** lượt 1 (8:30) |
@@ -448,7 +448,7 @@ Ba metric ghi `grader: code` (`khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `tric
 
 ### P2 · Luồng D + B — màn hình duyệt *(Hưng)*
 
-**Stack:** `http.server` của thư viện chuẩn, không thêm thư viện, **chỉ bind `127.0.0.1:8000`** (không dùng `0.0.0.0`). Docstring `codebase/app.py` yêu cầu `python run.py` là lệnh **duy nhất** chạy bản chạy thử, đổi giao diện thì sửa `run_app()` trong `run.py`; nhưng `AGENTS.md` xếp `run.py` vào phần khung không sửa. **Hỏi lab coach trước:** được thì `run_app()` mở web, giữ bản dòng lệnh làm dự phòng; chưa được thì `python run.py` vẫn là dòng lệnh, web chạy bằng `python3 codebase/web.py`, ghi rõ trong README.
+**Stack:** `http.server` của thư viện chuẩn, không thêm thư viện, **chỉ bind `127.0.0.1:8000`** (không dùng `0.0.0.0`). **`python run.py` là lệnh duy nhất chạy bản chạy thử** (docstring `codebase/app.py`): nhóm đã chốt được sửa `run.py`, chỉ sửa hàm `run_app()` để mở web; giữ bản dòng lệnh làm dự phòng (vd `python run.py cli` hoặc `python3 codebase/app.py`). Cập nhật bảng "Cấu trúc code" trong `AGENTS.md` cho khớp.
 **Consumes:** `xu_ly_hop_thu` (P1), `xu_ly` (X3), `validate_phone`, `lookup_address` (X2)
 
 Màn hình:
