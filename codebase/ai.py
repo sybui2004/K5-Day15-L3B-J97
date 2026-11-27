@@ -41,6 +41,36 @@ load_env()
 MODEL_PROVIDER = (os.environ.get("MODEL_PROVIDER") or "fake").strip().lower()
 MODEL_NAME = (os.environ.get("MODEL_NAME") or "").strip()
 API_KEY = (os.environ.get("API_KEY") or "").strip()
+MODEL_EFFORT = (os.environ.get("MODEL_EFFORT") or "").strip().lower()  # low | medium | high | xhigh | max
+
+_claude = None  # client Anthropic, tạo một lần khi gọi lần đầu
+
+
+def _call_claude(system: str, user: str) -> dict:
+    """Gọi Claude qua SDK chính thức `anthropic` (requirements.txt).
+
+    - Thinking để mặc định (adaptive); độ sâu chỉnh bằng MODEL_EFFORT trong .env.
+    - fallbacks="default": khi bộ lọc an toàn từ chối, API tự chạy lại trên model dự phòng trong cùng lần gọi.
+    - Bị từ chối hẳn (stop_reason "refusal") thì trả text rỗng → agent.py coi là JSON hỏng → HỎI LẠI.
+    """
+    global _claude
+    import anthropic
+    if _claude is None:
+        _claude = anthropic.Anthropic(api_key=API_KEY or None)
+    kwargs = {
+        "model": MODEL_NAME or "claude-sonnet-5-5",
+        "max_tokens": 16000,
+        "system": system,
+        "messages": [{"role": "user", "content": user}],
+        "betas": ["server-side-fallback-2026-07-01"],
+        "fallbacks": "default",
+    }
+    if MODEL_EFFORT:
+        kwargs["output_config"] = {"effort": MODEL_EFFORT}
+    resp = _claude.beta.messages.create(**kwargs)
+    text = "" if resp.stop_reason == "refusal" else "".join(b.text for b in resp.content if b.type == "text")
+    return {"text": text, "model": resp.model, "tokens_in": resp.usage.input_tokens,
+            "tokens_out": resp.usage.output_tokens}
 
 
 @model_call
@@ -49,8 +79,8 @@ def call_model(system: str, user: str) -> dict:
         last = (user.strip().splitlines() or [""])[-1]
         return {"text": "[câu trả lời giả — chưa nối model] " + last[:60], "model": "fake", "tokens_in": 0, "tokens_out": 0}
 
-    # NHÓM VIẾT: gọi model thật ở đây (theo MODEL_PROVIDER, MODEL_NAME, API_KEY) rồi trả đúng 4 khoá.
-    # Ví dụ chép được cho từng nhà cung cấp: docs/connect-model.md mục 2.
+    if MODEL_PROVIDER == "anthropic":
+        return _call_claude(system, user)
     raise NotImplementedError(
         "chưa viết phần gọi model thật cho MODEL_PROVIDER=%s trong codebase/ai.py — xem docs/connect-model.md"
         % MODEL_PROVIDER)
