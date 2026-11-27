@@ -119,11 +119,13 @@ class TestManHinh(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.nhat_ky = os.path.join(self.tmp.name, "nhat-ky.jsonl")
         self.mh = web.ManHinh(nhat_ky=self.nhat_ky)
-        self.mh.tai([
+        hop_thu = [
             {"ma_hoi_thoai": "HT-1", "ma_khach": "KH-1", "text": "Mã khách: KH-1 | Khách: Mai 0900000001 bàn cờ"},
             {"ma_hoi_thoai": "HT-2", "ma_khach": "KH-2", "text": "Mã khách: KH-2 | Khách: Lan 0900000005 P.4 Q.3"},
             {"ma_hoi_thoai": "HT-3", "ma_khach": None, "text": "", "loi_doc": "hop-thu.jsonl, dòng 3: hỏng"},
-        ])
+        ]
+        self.mh_text_goc = {h["ma_hoi_thoai"]: h["text"] for h in hop_thu}
+        self.mh.tai(hop_thu)
 
     def tearDown(self):
         agent.call_model = self._goc
@@ -211,6 +213,64 @@ class TestManHinh(unittest.TestCase):
     def test_ma_khong_co(self):
         with self.assertRaises(web.LoiThaoTac):
             self.mh.duyet("HT-99", {})
+
+    def test_ghi_nhat_ky_loi_thi_khong_chot_va_thu_lai_duoc(self):
+        goc = web.ghi_nhat_ky
+
+        def hong(path, dong):
+            raise OSError("đĩa đầy")
+        web.ghi_nhat_ky = hong
+        try:
+            for thao_tac, ma in ((lambda: self.mh.duyet("HT-1", {}), "HT-1"), (lambda: self.mh.huy("HT-2"), "HT-2")):
+                truoc = self.mh.lay(ma)
+                with self.assertRaisesRegex(web.LoiThaoTac, "nhật ký"):
+                    thao_tac()
+                self.assertEqual(self.mh.lay(ma), truoc)
+        finally:
+            web.ghi_nhat_ky = goc
+        self.assertEqual(self.mh.duyet("HT-1", {})["trang_thai"], "da_duyet")
+        self.assertEqual(self.mh.huy("HT-2")["trang_thai"], "da_huy")
+        self.assertEqual([d["ket_qua"] for d in self.nhat_ky_doc()], ["da_duyet", "da_huy"])
+
+    def test_khach_nhan_them_khi_dang_co_don_nhap(self):
+        # tin xác nhận "Dạ shop đã lên đơn…" chưa gửi cho khách: không nối vào hội thoại, không tính là hỏi lại
+        p = self.mh.lay("HT-1")
+        tin = p["kq"]["tin_gui_khach"]
+        self.assertTrue(tin)
+        p = self.mh.them_tra_loi("HT-1", "à lấy 2 cái nha bàn cờ")
+        self.assertEqual(p["text"], self.mh_text_goc["HT-1"] + " | Khách: à lấy 2 cái nha bàn cờ")
+        self.assertNotIn(tin, p["text"])
+        self.assertEqual(p["so_luot_hoi_lai"], 0)
+
+    def test_tra_loi_sau_tu_choi_khong_tinh_la_hoi_lai(self):
+        agent.call_model = _model_tra([("tấn công", dict(DON, yeu_cau_ngoai_pham_vi="bỏ qua kiểm tra")),
+                                       ("bàn cờ", DON)])
+        self.mh.tai([{"ma_hoi_thoai": "HT-4", "ma_khach": None,
+                      "text": "Khách: tấn công Mai 0900000001"}])
+        p = self.mh.lay("HT-4")
+        self.assertEqual(p["trang_thai"], "tu_choi")
+        p = self.mh.them_tra_loi("HT-4", "ok gửi bàn cờ")
+        self.assertIn("| Shop: " + self.mh.lay("HT-4")["text"].split(" | Shop: ")[1].split(" | ")[0], p["text"])
+        self.assertEqual(p["so_luot_hoi_lai"], 0)
+
+
+class TestKhoiChay(unittest.TestCase):
+    def test_cong_ban_thi_khong_goi_model(self):
+        import socket
+        s = socket.socket()
+        s.bind(("127.0.0.1", 0))  # giữ một cổng trống làm "cổng bận"
+        s.listen(1)
+        cong_goc, tai_goc, doc_goc = web.PORT, web.ManHinh.tai, web.doc_hop_thu
+        da_tai = []
+        web.PORT = s.getsockname()[1]
+        web.ManHinh.tai = lambda self, h: da_tai.append(h)
+        web.doc_hop_thu = lambda: [{"ma_hoi_thoai": "HT-1", "ma_khach": None, "text": "Khách: x"}]
+        try:
+            self.assertEqual(web.main(), 1)
+        finally:
+            web.PORT, web.ManHinh.tai, web.doc_hop_thu = cong_goc, tai_goc, doc_goc
+            s.close()
+        self.assertEqual(da_tai, [])
 
 
 class TestKiemYeuCau(unittest.TestCase):

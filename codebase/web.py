@@ -178,9 +178,9 @@ class ManHinh:
             if not k["duoc_duyet"]:
                 raise LoiThaoTac("còn trường chưa qua kiểm, chưa duyệt được", k)
             don = create_draft_order(dict(k["truong"], ma_hoi_thoai=ma))  # chỉ tính mã nháp, không gọi GHN
+            self._ghi(p, "da_duyet", k["truong_da_sua"])  # ghi nhật ký được rồi mới chốt trạng thái
             p.update(trang_thai="da_duyet", ma_don=don["ma_don"], ma_van_don=don["ma_van_don"],
                      truong_duyet=k["truong"], truong_da_sua=k["truong_da_sua"])
-            self._ghi(p, "da_duyet", k["truong_da_sua"])
             return copy.deepcopy(p)
 
     def huy(self, ma):
@@ -188,20 +188,25 @@ class ManHinh:
             p = self._lay(ma)
             if p["trang_thai"] in DA_XONG:
                 raise LoiThaoTac("hội thoại %s đã %s" % (ma, "duyệt" if p["trang_thai"] == "da_duyet" else "huỷ"))
+            self._ghi(p, "da_huy", [])  # ghi nhật ký được rồi mới chốt trạng thái
             p["trang_thai"] = "da_huy"
-            self._ghi(p, "da_huy", [])
             return copy.deepcopy(p)
 
     def them_tra_loi(self, ma, tra_loi):
-        """Luồng B: ghép câu khách trả lời rồi chạy lại xu_ly. Model lỗi thì giữ nguyên hội thoại để thử lại."""
+        """Luồng B: ghép câu khách trả lời rồi chạy lại xu_ly. Model lỗi thì giữ nguyên hội thoại để thử lại.
+        - Đang HỎI LẠI: nối tin hỏi lại của shop + câu khách, tính một lượt hỏi lại.
+        - Đang TỪ CHỐI: nối tin từ chối + câu khách, không tính là hỏi lại.
+        - Đang có đơn nháp chờ duyệt: tin xác nhận chưa gửi khách, nên chỉ nối câu khách nhắn thêm, không tính."""
         with self._khoa:
             p = self._lay(ma)
             if p["trang_thai"] in DA_XONG:
                 raise LoiThaoTac("hội thoại %s đã xong, không thêm trả lời được" % ma)
             if p["loi_doc"] or not p["text"]:
                 raise LoiThaoTac("hội thoại %s không đọc được từ hộp thư, shop xử lý tay" % ma)
+            tin = "" if p["trang_thai"] == "cho_duyet" else p["kq"]["tin_gui_khach"]
+            hoi_lai = p["kq"]["quyet_dinh"] == "HOI_LAI" and bool(lam_sach_luot(tin or ""))
             try:
-                text = ghep_tra_loi(p["text"], p["kq"]["tin_gui_khach"], tra_loi)
+                text = ghep_tra_loi(p["text"], tin, tra_loi)
             except ValueError as e:
                 raise LoiThaoTac(str(e))
             try:
@@ -209,14 +214,18 @@ class ManHinh:
             except Exception as e:  # model lỗi, mất mạng…
                 raise LoiThaoTac("chưa xử lý được câu trả lời (%s: %s), thử lại sau" % (type(e).__name__, e))
             p.update(text=text, kq=kq, trang_thai=TRANG_THAI.get(kq["quyet_dinh"], "cho_khach"),
-                     so_luot_hoi_lai=p["so_luot_hoi_lai"] + 1, ma_don=kq.get("ma_don"),
+                     so_luot_hoi_lai=p["so_luot_hoi_lai"] + (1 if hoi_lai else 0), ma_don=kq.get("ma_don"),
                      ma_van_don=kq.get("ma_van_don"))
             return copy.deepcopy(p)
 
     def _ghi(self, p, ket_qua, da_sua):
-        ghi_nhat_ky(self.nhat_ky, {"ma_hoi_thoai": p["ma_hoi_thoai"], "quyet_dinh_ai": p["kq"]["quyet_dinh"],
-                                   "truong_da_sua": da_sua, "so_luot_hoi_lai": p["so_luot_hoi_lai"],
-                                   "ket_qua": ket_qua, "luc": time.strftime("%Y-%m-%dT%H:%M:%S")})
+        """Ghi nhật ký; lỗi thì báo để chủ shop thử lại (trạng thái chưa đổi)."""
+        try:
+            ghi_nhat_ky(self.nhat_ky, {"ma_hoi_thoai": p["ma_hoi_thoai"], "quyet_dinh_ai": p["kq"]["quyet_dinh"],
+                                       "truong_da_sua": da_sua, "so_luot_hoi_lai": p["so_luot_hoi_lai"],
+                                       "ket_qua": ket_qua, "luc": time.strftime("%Y-%m-%dT%H:%M:%S")})
+        except OSError as e:
+            raise LoiThaoTac("chưa ghi được nhật ký duyệt (%s), đơn chưa đổi trạng thái — thử lại" % e)
 
 
 # ---------- HTTP ----------
@@ -298,17 +307,27 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         return self._gui(404, {"loi": "không có"})
 
 
+class MayChu(HTTPServer):
+    # Windows: SO_REUSEADDR cho tiến trình khác mở chung cổng đang dùng → tắt; nơi khác giữ mặc định
+    allow_reuse_address = os.name != "nt"
+
+
 def main() -> int:
-    hop_thu = doc_hop_thu()
-    print("Màn hình duyệt — đang xử lý %d hội thoại trong hộp thư mẫu..." % len(hop_thu))
-    mh = ManHinh()
-    mh.tai(hop_thu)
-    XuLyYeuCau.man_hinh = mh
+    # mở cổng trước: cổng bận thì dừng ngay, không gọi model cho cả hộp thư
     try:
-        server = HTTPServer((HOST, PORT), XuLyYeuCau)
+        server = MayChu((HOST, PORT), XuLyYeuCau)
     except OSError as e:
         print("Không mở được %s:%d (%s). Cổng đang bận? Tắt chương trình đang dùng cổng rồi chạy lại." % (HOST, PORT, e))
         return 1
+    try:
+        hop_thu = doc_hop_thu()
+        print("Màn hình duyệt — đang xử lý %d hội thoại trong hộp thư mẫu..." % len(hop_thu))
+        mh = ManHinh()
+        mh.tai(hop_thu)
+        XuLyYeuCau.man_hinh = mh
+    except BaseException:
+        server.server_close()
+        raise
     print("Mở trình duyệt: http://%s:%d   (chỉ máy này) · Thoát: Ctrl+C" % (HOST, PORT))
     print("Bản dòng lệnh dự phòng: python codebase/app.py")
     try:
@@ -377,7 +396,8 @@ async function goi(duong, body) {
   if (!r.ok) { const e = new Error(d.loi || r.statusText); e.chi_tiet = d.chi_tiet; throw e; }
   return d;
 }
-function bao(text, sai) { const b = document.getElementById("bao"); if (b) { b.textContent = text; b.style.color = sai ? "var(--do)" : "var(--xanh)"; } }
+// `ma`: hội thoại phát ra thông báo — kết quả về muộn của hội thoại khác thì không hiện lên khung đang xem
+function bao(text, sai, ma) { if (ma && ma !== chon) return; const b = document.getElementById("bao"); if (b) { b.textContent = text; b.style.color = sai ? "var(--do)" : "var(--xanh)"; } }
 
 async function tai(giu) {
   const d = await goi("/api/hop-thu");
@@ -386,11 +406,12 @@ async function tai(giu) {
   veHopThu();
   if (giu && chon) veChiTiet(phien.find(p => p.ma_hoi_thoai === chon));
 }
-function capNhat(p) { const i = phien.findIndex(x => x.ma_hoi_thoai === p.ma_hoi_thoai); if (i >= 0) phien[i] = p; veHopThu(); veChiTiet(p); }
+// cập nhật dữ liệu của p; chỉ vẽ lại khung chi tiết khi p vẫn là hội thoại đang chọn (kết quả có thể về muộn)
+function capNhat(p) { const i = phien.findIndex(x => x.ma_hoi_thoai === p.ma_hoi_thoai); if (i >= 0) phien[i] = p; veHopThu(); if (p.ma_hoi_thoai === chon) veChiTiet(p); }
 
 function veHopThu() {
   document.getElementById("hop-thu").replaceChildren(...phien.map(p => el("li", {class: p.ma_hoi_thoai === chon ? "chon" : null,
-      on: {click: () => { chon = p.ma_hoi_thoai; veHopThu(); veChiTiet(p); }}},
+      on: {click: () => { clearTimeout(hen); chon = p.ma_hoi_thoai; veHopThu(); veChiTiet(p); }}},
     el("span", {}, el("span", {text: DAU[p.trang_thai] + " " + (p.ma_khach || p.ma_hoi_thoai)}),
       el("br"), el("span", {class: "phu", text: p.ma_hoi_thoai + (p.so_luot_hoi_lai ? " · hỏi lại " + p.so_luot_hoi_lai + " lượt" : "")})),
     el("span", {class: "nhan " + p.trang_thai, text: NHAN[p.trang_thai]}))));
@@ -444,16 +465,16 @@ function veDon(p) {
       }
       const q = document.getElementById("qd"); if (q) q.hidden = k.truong_da_sua.includes("phuong_xa");
       duyet.disabled = !k.duoc_duyet;
-      bao(k.duoc_duyet ? (k.truong_da_sua.length ? "Đã sửa: " + k.truong_da_sua.join(", ") + " · qua kiểm" : "") : "Còn trường chưa qua kiểm, chưa duyệt được", !k.duoc_duyet);
-    } catch (e) { bao(e.message, true); }
+      bao(k.duoc_duyet ? (k.truong_da_sua.length ? "Đã sửa: " + k.truong_da_sua.join(", ") + " · qua kiểm" : "") : "Còn trường chưa qua kiểm, chưa duyệt được", !k.duoc_duyet, p.ma_hoi_thoai);
+    } catch (e) { bao(e.message, true, p.ma_hoi_thoai); }
   }
   duyet.addEventListener("click", async () => {
     duyet.disabled = true;
-    try { capNhat(await goi("/api/duyet", {ma: p.ma_hoi_thoai, sua: sua()})); } catch (e) { bao(e.message, true); kiem(); }
+    try { capNhat(await goi("/api/duyet", {ma: p.ma_hoi_thoai, sua: sua()})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); if (chon === p.ma_hoi_thoai) kiem(); }
   });
   huy.addEventListener("click", async () => {
     if (!confirm("Huỷ đơn nháp " + p.ma_don + "?")) return;
-    try { capNhat(await goi("/api/huy", {ma: p.ma_hoi_thoai})); } catch (e) { bao(e.message, true); }
+    try { capNhat(await goi("/api/huy", {ma: p.ma_hoi_thoai})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); }
   });
   ra.push(luoi, el("div", {class: "nut"}, duyet, huy));
   setTimeout(kiem, 0);
@@ -464,7 +485,7 @@ function veChoKhach(p) {
   const tin = p.kq.tin_gui_khach || "", ra = [el("h3", {text: p.trang_thai === "cho_duyet" ? "Khách nhắn thêm" : "Chờ khách (luồng B)"})];
   if (tin && p.trang_thai !== "cho_duyet") {
     const chep = el("button", {text: "Chép"});
-    chep.addEventListener("click", async () => { try { await navigator.clipboard.writeText(tin); bao("Đã chép tin gửi khách"); } catch (e) { bao("Không chép được: " + e.message, true); } });
+    chep.addEventListener("click", async () => { try { await navigator.clipboard.writeText(tin); bao("Đã chép tin gửi khách", false, p.ma_hoi_thoai); } catch (e) { bao("Không chép được: " + e.message, true, p.ma_hoi_thoai); } });
     ra.push(el("div", {class: "phu", text: "Tin gửi khách (shop tự gửi):"}), el("div", {class: "tin", text: tin}), el("div", {class: "nut"}, chep));
   } else if (!tin && p.trang_thai === "cho_khach") {
     ra.push(el("p", {class: "phu", text: "Không có tin soạn sẵn (lỗi hệ thống) — shop tự nhắn khách."}));
@@ -473,7 +494,7 @@ function veChoKhach(p) {
   them.addEventListener("click", async () => {
     if (!o.value.trim()) { bao("Câu khách trả lời đang trống", true); return; }
     them.disabled = true; bao("Đang xử lý lại hội thoại...");
-    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); } catch (e) { bao(e.message, true); them.disabled = false; }
+    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); them.disabled = false; }
   });
   ra.push(el("label", {for: "tra-loi", text: "Khách trả lời:"}), o, el("div", {class: "nut"}, them));
   return ra;
