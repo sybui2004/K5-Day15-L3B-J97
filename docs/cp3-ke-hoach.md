@@ -14,7 +14,7 @@
 |---|---|---|---|
 | Bằng chứng pain đạt ngưỡng ≥1 nguồn + ≥5 trích dẫn | Phỏng vấn 4 chủ shop: H2 4/4 (ngưỡng ≥2/3) · 7 trích dẫn nguyên văn (`evidence/summary.md`) | Chỉ cần chốt lại lúc 8:00. Đào review Google Play vẫn trống: ghi rõ "chưa làm", không ghi là đạt | cả nhóm |
 | Bộ câu thử 20–30 câu, ≥5 `kho`, ≥2 `tu_choi` | 19 câu (thuong 4 · kho 9 · tu_choi 6). `run.py check` báo thiếu | Thêm 9 câu → **28 câu** (B20–B22 luồng C, B23–B28 Y8). `check` còn đòi **≥1/3 câu nguồn thật** (`nguoi_dung` / `data_that`): đang 7/19, cần ≥10/28 | Việt Anh, Hưng |
-| Bản chạy thử gọi AI thật + **video 30 giây** | Đã nối Claude (`MODEL_PROVIDER=anthropic`); **chỉ máy Sỹ có key** trong `.env` · web hộp thư + màn hình duyệt (#18, #26), **chưa ai mở bằng trình duyệt thật** | Mở thử web tối nay · video | Hưng |
+| Bản chạy thử gọi AI thật + **video 30 giây** | Đã nối Claude (`MODEL_PROVIDER=anthropic`); Sỹ và Hưng đều có key trong `.env` (không commit) · web hộp thư + màn hình duyệt (#18, #26), **chưa ai mở bằng trình duyệt thật** | Mở thử web tối nay · video | Hưng |
 | Kết quả lượt 1 (x/N) + run ID | Chưa có. `eval/grade.py` chưa có | Y7 → P4 lượt 1 | An |
 | `spec.md` §0–§7 | §0–§6 đã có · sửa theo review PR #29 nằm ở PR `feature/cp3-spec-sua-review` | §7 dòng kết quả lượt 1 · dòng 7 "Data BTC" còn `__` · §5 dòng tấn công luồng C chưa có câu thử | Sỹ, An, Việt Anh |
 | Luồng A, B, D | Đã merge (P1 #18, P2 #26) | — | — |
@@ -30,7 +30,7 @@ Guide ("Cách chia việc", mục 2) cho phép **đổi cặp hoặc đổi vi�
 
 | Cặp | Người | Việc đến CP3 |
 |---|---|---|
-| **Cặp X** | Sỹ, Hưng | Sỹ: X5 prompt từ chối, tự soát và nộp · Hưng: Y8 câu thử B23–B28, mở thử web, V1 video (quay cùng Sỹ trên máy Sỹ) |
+| **Cặp X** | Sỹ, Hưng | Sỹ: X5 prompt từ chối, tự soát và nộp · Hưng: Y8 câu thử B23–B28, mở thử web, V1 video + mô phỏng thử |
 | **Cặp Y** | Việt Anh, An | Việt Anh: P3 luồng C + câu thử B20–B22 · An: Y7 `grade.py`, P4 lượt 1 |
 
 Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2). **Riêng PR kế hoạch (#17) và PR sửa mục spec của người khác: cả người giữ phần đó cùng duyệt.** Kế hoạch này đổi việc của cả 4 người, nên Hưng, Việt Anh, An đều phải Approve (hoặc comment chỗ muốn đổi ở phần của mình) rồi mới merge.
@@ -57,7 +57,7 @@ Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2). **Ri�
 | 23:45–0:30 | **X5** prompt từ chối + test · thử tay B16, B17 | **Y8** câu thử B23–B28 · **mở thử màn hình duyệt bằng trình duyệt thật** (model giả), lỗi giao diện thì sửa trong nhánh nhỏ riêng | **P3** `lich-su-khach.csv`, `get_customer_history`, bước 3 trong `agent.py`, test | **Y7** `eval/grade.py` + test |
 | 0:30 | **Mốc cắt luồng C** (xem dưới) · mở PR · đi ngủ | mở PR · đi ngủ | mở PR · đi ngủ | mở PR · đi ngủ |
 | 7:00–7:45 | Duyệt, merge Y8 (Hưng) | Duyệt, merge X5 (Sỹ) | Duyệt, merge Y7 (An) | Duyệt, merge P3 (Việt Anh) **sau** khi Y8 đã merge |
-| 7:45–8:00 | `python3 -m unittest discover -s tests` + `run.py check` sạch trên `develop` · **V1 cùng Hưng trên máy Sỹ**: `simulate --try 10`, mở web model thật | **V1 cùng Sỹ**: quay video trên máy Sỹ | DATA_CARD dataset lịch sử khách · §5 dòng B22 | `python3 run.py eval --try 3` trên `develop` mới |
+| 7:45–8:00 | `python3 -m unittest discover -s tests` + `run.py check` sạch trên `develop` | **V1** `simulate --try 10` · **quay video** trên `develop` mới (máy Hưng, model thật) | DATA_CARD dataset lịch sử khách · §5 dòng B22 | `python3 run.py eval --try 3` trên `develop` mới |
 | 8:00–8:30 | **Cả nhóm (guide chặng 4):** chốt bằng chứng + bảng impact §2 — số nào lấy từ file nào, ai cũng đọc được | | | |
 | 8:30–9:15 | **Cả nhóm: lượt 1 (P4).** An chạy · Việt Anh + An chấm tay 2 metric `nguoi` · Sỹ + Hưng đọc câu trượt, ghi nhóm lỗi | | | |
 | 9:15–9:30 | **F2** tự soát §0–§7 · dòng 7 · §10 | Up video, mở bằng cửa sổ ẩn danh, gửi link cho Sỹ | Kiểm `run.py check` lần cuối | `eval/report.md` lượt 1 · §7 dòng kết quả · merge P4 |
@@ -154,11 +154,11 @@ PR #26 mới kiểm qua API và bộ chạy Node với DOM giả, chưa ai mở 
 - [ ] Không có key (model giả): `python3 run.py`, mở `http://127.0.0.1:8000` bằng trình duyệt, đi hết: chọn hội thoại → sửa sđt sai (Duyệt bị khoá) → sửa đúng → Duyệt · gõ "Khách trả lời" ở một hội thoại HỎI LẠI.
 - [ ] Lỗi giao diện thì sửa trong nhánh nhỏ `fix/cp3-web-<tên lỗi>`, Sỹ duyệt.
 
-## V1 · Video 30 giây + mô phỏng thử *(Hưng + Sỹ · 7:45–8:00 trên máy Sỹ, up lúc 9:15)*
+## V1 · Video 30 giây + mô phỏng thử *(Hưng · 7:45–8:00, up lúc 9:15)*
 
-**Chỉ máy Sỹ có key.** Không gửi key qua chat hay commit; Hưng sang máy Sỹ (cùng cặp X) để chạy và quay.
+Hưng đã có key (Sỹ gửi qua kênh riêng). Key chỉ để trong `.env`, **không commit, không đưa lên màn hình**. Trước 0:30 chạy `python3 run.py eval --try 1` một lần để chắc key chạy trên máy Hưng.
 
-- [ ] `python3 run.py simulate --try 10` trên `develop` mới → `cost/simulate-try.csv` (đã có trong `.gitignore`, **không commit**). Kiểm: token > 0, cột `error` trống. Ghi lại số token trung bình mỗi phiên để Hưng dùng cho §8 ở CP4.
+- [ ] `python3 run.py simulate --try 10` trên `develop` mới → `cost/simulate-try.csv` (đã có trong `.gitignore`, **không commit**). Kiểm: token > 0, cột `error` trống. Ghi lại số token trung bình mỗi phiên để dùng cho §8 ở CP4.
 - [ ] `python3 run.py` với **model thật**. Web gọi model cho cả hộp thư lúc khởi động rồi mới mở cổng: **chờ terminal in "Mở trình duyệt: …" rồi mới quay.**
 - [ ] Quay ~30 giây: hộp thư → một đơn nháp có "quy đổi từ … khoản …" → một hội thoại phường bị tách đang HỎI LẠI kèm danh sách phường → bấm Duyệt.
 - [ ] Không để lộ `.env`, key hay terminal có key trên màn hình. Chỉ dùng hộp thư dựng (`data/hop-thu-mau.jsonl`).
