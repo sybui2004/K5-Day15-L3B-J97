@@ -1,0 +1,494 @@
+tinh_cu,quan_huyen_cu,phuong_xa_cu,phuong_xa_moi,kieu,khoan,nguon_quan
+TP Hồ Chí Minh,Quận 1,phường Bến Nghé,phường Sài Gòn,toan_bo,1,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Đa Kao,phường Sài Gòn,mot_phan,1,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Nguyễn Thái Bình,phường Sài Gòn,mot_phan,1,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Tân Định,phường Tân Định,toan_bo,2,van_ban
+TP Hồ Chí Minh,Quận 1,phường Đa Kao,phường Tân Định,phan_con_lai,2,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Bến Thành,phường Bến Thành,toan_bo,3,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Phạm Ngũ Lão,phường Bến Thành,toan_bo,3,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Cầu Ông Lãnh,phường Bến Thành,mot_phan,3,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Nguyễn Thái Bình,phường Bến Thành,phan_con_lai,3,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Nguyễn Cư Trinh,phường Cầu Ông Lãnh,toan_bo,4,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Cầu Kho,phường Cầu Ông Lãnh,toan_bo,4,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Cô Giang,phường Cầu Ông Lãnh,toan_bo,4,cuc_thong_ke
+TP Hồ Chí Minh,Quận 1,phường Cầu Ông Lãnh,phường Cầu Ông Lãnh,phan_con_lai,4,cuc_thong_ke
+TP Hồ Chí Minh,Quận 3,Phường 1,phường Bàn Cờ,toan_bo,5,cuc_thong_ke
+TP Hồ Chí Minh,Quận 3,Phường 2,phường Bàn Cờ,toan_bo,5,cuc_thong_ke
+TP Hồ Chí Minh,Quận 3,Phường 3,phường Bàn Cờ,toan_bo,5,cuc_thong_ke
+TP Hồ Chí Minh,Quận 3,Phường 5,phường Bàn Cờ,toan_bo,5,cuc_thong_ke
+TP Hồ Chí Minh,Quận 3,Phường 4,phường Bàn Cờ,mot_phan,5,van_ban
+TP Hồ Chí Minh,Quận 3,phường Võ Thị Sáu,phường Xuân Hòa,toan_bo,6,cuc_thong_ke
+TP Hồ Chí Minh,Quận 3,Phường 4,phường Xuân Hòa,phan_con_lai,6,van_ban
+TP Hồ Chí Minh,Quận 3,Phường 9,phường Nhiêu Lộc,toan_bo,7,van_ban
+TP Hồ Chí Minh,Quận 3,Phường 11,phường Nhiêu Lộc,toan_bo,7,van_ban
+TP Hồ Chí Minh,Quận 3,Phường 12,phường Nhiêu Lộc,toan_bo,7,van_ban
+TP Hồ Chí Minh,Quận 3,Phường 14,phường Nhiêu Lộc,toan_bo,7,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 13,phường Xóm Chiếu,toan_bo,8,cuc_thong_ke
+TP Hồ Chí Minh,Quận 4,Phường 16,phường Xóm Chiếu,toan_bo,8,cuc_thong_ke
+TP Hồ Chí Minh,Quận 4,Phường 18,phường Xóm Chiếu,toan_bo,8,cuc_thong_ke
+TP Hồ Chí Minh,Quận 4,Phường 15,phường Xóm Chiếu,mot_phan,8,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 8,phường Khánh Hội,toan_bo,9,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 9,phường Khánh Hội,toan_bo,9,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 2,phường Khánh Hội,mot_phan,9,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 4,phường Khánh Hội,mot_phan,9,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 15,phường Khánh Hội,phan_con_lai,9,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 1,phường Vĩnh Hội,toan_bo,10,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 3,phường Vĩnh Hội,toan_bo,10,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 2,phường Vĩnh Hội,phan_con_lai,10,van_ban
+TP Hồ Chí Minh,Quận 4,Phường 4,phường Vĩnh Hội,phan_con_lai,10,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 1,phường Chợ Quán,toan_bo,11,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 2,phường Chợ Quán,toan_bo,11,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 4,phường Chợ Quán,toan_bo,11,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 5,phường An Đông,toan_bo,12,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 7,phường An Đông,toan_bo,12,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 9,phường An Đông,toan_bo,12,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 11,phường Chợ Lớn,toan_bo,13,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 12,phường Chợ Lớn,toan_bo,13,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 13,phường Chợ Lớn,toan_bo,13,van_ban
+TP Hồ Chí Minh,Quận 5,Phường 14,phường Chợ Lớn,toan_bo,13,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 2,phường Bình Tây,toan_bo,14,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 9,phường Bình Tây,toan_bo,14,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 1,phường Bình Tiên,toan_bo,15,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 7,phường Bình Tiên,toan_bo,15,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 8,phường Bình Tiên,toan_bo,15,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 10,phường Bình Phú,toan_bo,16,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 11,phường Bình Phú,toan_bo,16,van_ban
+TP Hồ Chí Minh,Quận 8,Phường 16,phường Bình Phú,mot_phan,16,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 12,phường Phú Lâm,toan_bo,17,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 13,phường Phú Lâm,toan_bo,17,van_ban
+TP Hồ Chí Minh,Quận 6,Phường 14,phường Phú Lâm,toan_bo,17,van_ban
+TP Hồ Chí Minh,Quận 7,phường Bình Thuận,phường Tân Thuận,toan_bo,18,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Tân Thuận Đông,phường Tân Thuận,toan_bo,18,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Tân Thuận Tây,phường Tân Thuận,toan_bo,18,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Phú Thuận,phường Phú Thuận,toan_bo,19,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Phú Mỹ,phường Phú Thuận,mot_phan,19,van_ban
+TP Hồ Chí Minh,Quận 7,phường Tân Phú,phường Tân Mỹ,toan_bo,20,van_ban
+TP Hồ Chí Minh,Quận 7,phường Phú Mỹ,phường Tân Mỹ,phan_con_lai,20,van_ban
+TP Hồ Chí Minh,Quận 7,phường Tân Phong,phường Tân Hưng,toan_bo,21,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Tân Quy,phường Tân Hưng,toan_bo,21,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Tân Kiểng,phường Tân Hưng,toan_bo,21,cuc_thong_ke
+TP Hồ Chí Minh,Quận 7,phường Tân Hưng,phường Tân Hưng,toan_bo,21,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,Phường 4,phường Chánh Hưng,toan_bo,22,van_ban
+TP Hồ Chí Minh,Quận 8,phường Rạch Ông,phường Chánh Hưng,toan_bo,22,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,phường Hưng Phú,phường Chánh Hưng,toan_bo,22,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,Phường 5,phường Chánh Hưng,mot_phan,22,van_ban
+TP Hồ Chí Minh,Quận 8,Phường 14,phường Phú Định,toan_bo,23,van_ban
+TP Hồ Chí Minh,Quận 8,Phường 15,phường Phú Định,toan_bo,23,van_ban
+TP Hồ Chí Minh,Quận 8,phường Xóm Củi,phường Phú Định,toan_bo,23,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,Phường 16,phường Phú Định,mot_phan,23,van_ban
+TP Hồ Chí Minh,Quận 8,Phường 6,phường Bình Đông,toan_bo,24,van_ban
+TP Hồ Chí Minh,Quận 8,Phường 7,phường Bình Đông,mot_phan,24,van_ban
+TP Hồ Chí Minh,huyện Bình Chánh,xã An Phú Tây,phường Bình Đông,mot_phan,24,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,Phường 5,phường Bình Đông,phan_con_lai,24,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 6,phường Diên Hồng,toan_bo,25,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 8,phường Diên Hồng,toan_bo,25,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 14,phường Diên Hồng,mot_phan,25,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 1,phường Vườn Lài,toan_bo,26,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 2,phường Vườn Lài,toan_bo,26,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 4,phường Vườn Lài,toan_bo,26,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 9,phường Vườn Lài,toan_bo,26,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 10,phường Vườn Lài,toan_bo,26,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 12,phường Hòa Hưng,toan_bo,27,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 13,phường Hòa Hưng,toan_bo,27,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 15,phường Hòa Hưng,toan_bo,27,van_ban
+TP Hồ Chí Minh,Quận 10,Phường 14,phường Hòa Hưng,phan_con_lai,27,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 1,phường Minh Phụng,toan_bo,28,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 7,phường Minh Phụng,toan_bo,28,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 16,phường Minh Phụng,toan_bo,28,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 3,phường Bình Thới,toan_bo,29,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 10,phường Bình Thới,toan_bo,29,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 8,phường Bình Thới,mot_phan,29,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 5,phường Hòa Bình,toan_bo,30,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 14,phường Hòa Bình,toan_bo,30,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 11,phường Phú Thọ,toan_bo,31,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 15,phường Phú Thọ,toan_bo,31,van_ban
+TP Hồ Chí Minh,Quận 11,Phường 8,phường Phú Thọ,phan_con_lai,31,van_ban
+TP Hồ Chí Minh,Quận 12,phường Tân Thới Nhất,phường Đông Hưng Thuận,toan_bo,32,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Tân Hưng Thuận,phường Đông Hưng Thuận,toan_bo,32,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Đông Hưng Thuận,phường Đông Hưng Thuận,toan_bo,32,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Tân Chánh Hiệp,phường Trung Mỹ Tây,toan_bo,33,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Trung Mỹ Tây,phường Trung Mỹ Tây,toan_bo,33,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Hiệp Thành,phường Tân Thới Hiệp,toan_bo,34,van_ban
+TP Hồ Chí Minh,Quận 12,phường Tân Thới Hiệp,phường Tân Thới Hiệp,toan_bo,34,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Thạnh Xuân,phường Thới An,toan_bo,35,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Thới An,phường Thới An,toan_bo,35,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường Thạnh Lộc,phường An Phú Đông,toan_bo,36,cuc_thong_ke
+TP Hồ Chí Minh,Quận 12,phường An Phú Đông,phường An Phú Đông,toan_bo,36,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Trị Đông B,phường An Lạc,toan_bo,37,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường An Lạc A,phường An Lạc,toan_bo,37,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường An Lạc,phường An Lạc,toan_bo,37,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Hưng Hòa B,phường Bình Tân,toan_bo,38,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Trị Đông A,phường Bình Tân,mot_phan,38,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Tân Tạo,phường Bình Tân,mot_phan,38,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Tân Tạo A,phường Tân Tạo,mot_phan,39,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Tân Tạo,phường Tân Tạo,mot_phan,39,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Tân Kiên,phường Tân Tạo,mot_phan,39,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Trị Đông,phường Bình Trị Đông,toan_bo,40,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Hưng Hòa A,phường Bình Trị Đông,mot_phan,40,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Trị Đông A,phường Bình Trị Đông,phan_con_lai,40,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Hưng Hòa,phường Bình Hưng Hòa,toan_bo,41,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Sơn Kỳ,phường Bình Hưng Hòa,mot_phan,41,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Bình Hưng Hòa A,phường Bình Hưng Hòa,phan_con_lai,41,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 1,phường Gia Định,toan_bo,42,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 2,phường Gia Định,toan_bo,42,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 7,phường Gia Định,toan_bo,42,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 17,phường Gia Định,toan_bo,42,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 12,phường Bình Thạnh,toan_bo,43,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 14,phường Bình Thạnh,toan_bo,43,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 26,phường Bình Thạnh,toan_bo,43,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 5,phường Bình Lợi Trung,toan_bo,44,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 11,phường Bình Lợi Trung,toan_bo,44,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 13,phường Bình Lợi Trung,toan_bo,44,van_ban
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 19,phường Thạnh Mỹ Tây,toan_bo,45,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 22,phường Thạnh Mỹ Tây,toan_bo,45,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 25,phường Thạnh Mỹ Tây,toan_bo,45,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 27,phường Bình Quới,toan_bo,46,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Thạnh,Phường 28,phường Bình Quới,toan_bo,46,cuc_thong_ke
+TP Hồ Chí Minh,quận Gò Vấp,Phường 1,phường Hạnh Thông,toan_bo,47,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 3,phường Hạnh Thông,toan_bo,47,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 5,phường An Nhơn,toan_bo,48,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 6,phường An Nhơn,toan_bo,48,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 10,phường Gò Vấp,toan_bo,49,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 17,phường Gò Vấp,toan_bo,49,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 15,phường An Hội Đông,toan_bo,50,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 16,phường An Hội Đông,toan_bo,50,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 8,phường Thông Tây Hội,toan_bo,51,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 11,phường Thông Tây Hội,toan_bo,51,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 12,phường An Hội Tây,toan_bo,52,van_ban
+TP Hồ Chí Minh,quận Gò Vấp,Phường 14,phường An Hội Tây,toan_bo,52,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 4,phường Đức Nhuận,toan_bo,53,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 5,phường Đức Nhuận,toan_bo,53,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 9,phường Đức Nhuận,toan_bo,53,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 1,phường Cầu Kiệu,toan_bo,54,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 2,phường Cầu Kiệu,toan_bo,54,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 7,phường Cầu Kiệu,toan_bo,54,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 15,phường Cầu Kiệu,mot_phan,54,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 8,phường Phú Nhuận,toan_bo,55,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 10,phường Phú Nhuận,toan_bo,55,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 11,phường Phú Nhuận,toan_bo,55,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 13,phường Phú Nhuận,toan_bo,55,van_ban
+TP Hồ Chí Minh,quận Phú Nhuận,Phường 15,phường Phú Nhuận,phan_con_lai,55,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 1,phường Tân Sơn Hòa,toan_bo,56,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 2,phường Tân Sơn Hòa,toan_bo,56,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 3,phường Tân Sơn Hòa,toan_bo,56,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 4,phường Tân Sơn Nhất,toan_bo,57,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 5,phường Tân Sơn Nhất,toan_bo,57,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 7,phường Tân Sơn Nhất,toan_bo,57,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 6,phường Tân Hòa,toan_bo,58,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 8,phường Tân Hòa,toan_bo,58,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 9,phường Tân Hòa,toan_bo,58,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 10,phường Bảy Hiền,toan_bo,59,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 11,phường Bảy Hiền,toan_bo,59,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 12,phường Bảy Hiền,toan_bo,59,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 13,phường Tân Bình,toan_bo,60,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 14,phường Tân Bình,toan_bo,60,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 15,phường Tân Bình,mot_phan,60,van_ban
+TP Hồ Chí Minh,quận Tân Bình,Phường 15,phường Tân Sơn,phan_con_lai,61,van_ban
+TP Hồ Chí Minh,quận Tân Phú,phường Tây Thạnh,phường Tây Thạnh,toan_bo,62,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Sơn Kỳ,phường Tây Thạnh,mot_phan,62,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Sơn Nhì,phường Tân Sơn Nhì,toan_bo,63,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Sơn Kỳ,phường Tân Sơn Nhì,phan_con_lai,63,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Quý,phường Tân Sơn Nhì,mot_phan,63,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Thành,phường Tân Sơn Nhì,mot_phan,63,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Phú Thọ Hòa,phường Phú Thọ Hòa,toan_bo,64,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Thành,phường Phú Thọ Hòa,mot_phan,64,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Quý,phường Phú Thọ Hòa,phan_con_lai,64,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Phú Trung,phường Tân Phú,toan_bo,65,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Hòa Thạnh,phường Tân Phú,toan_bo,65,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Thới Hòa,phường Tân Phú,mot_phan,65,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Thành,phường Tân Phú,phan_con_lai,65,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Hiệp Tân,phường Phú Thạnh,toan_bo,66,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Phú Thạnh,phường Phú Thạnh,toan_bo,66,cuc_thong_ke
+TP Hồ Chí Minh,quận Tân Phú,phường Tân Thới Hòa,phường Phú Thạnh,phan_con_lai,66,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Hiệp Bình Chánh,phường Hiệp Bình,toan_bo,67,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Hiệp Bình Phước,phường Hiệp Bình,toan_bo,67,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Đông,phường Hiệp Bình,mot_phan,67,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Bình Thọ,phường Thủ Đức,toan_bo,68,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Chiểu,phường Thủ Đức,toan_bo,68,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Trường Thọ,phường Thủ Đức,toan_bo,68,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Tây,phường Thủ Đức,mot_phan,68,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Đông,phường Thủ Đức,phan_con_lai,68,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Bình Chiểu,phường Tam Bình,toan_bo,69,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Tam Phú,phường Tam Bình,toan_bo,69,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Tam Bình,phường Tam Bình,toan_bo,69,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Trung,phường Linh Xuân,toan_bo,70,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Xuân,phường Linh Xuân,toan_bo,70,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Linh Tây,phường Linh Xuân,phan_con_lai,70,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Tân Phú,phường Tăng Nhơn Phú,toan_bo,71,van_ban
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Hiệp Phú,phường Tăng Nhơn Phú,toan_bo,71,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Tăng Nhơn Phú A,phường Tăng Nhơn Phú,toan_bo,71,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Tăng Nhơn Phú B,phường Tăng Nhơn Phú,toan_bo,71,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Long Thạnh Mỹ,phường Tăng Nhơn Phú,mot_phan,71,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Long Bình,phường Long Bình,toan_bo,72,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Long Thạnh Mỹ,phường Long Bình,phan_con_lai,72,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Trường Thạnh,phường Long Phước,toan_bo,73,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Long Phước,phường Long Phước,toan_bo,73,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Phú Hữu,phường Long Trường,toan_bo,74,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Long Trường,phường Long Trường,toan_bo,74,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Thạnh Mỹ Lợi,phường Cát Lái,toan_bo,75,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Cát Lái,phường Cát Lái,toan_bo,75,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Bình Trưng Đông,phường Bình Trưng,toan_bo,76,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Bình Trưng Tây,phường Bình Trưng,toan_bo,76,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường An Phú,phường Bình Trưng,mot_phan,76,van_ban
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Phước Bình,phường Phước Long,toan_bo,77,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Phước Long A,phường Phước Long,toan_bo,77,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Phước Long B,phường Phước Long,toan_bo,77,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Thủ Thiêm,phường An Khánh,toan_bo,78,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường An Lợi Đông,phường An Khánh,toan_bo,78,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường Thảo Điền,phường An Khánh,toan_bo,78,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường An Khánh,phường An Khánh,toan_bo,78,cuc_thong_ke
+TP Hồ Chí Minh,thành phố Thủ Đức,phường An Phú,phường An Khánh,phan_con_lai,78,van_ban
+Bình Dương,thành phố Dĩ An,phường Bình An,phường Đông Hòa,toan_bo,79,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường Bình Thắng,phường Đông Hòa,toan_bo,79,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường Đông Hòa,phường Đông Hòa,toan_bo,79,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường An Bình,phường Dĩ An,toan_bo,80,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường Dĩ An,phường Dĩ An,toan_bo,80,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường Tân Đông Hiệp,phường Dĩ An,mot_phan,80,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường Tân Bình,phường Tân Đông Hiệp,toan_bo,81,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Thái Hòa,phường Tân Đông Hiệp,mot_phan,81,cuc_thong_ke
+Bình Dương,thành phố Dĩ An,phường Tân Đông Hiệp,phường Tân Đông Hiệp,phan_con_lai,81,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường An Phú,phường An Phú,toan_bo,82,van_ban
+Bình Dương,thành phố Thuận An,phường Bình Chuẩn,phường An Phú,mot_phan,82,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Bình Hòa,phường Bình Hòa,toan_bo,83,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Vĩnh Phú,phường Bình Hòa,mot_phan,83,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Bình Nhâm,phường Lái Thiêu,toan_bo,84,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Lái Thiêu,phường Lái Thiêu,toan_bo,84,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Vĩnh Phú,phường Lái Thiêu,phan_con_lai,84,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Hưng Định,phường Thuận An,toan_bo,85,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường An Thạnh,phường Thuận An,toan_bo,85,cuc_thong_ke
+Bình Dương,thành phố Thuận An,xã An Sơn,phường Thuận An,toan_bo,85,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Thuận Giao,phường Thuận Giao,toan_bo,86,cuc_thong_ke
+Bình Dương,thành phố Thuận An,phường Bình Chuẩn,phường Thuận Giao,phan_con_lai,86,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Phú Cường,phường Thủ Dầu Một,toan_bo,87,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Phú Thọ,phường Thủ Dầu Một,toan_bo,87,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Chánh Nghĩa,phường Thủ Dầu Một,toan_bo,87,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Hiệp Thành,phường Thủ Dầu Một,mot_phan,87,van_ban
+Bình Dương,thành phố Thủ Dầu Một,phường Chánh Mỹ,phường Thủ Dầu Một,mot_phan,87,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Phú Hòa,phường Phú Lợi,toan_bo,88,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Phú Lợi,phường Phú Lợi,toan_bo,88,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Hiệp Thành,phường Phú Lợi,phan_con_lai,88,van_ban
+Bình Dương,thành phố Thủ Dầu Một,phường Định Hòa,phường Chánh Hiệp,toan_bo,89,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Tương Bình Hiệp,phường Chánh Hiệp,toan_bo,89,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Hiệp An,phường Chánh Hiệp,mot_phan,89,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Chánh Mỹ,phường Chánh Hiệp,phan_con_lai,89,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Phú Mỹ,phường Bình Dương,toan_bo,90,van_ban
+Bình Dương,thành phố Thủ Dầu Một,phường Hòa Phú,phường Bình Dương,toan_bo,90,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Phú Tân,phường Bình Dương,toan_bo,90,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Phú Chánh,phường Bình Dương,toan_bo,90,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,phường Tân Định,phường Hòa Lợi,toan_bo,91,van_ban
+Bình Dương,thành phố Bến Cát,phường Hòa Lợi,phường Hòa Lợi,toan_bo,91,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Tân An,phường Phú An,toan_bo,92,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,xã Phú An,phường Phú An,toan_bo,92,cuc_thong_ke
+Bình Dương,thành phố Thủ Dầu Một,phường Hiệp An,phường Phú An,phan_con_lai,92,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,phường An Tây,phường Tây Nam,toan_bo,93,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Thanh Tuyền,phường Tây Nam,mot_phan,93,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã An Lập,phường Tây Nam,mot_phan,93,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,phường An Điền,phường Long Nguyên,toan_bo,94,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,xã Long Nguyên,phường Long Nguyên,toan_bo,94,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,phường Mỹ Phước,phường Long Nguyên,mot_phan,94,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,xã Tân Hưng,phường Bến Cát,toan_bo,95,van_ban
+Bình Dương,huyện Bàu Bàng,xã Lai Hưng,phường Bến Cát,toan_bo,95,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,phường Mỹ Phước,phường Bến Cát,phan_con_lai,95,cuc_thong_ke
+Bình Dương,thành phố Bến Cát,phường Chánh Phú Hòa,phường Chánh Phú Hòa,toan_bo,96,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,xã Hưng Hòa,phường Chánh Phú Hòa,toan_bo,96,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Vĩnh Tân,phường Vĩnh Tân,toan_bo,97,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,thị trấn Tân Bình,phường Vĩnh Tân,toan_bo,97,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Bình Mỹ,phường Bình Cơ,toan_bo,98,van_ban
+Bình Dương,thành phố Tân Uyên,phường Hội Nghĩa,phường Bình Cơ,toan_bo,98,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Uyên Hưng,phường Tân Uyên,toan_bo,99,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,xã Bạch Đằng,phường Tân Uyên,toan_bo,99,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Tân Lập,phường Tân Uyên,toan_bo,99,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Tân Mỹ,phường Tân Uyên,mot_phan,99,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Khánh Bình,phường Tân Hiệp,toan_bo,100,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Tân Hiệp,phường Tân Hiệp,toan_bo,100,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Thạnh Phước,phường Tân Khánh,toan_bo,101,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Tân Phước Khánh,phường Tân Khánh,toan_bo,101,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Tân Vĩnh Hiệp,phường Tân Khánh,toan_bo,101,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,xã Thạnh Hội,phường Tân Khánh,toan_bo,101,cuc_thong_ke
+Bình Dương,thành phố Tân Uyên,phường Thái Hòa,phường Tân Khánh,phan_con_lai,101,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 1,phường Vũng Tàu,toan_bo,102,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 2,phường Vũng Tàu,toan_bo,102,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 3,phường Vũng Tàu,toan_bo,102,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 4,phường Vũng Tàu,toan_bo,102,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 5,phường Vũng Tàu,toan_bo,102,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,phường Thắng Nhì,phường Vũng Tàu,toan_bo,102,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,phường Thắng Tam,phường Vũng Tàu,toan_bo,102,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 7,phường Tam Thắng,toan_bo,103,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 8,phường Tam Thắng,toan_bo,103,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 9,phường Tam Thắng,toan_bo,103,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,phường Nguyễn An Ninh,phường Tam Thắng,toan_bo,103,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 10,phường Rạch Dừa,toan_bo,104,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,phường Thắng Nhất,phường Rạch Dừa,toan_bo,104,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,phường Rạch Dừa,phường Rạch Dừa,toan_bo,104,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 11,phường Phước Thắng,toan_bo,105,van_ban
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,Phường 12,phường Phước Thắng,toan_bo,105,van_ban
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,xã Tân Hưng,phường Long Hương,toan_bo,106,van_ban
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Kim Dinh,phường Long Hương,toan_bo,106,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Long Hương,phường Long Hương,toan_bo,106,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Phước Trung,phường Bà Rịa,toan_bo,107,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Phước Nguyên,phường Bà Rịa,toan_bo,107,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Long Toàn,phường Bà Rịa,toan_bo,107,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Phước Hưng,phường Bà Rịa,toan_bo,107,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,phường Long Tâm,phường Tam Long,toan_bo,108,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,xã Hòa Long,phường Tam Long,toan_bo,108,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Bà Rịa,xã Long Phước,phường Tam Long,toan_bo,108,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Tân Hòa,phường Tân Hải,toan_bo,109,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Tân Hải,phường Tân Hải,toan_bo,109,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Phước Hòa,phường Tân Phước,toan_bo,110,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Tân Phước,phường Tân Phước,toan_bo,110,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Phú Mỹ,phường Phú Mỹ,toan_bo,111,van_ban
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Mỹ Xuân,phường Phú Mỹ,toan_bo,111,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,phường Hắc Dịch,phường Tân Thành,toan_bo,112,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,xã Sông Xoài,phường Tân Thành,toan_bo,112,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Vĩnh Lộc A,xã Vĩnh Lộc,toan_bo,113,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Phạm Văn Hai,xã Vĩnh Lộc,mot_phan,113,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Vĩnh Lộc B,xã Tân Vĩnh Lộc,toan_bo,114,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Phạm Văn Hai,xã Tân Vĩnh Lộc,phan_con_lai,114,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Tân Tạo,xã Tân Vĩnh Lộc,phan_con_lai,114,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Lê Minh Xuân,xã Bình Lợi,toan_bo,115,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Bình Lợi,xã Bình Lợi,toan_bo,115,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,thị trấn Tân Túc,xã Tân Nhựt,toan_bo,116,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Tân Nhựt,xã Tân Nhựt,toan_bo,116,cuc_thong_ke
+TP Hồ Chí Minh,quận Bình Tân,phường Tân Tạo A,xã Tân Nhựt,phan_con_lai,116,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Tân Kiên,xã Tân Nhựt,phan_con_lai,116,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,Phường 16,xã Tân Nhựt,phan_con_lai,116,van_ban
+TP Hồ Chí Minh,huyện Bình Chánh,xã Tân Quý Tây,xã Bình Chánh,toan_bo,117,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Bình Chánh,xã Bình Chánh,toan_bo,117,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã An Phú Tây,xã Bình Chánh,phan_con_lai,117,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Đa Phước,xã Hưng Long,toan_bo,118,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Qui Đức,xã Hưng Long,toan_bo,118,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Hưng Long,xã Hưng Long,toan_bo,118,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Phong Phú,xã Bình Hưng,toan_bo,119,cuc_thong_ke
+TP Hồ Chí Minh,huyện Bình Chánh,xã Bình Hưng,xã Bình Hưng,toan_bo,119,cuc_thong_ke
+TP Hồ Chí Minh,Quận 8,Phường 7,xã Bình Hưng,phan_con_lai,119,van_ban
+TP Hồ Chí Minh,huyện Cần Giờ,xã Tam Thôn Hiệp,xã Bình Khánh,toan_bo,120,cuc_thong_ke
+TP Hồ Chí Minh,huyện Cần Giờ,xã Bình Khánh,xã Bình Khánh,toan_bo,120,cuc_thong_ke
+TP Hồ Chí Minh,huyện Cần Giờ,xã An Thới Đông,xã Bình Khánh,mot_phan,120,cuc_thong_ke
+TP Hồ Chí Minh,huyện Cần Giờ,xã Lý Nhơn,xã An Thới Đông,toan_bo,121,cuc_thong_ke
+TP Hồ Chí Minh,huyện Cần Giờ,xã An Thới Đông,xã An Thới Đông,phan_con_lai,121,cuc_thong_ke
+TP Hồ Chí Minh,huyện Cần Giờ,xã Long Hòa,xã Cần Giờ,toan_bo,122,van_ban
+TP Hồ Chí Minh,huyện Cần Giờ,thị trấn Cần Thạnh,xã Cần Giờ,toan_bo,122,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Tân Phú Trung,xã Củ Chi,toan_bo,123,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Tân Thông Hội,xã Củ Chi,toan_bo,123,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Phước Vĩnh An,xã Củ Chi,toan_bo,123,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,thị trấn Củ Chi,xã Tân An Hội,toan_bo,124,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Phước Hiệp,xã Tân An Hội,toan_bo,124,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Tân An Hội,xã Tân An Hội,toan_bo,124,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Trung Lập Thượng,xã Thái Mỹ,toan_bo,125,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Phước Thạnh,xã Thái Mỹ,toan_bo,125,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Thái Mỹ,xã Thái Mỹ,toan_bo,125,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Phú Mỹ Hưng,xã An Nhơn Tây,toan_bo,126,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã An Phú,xã An Nhơn Tây,toan_bo,126,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã An Nhơn Tây,xã An Nhơn Tây,toan_bo,126,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Phạm Văn Cội,xã Nhuận Đức,toan_bo,127,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Trung Lập Hạ,xã Nhuận Đức,toan_bo,127,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Nhuận Đức,xã Nhuận Đức,toan_bo,127,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Tân Thạnh Tây,xã Phú Hòa Đông,toan_bo,128,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Tân Thạnh Đông,xã Phú Hòa Đông,toan_bo,128,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Phú Hòa Đông,xã Phú Hòa Đông,toan_bo,128,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Bình Mỹ,xã Bình Mỹ,toan_bo,129,van_ban
+TP Hồ Chí Minh,huyện Củ Chi,xã Hòa Phú,xã Bình Mỹ,toan_bo,129,cuc_thong_ke
+TP Hồ Chí Minh,huyện Củ Chi,xã Trung An,xã Bình Mỹ,toan_bo,129,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Thới Tam Thôn,xã Đông Thạnh,toan_bo,130,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Nhị Bình,xã Đông Thạnh,toan_bo,130,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Đông Thạnh,xã Đông Thạnh,toan_bo,130,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Tân Hiệp,xã Hóc Môn,toan_bo,131,van_ban
+TP Hồ Chí Minh,huyện Hóc Môn,xã Tân Xuân,xã Hóc Môn,toan_bo,131,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,thị trấn Hóc Môn,xã Hóc Môn,toan_bo,131,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Tân Thới Nhì,xã Xuân Thới Sơn,toan_bo,132,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Xuân Thới Đông,xã Xuân Thới Sơn,toan_bo,132,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Xuân Thới Sơn,xã Xuân Thới Sơn,toan_bo,132,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Xuân Thới Thượng,xã Bà Điểm,toan_bo,133,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Trung Chánh,xã Bà Điểm,toan_bo,133,cuc_thong_ke
+TP Hồ Chí Minh,huyện Hóc Môn,xã Bà Điểm,xã Bà Điểm,toan_bo,133,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,thị trấn Nhà Bè,xã Nhà Bè,toan_bo,134,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,xã Phú Xuân,xã Nhà Bè,toan_bo,134,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,xã Phước Kiển,xã Nhà Bè,toan_bo,134,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,xã Phước Lộc,xã Nhà Bè,toan_bo,134,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,xã Nhơn Đức,xã Hiệp Phước,toan_bo,135,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,xã Long Thới,xã Hiệp Phước,toan_bo,135,cuc_thong_ke
+TP Hồ Chí Minh,huyện Nhà Bè,xã Hiệp Phước,xã Hiệp Phước,toan_bo,135,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Lạc An,xã Thường Tân,toan_bo,136,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Hiếu Liêm,xã Thường Tân,toan_bo,136,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Thường Tân,xã Thường Tân,toan_bo,136,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Tân Mỹ,xã Thường Tân,phan_con_lai,136,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,thị trấn Tân Thành,xã Bắc Tân Uyên,toan_bo,137,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Đất Cuốc,xã Bắc Tân Uyên,toan_bo,137,cuc_thong_ke
+Bình Dương,huyện Bắc Tân Uyên,xã Tân Định,xã Bắc Tân Uyên,toan_bo,137,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,thị trấn Phước Vĩnh,xã Phú Giáo,toan_bo,138,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã An Bình,xã Phú Giáo,toan_bo,138,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Tam Lập,xã Phú Giáo,mot_phan,138,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Vĩnh Hòa,xã Phước Hòa,toan_bo,139,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Phước Hòa,xã Phước Hòa,toan_bo,139,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Tam Lập,xã Phước Hòa,phan_con_lai,139,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Tân Hiệp,xã Phước Thành,toan_bo,140,van_ban
+Bình Dương,huyện Phú Giáo,xã An Thái,xã Phước Thành,toan_bo,140,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Phước Sang,xã Phước Thành,toan_bo,140,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã An Linh,xã An Long,toan_bo,141,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã Tân Long,xã An Long,toan_bo,141,cuc_thong_ke
+Bình Dương,huyện Phú Giáo,xã An Long,xã An Long,toan_bo,141,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,xã Trừ Văn Thố,xã Trừ Văn Thố,toan_bo,142,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,xã Cây Trường II,xã Trừ Văn Thố,toan_bo,142,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,thị trấn Lai Uyên,xã Trừ Văn Thố,mot_phan,142,cuc_thong_ke
+Bình Dương,huyện Bàu Bàng,thị trấn Lai Uyên,xã Bàu Bàng,phan_con_lai,143,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Long Tân,xã Long Hòa,toan_bo,144,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Long Hòa,xã Long Hòa,toan_bo,144,van_ban
+Bình Dương,huyện Dầu Tiếng,xã Minh Tân,xã Long Hòa,mot_phan,144,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Minh Thạnh,xã Long Hòa,mot_phan,144,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Thanh An,xã Thanh An,toan_bo,145,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Định Hiệp,xã Thanh An,mot_phan,145,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Thanh Tuyền,xã Thanh An,phan_con_lai,145,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã An Lập,xã Thanh An,phan_con_lai,145,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,thị trấn Dầu Tiếng,xã Dầu Tiếng,toan_bo,146,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Định An,xã Dầu Tiếng,toan_bo,146,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Định Thành,xã Dầu Tiếng,toan_bo,146,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Định Hiệp,xã Dầu Tiếng,phan_con_lai,146,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Minh Hòa,xã Minh Thạnh,toan_bo,147,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Minh Tân,xã Minh Thạnh,phan_con_lai,147,cuc_thong_ke
+Bình Dương,huyện Dầu Tiếng,xã Minh Thạnh,xã Minh Thạnh,phan_con_lai,147,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,xã Tóc Tiên,xã Châu Pha,toan_bo,148,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Phú Mỹ,xã Châu Pha,xã Châu Pha,toan_bo,148,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,thị trấn Long Hải,xã Long Hải,toan_bo,149,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Phước Tỉnh,xã Long Hải,toan_bo,149,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Phước Hưng,xã Long Hải,toan_bo,149,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,thị trấn Long Điền,xã Long Điền,toan_bo,150,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Tam An,xã Long Điền,toan_bo,150,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,thị trấn Phước Hải,xã Phước Hải,toan_bo,151,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Phước Hội,xã Phước Hải,toan_bo,151,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,thị trấn Đất Đỏ,xã Đất Đỏ,toan_bo,152,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Long Tân,xã Đất Đỏ,toan_bo,152,van_ban
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Láng Dài,xã Đất Đỏ,toan_bo,152,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Long Đất,xã Phước Long Thọ,xã Đất Đỏ,toan_bo,152,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Đá Bạc,xã Nghĩa Thành,toan_bo,153,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Nghĩa Thành,xã Nghĩa Thành,toan_bo,153,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,thị trấn Ngãi Giao,xã Ngãi Giao,toan_bo,154,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Bình Ba,xã Ngãi Giao,toan_bo,154,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Suối Nghệ,xã Ngãi Giao,toan_bo,154,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,thị trấn Kim Long,xã Kim Long,toan_bo,155,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Bàu Chinh,xã Kim Long,toan_bo,155,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Láng Lớn,xã Kim Long,toan_bo,155,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Cù Bị,xã Châu Đức,toan_bo,156,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Xà Bang,xã Châu Đức,toan_bo,156,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Bình Trung,xã Bình Giã,toan_bo,157,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Quảng Thành,xã Bình Giã,toan_bo,157,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Bình Giã,xã Bình Giã,toan_bo,157,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Suối Rao,xã Xuân Sơn,toan_bo,158,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Sơn Bình,xã Xuân Sơn,toan_bo,158,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Châu Đức,xã Xuân Sơn,xã Xuân Sơn,toan_bo,158,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,thị trấn Phước Bửu,xã Hồ Tràm,toan_bo,159,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Phước Tân,xã Hồ Tràm,toan_bo,159,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Phước Thuận,xã Hồ Tràm,toan_bo,159,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Bông Trang,xã Xuyên Mộc,toan_bo,160,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Bưng Riềng,xã Xuyên Mộc,toan_bo,160,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Xuyên Mộc,xã Xuyên Mộc,toan_bo,160,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Hòa Hưng,xã Hòa Hội,toan_bo,161,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Hòa Bình,xã Hòa Hội,toan_bo,161,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Hòa Hội,xã Hòa Hội,toan_bo,161,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Tân Lâm,xã Bàu Lâm,toan_bo,162,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Bàu Lâm,xã Bàu Lâm,toan_bo,162,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Côn Đảo,,đặc khu Côn Đảo,toan_bo,163,van_ban
+Bình Dương,thành phố Bến Cát,phường Thới Hòa,phường Thới Hòa,khong_sap_xep,164,cuc_thong_ke
+Bà Rịa - Vũng Tàu,thành phố Vũng Tàu,xã Long Sơn,xã Long Sơn,khong_sap_xep,164,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Hòa Hiệp,xã Hòa Hiệp,khong_sap_xep,164,cuc_thong_ke
+Bà Rịa - Vũng Tàu,huyện Xuyên Mộc,xã Bình Châu,xã Bình Châu,khong_sap_xep,164,cuc_thong_ke
+TP Hồ Chí Minh,huyện Cần Giờ,xã Thạnh An,xã Thạnh An,khong_sap_xep,164,cuc_thong_ke

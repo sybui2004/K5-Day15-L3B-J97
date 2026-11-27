@@ -6,10 +6,13 @@
 
 ## 1. Cách đếm — viết TRƯỚC khi chạy
 
-- Data dùng: __ (file nào, từ ngày nào đến ngày nào)
-- Đếm gì: __ · trên tập nào: __ · lọc gì: __
-- **Mẫu số là gì:** __ *(lỗi hay gặp nhất là mẫu số sai)*
-- Script / công thức: __
+> Viết lúc 27/11, **trước khi đọc review đầu tiên**. Đây là nguồn kiểm chéo cho phỏng vấn, không phải nguồn chính.
+
+- Data dùng: review trên Google Play của app **GHN** (Giao Hàng Nhanh); thêm app quản lý tin nhắn chủ shop đang dùng nếu phỏng vấn nêu tên. **100 review mới nhất** mỗi app tính đến ngày đếm, sắp theo "Mới nhất", **mọi mức sao**.
+- Đếm gì: số review kể chuyện **sai hoặc thiếu thông tin nhận hàng** (sai địa chỉ, sai phường, sai sđt, giao nhầm người, hoàn hàng vì không liên lạc được). Đếm riêng số review **nhắc địa chỉ sau sáp nhập / địa giới mới**.
+- Nhãn (mỗi review đúng một nhãn, gắn theo chuyện được kể chứ không theo số sao): `sai_thieu_thong_tin_nhan_hang` · `tra_loi_cham` · `khac` (giá, app lỗi, shipper thái độ…). Review vừa kể sai thông tin vừa kể chuyện khác thì gắn `sai_thieu_thong_tin_nhan_hang`.
+- **Mẫu số là gì:** 100 review mới nhất của mỗi app (không lọc trước theo từ khoá, để không thổi phồng tỉ lệ). Review trống hoặc chỉ có emoji vẫn tính vào mẫu số, gắn `khac`.
+- Cách làm lại được: ghi ngày đếm, chép mã hoặc 1 câu đầu của mỗi review vào `evidence/review-ghn.csv` (cột `stt, so_sao, nhan, cau_dau`, không ghi tên người viết), đếm bằng `COUNTIF` theo cột `nhan`. Hai người gắn nhãn độc lập 20 review đầu, lệch >4/20 thì viết lại định nghĩa nhãn trước khi gắn tiếp.
 
 ## 2. Đọc trước, đếm sau
 
