@@ -44,11 +44,23 @@ LOAI_TEP = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-
             ".js": "text/javascript; charset=utf-8", ".woff2": "font/woff2"}
 PERSONAS = os.path.join(GOC, "cost", "personas.yaml")
 MOI_TOI_DA_LUOT, MOI_TOI_DA_KY_TU = 30, 2000  # hội thoại gõ trên màn hình
+# Giới hạn byte thân POST. /api/moi phải chứa được đầu vào hợp lệ lớn nhất: mỗi ký tự (code point) tối đa
+# 12 byte JSON (cặp surrogate \uXXXX\uXXXX), mỗi lượt thêm khung {"vai":..,"tin":..}; ~0,7 MB.
+GIOI_HAN_POST = 65536
+GIOI_HAN_POST_MOI = MOI_TOI_DA_LUOT * (MOI_TOI_DA_KY_TU * 12 + 256) + 4096
 HOST, PORT = "127.0.0.1", 8000
 SUA_DUOC = ["ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "phuong_xa", "san_pham", "so_luong"]
 BAT_BUOC_CHU = ["ten_nguoi_nhan", "dia_chi_chi_tiet", "san_pham"]
 TRANG_THAI = {"TAO_DON_NHAP": "cho_duyet", "HOI_LAI": "cho_khach", "TU_CHOI": "tu_choi"}
 DA_XONG = ("da_duyet", "da_huy")
+
+
+class LoiChayAI(Exception):
+    """`ham` trong _co_trace ném lỗi. Giữ trace đo được tới lúc lỗi (token, bước) để vẫn ghi nhật ký."""
+
+    def __init__(self, goc, trace):
+        super().__init__("%s: %s" % (type(goc).__name__, goc))
+        self.goc, self.trace = goc, trace
 
 
 class LoiThaoTac(Exception):
@@ -154,21 +166,29 @@ def _buoc(e):
 def _co_trace(nhan, ham, *args, nguon="hop_thu", bang_gia=()):
     """Chạy `ham` trong một case trace (như app.py), in tóm tắt ra màn hình.
     Trả (kết quả, trace) với trace = {nguon, buoc, model_calls, tool_calls, tokens_in, tokens_out, model,
-    thoi_gian_s, chi_phi_usd (None nếu chưa có giá), loi}."""
+    thoi_gian_s, chi_phi_usd (None nếu chưa có giá), loi}. `ham` ném lỗi thì ném LoiChayAI kèm trace."""
     tracing.begin(nhan)
     t0 = time.perf_counter()
+    loi_ham = None
     try:
         kq = ham(*args)
+    except Exception as e:  # model lỗi, mất mạng…: vẫn giữ trace đo được
+        loi_ham, kq = e, None
     finally:
         s, su_kien = tracing.end()
-        print("   [%s] model %d lần · công cụ %d lần · token vào %d / ra %d%s"
-              % (nhan, s["model_calls"], s["tool_calls"], s["tokens_in"], s["tokens_out"],
-                 " · lỗi: %s" % "; ".join(s["errors"]) if s["errors"] else ""))
+    loi = list(s["errors"])
+    if loi_ham is not None and not loi:
+        loi.append("%s: %s" % (type(loi_ham).__name__, loi_ham))
+    print("   [%s] model %d lần · công cụ %d lần · token vào %d / ra %d%s"
+          % (nhan, s["model_calls"], s["tool_calls"], s["tokens_in"], s["tokens_out"],
+             " · lỗi: %s" % "; ".join(loi) if loi else ""))
     model = s["models"][0] if s["models"] else ""
     trace = {"nguon": nguon, "buoc": [_buoc(e) for e in su_kien], "model_calls": s["model_calls"],
              "tool_calls": s["tool_calls"], "tokens_in": s["tokens_in"], "tokens_out": s["tokens_out"],
              "model": model, "thoi_gian_s": round(time.perf_counter() - t0, 3),
-             "chi_phi_usd": chi_phi(model, s["tokens_in"], s["tokens_out"], list(bang_gia)), "loi": s["errors"]}
+             "chi_phi_usd": chi_phi(model, s["tokens_in"], s["tokens_out"], list(bang_gia)), "loi": loi}
+    if loi_ham is not None:
+        raise LoiChayAI(loi_ham, trace) from loi_ham
     return kq, trace
 
 
@@ -214,9 +234,9 @@ class ManHinh:
     def _chay(self, ma, nguon, ham, *args):
         return _co_trace("web:" + str(ma), ham, *args, nguon=nguon, bang_gia=self._bang_gia)
 
-    def _luu_lan_chay(self, p, trace):
-        """Gắn trace vào phiên, cộng tổng phiên demo, ghi kho. Kho lỗi chỉ ghi lại lỗi, không chặn demo."""
-        p["trace"] = trace
+    def _luu_lan_chay(self, ma, quyet_dinh, trace):
+        """Cộng tổng phiên demo và ghi kho ngay khi một lần chạy AI kết thúc (cả lần lỗi: quyet_dinh None).
+        Kho lỗi chỉ ghi lại lỗi, không chặn demo. Gọi khi đang giữ self._khoa (hoặc chưa mở server)."""
         t = self._tong
         t["lan_chay"] += 1
         t["model_calls"] += trace["model_calls"]
@@ -227,12 +247,20 @@ class ManHinh:
         else:
             t["chi_phi_usd"] += trace["chi_phi_usd"]
         try:
-            self.kho.ghi_lan_chay({"ma_hoi_thoai": p["ma_hoi_thoai"], "nguon": trace["nguon"],
-                                   "quyet_dinh": p["kq"]["quyet_dinh"], "trace": trace,
-                                   "luc": time.strftime("%Y-%m-%dT%H:%M:%S")})
+            self.kho.ghi_lan_chay({"ma_hoi_thoai": ma, "nguon": trace["nguon"], "quyet_dinh": quyet_dinh,
+                                   "trace": trace, "luc": time.strftime("%Y-%m-%dT%H:%M:%S")})
         except OSError as e:
             t["loi_kho"] = str(e)
-            print("   [kho] chưa ghi được lần chạy %s: %s" % (p["ma_hoi_thoai"], e))
+            print("   [kho] chưa ghi được lần chạy %s: %s" % (ma, e))
+
+    def _chay_va_luu(self, ma, nguon, ham, *args):
+        """Chạy AI rồi ghi lần chạy ngay. Lỗi thì ghi trace lỗi rồi ném LoiChayAI (trạng thái hội thoại chưa đổi)."""
+        try:
+            kq, trace = self._chay(ma, nguon, ham, *args)
+        except LoiChayAI as e:
+            self._luu_lan_chay(ma, None, e.trace)
+            raise
+        return kq, trace
 
     def _phien_moi(self, ma, h, kq, nguon):
         kq = {k: v for k, v in kq.items() if k != "ma_hoi_thoai"}
@@ -242,19 +270,20 @@ class ManHinh:
                 "nguon": nguon, "trace": None}
 
     def tai(self, hoi_thoai: list):
+        """Chạy AI cho cả hộp thư. Nhật ký ghi theo đúng thứ tự chạy; chỉ danh sách hiển thị được sắp lại."""
         ra = []
-        for h in hoi_thoai:
-            [kq], trace = self._chay(h.get("ma_hoi_thoai"), "hop_thu", xu_ly_hop_thu, [h])
-            ra.append((h, kq, trace))
-        ra.sort(key=lambda x: THU_TU.get(x[1]["quyet_dinh"], THU_TU["HOI_LAI"]))
         with self._khoa:
+            for h in hoi_thoai:
+                [kq], trace = self._chay_va_luu(h.get("ma_hoi_thoai"), "hop_thu", xu_ly_hop_thu, [h])
+                self._luu_lan_chay(kq["ma_hoi_thoai"], kq["quyet_dinh"], trace)  # ghi ngay khi chạy xong
+                ra.append((h, kq, trace))
+            ra.sort(key=lambda x: THU_TU.get(x[1]["quyet_dinh"], THU_TU["HOI_LAI"]))  # chỉ thứ tự hiển thị
             self._phien = {}
             for h, kq, trace in ra:
                 ma = str(kq["ma_hoi_thoai"])
                 while ma in self._phien:  # mã trùng trong file: giữ cả hai
                     ma += "*"
-                self._phien[ma] = self._phien_moi(ma, h, kq, "hop_thu")
-                self._luu_lan_chay(self._phien[ma], trace)
+                self._phien[ma] = dict(self._phien_moi(ma, h, kq, "hop_thu"), trace=trace)
 
     def tao_moi(self, luot, ma_khach=None):
         """Hội thoại gõ trên màn hình (vd câu thử lạ giám khảo đưa lúc demo): kiểm, chạy AI, đưa lên đầu hộp thư."""
@@ -268,13 +297,14 @@ class ManHinh:
                 so += 1
             ma = "HT-M%02d" % so
             try:
-                kq, trace = self._chay(ma, "moi", xu_ly, text, ma)
-            except Exception as e:  # model lỗi, mất mạng…
-                raise LoiThaoTac("chưa chạy được AI cho hội thoại mới (%s: %s), thử lại" % (type(e).__name__, e))
+                kq, trace = self._chay_va_luu(ma, "moi", xu_ly, text, ma)
+            except LoiChayAI as e:  # model lỗi, mất mạng…: trace lỗi đã ghi, không thêm hội thoại
+                raise LoiThaoTac("chưa chạy được AI cho hội thoại mới (%s), thử lại" % e)
+            self._luu_lan_chay(ma, kq["quyet_dinh"], trace)
             self._so_moi = so
             p = self._phien_moi(ma, {"ma_khach": (ma_khach or "").strip() or None, "text": text}, kq, "moi")
+            p["trace"] = trace
             self._phien = {ma: p, **self._phien}
-            self._luu_lan_chay(p, trace)
             return copy.deepcopy(p)
 
     def tong(self):
@@ -352,13 +382,13 @@ class ManHinh:
             except ValueError as e:
                 raise LoiThaoTac(str(e))
             try:
-                kq, trace = self._chay(ma, "tra_loi", xu_ly, text, ma)
-            except Exception as e:  # model lỗi, mất mạng…
-                raise LoiThaoTac("chưa xử lý được câu trả lời (%s: %s), thử lại sau" % (type(e).__name__, e))
+                kq, trace = self._chay_va_luu(ma, "tra_loi", xu_ly, text, ma)
+            except LoiChayAI as e:  # model lỗi, mất mạng…: trace lỗi đã ghi, hội thoại giữ nguyên để thử lại
+                raise LoiThaoTac("chưa xử lý được câu trả lời (%s), thử lại sau" % e)
+            self._luu_lan_chay(ma, kq["quyet_dinh"], trace)
             p.update(text=text, kq=kq, trang_thai=TRANG_THAI.get(kq["quyet_dinh"], "cho_khach"),
                      so_luot_hoi_lai=p["so_luot_hoi_lai"] + (1 if hoi_lai else 0), ma_don=kq.get("ma_don"),
-                     ma_van_don=kq.get("ma_van_don"))
-            self._luu_lan_chay(p, trace)
+                     ma_van_don=kq.get("ma_van_don"), trace=trace)
             return copy.deepcopy(p)
 
     def _ghi(self, p, ket_qua, da_sua):
@@ -446,7 +476,7 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
             return self._gui(403, {"loi": "yêu cầu không hợp lệ"})
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            if n > 65536:
+            if n < 0 or n > (GIOI_HAN_POST_MOI if self.path == "/api/moi" else GIOI_HAN_POST):
                 return self._gui(413, {"loi": "dữ liệu quá lớn"})
             body = json.loads(self.rfile.read(n) or b"{}")
             if not isinstance(body, dict):

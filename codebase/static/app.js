@@ -377,6 +377,7 @@ async function guiMoi(e) {
     const p = await goi("/api/moi", {ma_khach: maKhach || null, luot});
     clearInterval(dem); dangTaoMoi = false;
     $("hop-moi").close(); $("form-moi").reset();
+    chuyenXem("hop-thu");  // tạo từ tab Nhật ký thì đưa về hộp thư để thấy kết quả
     loc = "tat_ca"; chon = p.ma_hoi_thoai; capNhat(p); chonHoiThoai(p.ma_hoi_thoai);
   } catch (err) {
     clearInterval(dem); dangTaoMoi = false;
@@ -405,7 +406,8 @@ async function taiNhatKy() {
     bang("nk-lan-chay", [["Lúc"], ["Hội thoại"], ["Nguồn"], ["Quyết định"], ["Model / công cụ", "so"], ["Token vào → ra", "so"], ["Thời gian", "so"], ["Chi phí", "so"]],
       d.lan_chay.map(r => { const t = r.trace || {}; return el("tr", {}, el("td", {class: "mono", text: (r.luc || "").replace("T", " ")}),
         el("td", {class: "mono", text: r.ma_hoi_thoai}), el("td", {text: NGUON[r.nguon] || r.nguon}),
-        el("td", {}, r.quyet_dinh ? el("span", {class: "chip " + r.quyet_dinh, text: QUYET_DINH[r.quyet_dinh] || r.quyet_dinh}) : ""),
+        el("td", {}, r.quyet_dinh ? el("span", {class: "chip " + r.quyet_dinh, text: QUYET_DINH[r.quyet_dinh] || r.quyet_dinh})
+          : (t.loi || []).length ? el("span", {class: "chip TU_CHOI", title: t.loi.join("; "), text: "AI lỗi"}) : ""),
         el("td", {class: "so", text: (t.model_calls || 0) + " / " + (t.tool_calls || 0)}),
         el("td", {class: "so", text: so(t.tokens_in) + " → " + so(t.tokens_out)}), el("td", {class: "so", text: giay(t.thoi_gian_s)}),
         t.chi_phi_usd != null ? el("td", {class: "so", text: usd(t.chi_phi_usd)}) : el("td", {class: "so chu", text: "chưa có giá"})); }), "Chưa có lần chạy nào.");
