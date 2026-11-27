@@ -1,35 +1,10 @@
-> Đây là khung repo nộp bài. Điền mọi chỗ `____`, giữ nguyên tên các mục. **Mục 0 xoá đi sau khi tạo repo xong.**
 > Giờ, mốc, luật, rubric: xem `README.md`, `02-guide.md`, `03-rubric.md` trong repo đề (bộ đề BTC phát).
 
-# [Tên nhóm] — [Tên lát cắt]
+# J97 — Lên đơn từ tin nhắn chốt mua, quy địa chỉ cũ sang phường/xã mới
 
 **Thành viên, lớp, track:** xem [TEAMS.md](TEAMS.md). **Điền TEAMS.md đúng format**: khi chấm và đánh giá, BTC quét file này để ghép điểm cho từng người.
 
-*Lát cắt = phần nhỏ nhất làm xong được trong hackathon: một người dùng · một việc · một quyết định AI · một kết quả.*
-
----
-
-## 0. Tạo repo nhóm từ khung này *(guide bước 1.0 — xoá mục này khi xong)*
-
-**Hai luật:** repo **mới, công khai (Public)** · tên `K5-Day15-<lớp>-<tên nhóm>`, vd `K5-Day15-L3A-StudyPulse` (tên nhóm viết liền, không dấu). Chép **nội dung bên trong** `starter-repo/` — `README.md`, `run.py` phải nằm ngay ở trang đầu repo.
-
-**(a) Không cần terminal — làm trên web GitHub**
-1. **New repository** → tên theo mẫu → **Public** → không tick thêm gì → tạo.
-2. Trên máy mở thư mục `starter-repo/`, **bật hiện file ẩn** (Mac Finder: `Cmd + Shift + .` · Windows: View → Show → Hidden items) để thấy `.gitignore`, `.env.example`.
-3. Trên repo vừa tạo: **Add file → Upload files** → **kéo thả** tất cả file và thư mục bên trong `starter-repo/` → **Commit changes**. Kéo thả mới giữ được thư mục con; lỗi vì nhiều file quá thì tải từng thư mục.
-4. Kiểm: có `.gitignore` chưa (hay thiếu nhất). Thiếu thì **Add file → Create new file**, tên `.gitignore`, dán nội dung từ máy.
-5. Từ giờ sửa file ngay trên web (biểu tượng bút chì → Commit). Phần code vẫn cần **một** người chạy được trên máy: trước mỗi lượt chạy tải **Code → Download ZIP** về thư mục mới (mang `.env` sang), chạy xong chỉ upload file kết quả và file vừa sửa; trong lúc đang chạy không ai sửa `eval/benchmark.csv` trên web.
-
-**(b) Dùng git**
-```bash
-git clone https://github.com/<tai-khoan>/K5-Day15-L3A-TenNhom.git
-cd K5-Day15-L3A-TenNhom
-cp -R ../duong-dan-toi/starter-repo/. .      # Windows PowerShell: Copy-Item -Recurse -Force ..\duong-dan-toi\starter-repo\* .
-git status                                   # không được có .env, data-btc/
-git add -A && git commit -m "Khung repo từ starter-repo" && git push
-```
-
-**Xong khi:** mở link repo bằng **cửa sổ ẩn danh** thấy được file (link nộp CP1) · đã mời thành viên (Settings → Collaborators) · đã điền `TEAMS.md` và `python run.py check` không báo gì ở phần "Kiểm TEAMS.md".
+**Lát cắt:** một chủ shop bán lẻ · khách đã đồng ý mua qua tin nhắn Facebook hoặc website · AI xác định thông tin nhận hàng, kể cả quy địa chỉ cũ sang phường/xã mới theo Nghị quyết 1685/NQ-UBTVQH15, đã đủ và chắc để tạo đơn nháp, hay phải hỏi lại khách · chủ shop nhận đơn nháp chờ duyệt. Chi tiết: [spec.md](spec.md) §4.
 
 ---
 
@@ -44,6 +19,20 @@ git add -A && git commit -m "Khung repo từ starter-repo" && git push
 | Persona, số người dùng thật, giá model (`cost/personas.yaml`) | Sinh ~50 phiên, chạy thật qua bản chạy thử, tính chi phí / phiên, / task thành công, / tháng 3 kịch bản (`run.py simulate`) |
 
 *Ví dụ track A (ví dụ cỡ, không phải lời giải):* nhóm viết công cụ `search_lesson` tra bài pre-class đã đánh mã đoạn, luồng "tra đoạn → model trả lời kèm mã đoạn, không có thì nói không có", metric "mọi khẳng định có mã đoạn đúng", persona "ôn dồn trước kiểm tra". Khung chạy 25 câu thử ra `run-1.csv`, nhóm chấm `pass`, `score` in % đạt; `simulate` chạy 50 phiên ra chi phí / task thành công cho hai model.
+
+## Chạy bản chạy thử của nhóm J97
+
+```bash
+python -m pip install -r requirements.txt   # SDK anthropic, chỉ cần khi gọi model thật
+cp .env.example .env                        # Windows: copy .env.example .env
+#   điền API_KEY; nhóm chạy với MODEL_PROVIDER=anthropic, MODEL_NAME=claude-sonnet-5-5, MODEL_EFFORT=low
+python run.py                               # mở màn hình duyệt ở http://127.0.0.1:8000
+```
+
+- **Màn hình duyệt** (`codebase/web.py`): hộp thư 10 hội thoại mẫu (`data/hop-thu-mau.jsonl`). Bấm từng hội thoại để xem đơn nháp, sửa trường, Duyệt hoặc Huỷ; hội thoại đang chờ khách thì dán câu trả lời của khách để chạy lại (luồng B). Chỉ mở trên máy này (`127.0.0.1`).
+- **Bản dòng lệnh dự phòng:** `python codebase/app.py`, gõ một hội thoại, nhận QUYẾT ĐỊNH (TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI).
+- **Chưa có `.env`:** chạy chế độ giả (model giả, không cần `pip install`). Luồng vẫn đi hết, nhưng model giả không trả JSON nên mọi hội thoại ra HỎI LẠI.
+- Chạy bộ câu thử, chấm, mô phỏng chi phí: xem mục "Lệnh" bên dưới.
 
 ## Chạy trong 3 phút
 
@@ -99,6 +88,8 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 | `codebase/agent.py` | `answer(text)` — luồng chính, đúng hình dạng ở `spec.md` §4. Khung có sẵn một workflow 2 bước *ví dụ* | 3.2 |
 | `codebase/tools.py` | Công cụ của bài toán, mỗi công cụ một hàm có `@tool` | 2.2, 3.2 |
 | `codebase/ai.py` | `call_model(system, user)` — chỗ duy nhất gọi model. Chưa điền `.env` thì chạy **chế độ giả** | 3.3 |
+| `codebase/inbox.py` | *(J97)* luồng A: chạy cả hộp thư, xếp TẠO ĐƠN NHÁP → HỎI LẠI → TỪ CHỐI | 3.2 |
+| `codebase/web.py` | *(J97)* luồng D + B: màn hình duyệt, sửa trường thì code kiểm lại, hỏi lại nhiều lượt | 3.2 |
 
 - **Trước CP2:** để chế độ giả, công cụ trả dữ liệu giả — `python run.py` đi hết luồng là đủ.
 - **Trước CP3:** nối model thật theo [docs/connect-model.md](docs/connect-model.md), `eval --try` thấy token > 0 rồi mới `eval`.
@@ -108,8 +99,13 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 | Thành phần | Thật / Giả | Ghi chú |
 |---|---|---|
-| Lời gọi AI ở quyết định trung tâm | **Thật** (bắt buộc từ CP3) | Model: ____ |
-|  |  |  |
+| Lời gọi AI ở quyết định trung tâm | **Thật** (bắt buộc từ CP3) | Model: `claude-sonnet-5-5`, `MODEL_EFFORT=low`, qua SDK `anthropic` (`codebase/ai.py`). Mỗi hội thoại gọi model 1 lần: đọc hội thoại, trả JSON. Chưa có `.env` thì chạy chế độ giả |
+| Kiểm sđt, quy đổi và tra phường/xã | **Thật** | Code, không dùng AI: `validate_phone`, `convert_old_address`, `lookup_address` (`codebase/tools.py`) trên bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15 (`data/chuyen-doi-dia-gioi.csv`) |
+| Lịch sử khách cũ (luồng C) | Thật, dữ liệu dựng | `get_customer_history` đọc `data/lich-su-khach.csv`: 6 khách tự dựng, không phải khách thật |
+| Hộp thư, màn hình duyệt | Thật, dữ liệu dựng | `data/hop-thu-mau.jsonl`: 10 hội thoại tự dựng. Duyệt chỉ đổi trạng thái đơn trên máy, không lưu vào hệ thống bán hàng nào |
+| Tạo đơn, vận đơn GHN | **Giả** | `create_draft_order` chỉ tạo đơn nháp; mã vận đơn `GHN-NHAP-…` là mã giả, **không gọi API GHN**, không bàn giao đơn thật |
+| Gửi tin cho khách | **Giả** | Tin hỏi lại chỉ hiện để chủ shop bấm Chép, **không gửi Facebook / website** |
+| Bộ câu thử | Thật + dựng | 30 câu: 3 từ chat thật đã che (P2–P4), 7 trích nguồn công khai (3 địa chỉ ví dụ trên since98.vn, 4 review app GHN), 20 tự viết (`data/DATA_CARD.md`) |
 
 ## Dùng AI vào việc gì
 
