@@ -73,7 +73,9 @@ class TestQuyDoi(unittest.TestCase):
 
 class TestDiaChiCu(unittest.TestCase):
     def test_bo_cau_thu(self):
-        cu = {"B02", "B04", "B07", "B09", "B10", "B11", "B12", "B13"}
+        # B23 (P. Bình Thọ, TP. Thủ Đức) · B24 (P.14, Q.3) · B25 (P. 14, Q. 10) · B28 (Phường 2, thành phố Vũng Tàu):
+        # câu Y8 ghi địa chỉ kiểu cũ. B26, B27 ghi phường kiểu mới nên không có ở đây.
+        cu = {"B02", "B04", "B07", "B09", "B10", "B11", "B12", "B13", "B23", "B24", "B25", "B28"}
         with open(os.path.join(ROOT, "eval", "benchmark.csv"), encoding="utf-8") as f:
             rows = list(csv.DictReader(f))
         thay = {r["id"] for r in rows if grade.la_dia_chi_cu(r["input"])}
