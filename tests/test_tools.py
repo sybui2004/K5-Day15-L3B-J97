@@ -107,6 +107,15 @@ class TestConvertOldAddress(unittest.TestCase):
     def test_ngoai_pham_vi(self):
         self.assertEqual(convert_old_address("Hà Nội", "quận Hoàn Kiếm", "phường Hàng Bạc")["ket_qua"], "khong_thay")
 
+    def test_chu_so_khong_phai_ascii_khong_lam_dung(self):
+        # '²'.isdigit() là True nhưng int('²') lỗi: không được ném ngoại lệ, chỉ trả khong_thay
+        for phuong in ["Phường ²", "Phường ０７", "p.²"]:
+            with self.subTest(phuong=phuong):
+                kq = convert_old_address("hcm", "Quận 3", phuong)
+                self.assertEqual(kq["ket_qua"], "khong_thay")
+                self.assertTrue(kq["ly_do"])
+        self.assertEqual(convert_old_address("hcm", "Quận ³", "Phường 9")["ket_qua"], "khong_thay")
+
     def test_ca_huyen_con_dao(self):
         # khoản 163: cả huyện Côn Đảo -> đặc khu Côn Đảo; huyện không có phường/xã nên phường cũ để trống là hợp lệ
         for phuong in ["", None, "Côn Đảo"]:
@@ -176,6 +185,14 @@ class TestLookupAddress(unittest.TestCase):
         kq = lookup_address(HCM, "xa thanh an")
         self.assertFalse(kq["ok"])
         self.assertEqual(set(kq["goi_y"]), {"xã Thanh An", "xã Thạnh An"})
+
+    def test_chu_so_khong_phai_ascii_khong_lam_dung(self):
+        for phuong in ["Phường ²", "²", "p.²"]:
+            with self.subTest(phuong=phuong):
+                kq = lookup_address("hcm", phuong)
+                self.assertFalse(kq["ok"])
+                self.assertIsNone(kq["khop"])
+                self.assertTrue(kq["ly_do"])
 
     def test_ngoai_pham_vi(self):
         kq = lookup_address("Hà Nội", "phường Hoàn Kiếm")

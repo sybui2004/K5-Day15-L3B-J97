@@ -40,13 +40,15 @@ def _khoa(s):
     for a, b in _DAU_CU:
         s = s.replace(a, b)
     s = re.sub(r"\b[pq]\s*\.\s*", " ", s)
-    s = re.sub(r"\b[pq](?=\s*\d)", " ", s)
+    s = re.sub(r"\b[pq](?=\s*[0-9])", " ", s)
     tu = re.sub(r"[\W_]+", " ", s).split()
     for tt in _TIEN_TO:
         if len(tu) > len(tt) and tu[:len(tt)] == tt:
             tu = tu[len(tt):]
             break
-    tu = [str(int(t)) if t.isdigit() else t for t in tu]
+    # bỏ số 0 đầu ở token chữ số ASCII (p.07 = Phường 7). Không dùng isdigit()/int(): '²'.isdigit() là True
+    # nhưng int('²') lỗi. Token khác giữ nguyên, để tra cứu trả "không khớp" thay vì ném ngoại lệ.
+    tu = [(t.lstrip("0") or "0") if re.fullmatch(r"[0-9]+", t) else t for t in tu]
     co_dau = " ".join(tu)
     return co_dau, bo_dau(co_dau)
 
@@ -190,7 +192,7 @@ def lookup_address(tinh_thanh: str, phuong_xa: str) -> dict:
     goi_y = [u for kk in difflib.get_close_matches(k, list(theo_khoa), n=3, cutoff=0.6) for u in theo_khoa[kk]][:3]
     pham_vi = "TP Hồ Chí Minh" if tinh == HCM else "TP Hồ Chí Minh trên địa bàn %s cũ" % tinh
     ly_do = "không thấy phường/xã '%s' trong danh sách phường/xã mới của %s" % (phuong_xa, pham_vi)
-    if k.isdigit():
+    if re.fullmatch(r"[0-9]+", k):
         ly_do += " (phường số là tên cũ: cần kèm quận/huyện cũ để quy đổi)"
     return {"ok": False, "khop": None, "tinh": HCM, "goi_y": goi_y, "ly_do": ly_do}
 
