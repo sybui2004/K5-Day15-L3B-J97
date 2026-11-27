@@ -1,4 +1,4 @@
-"""Test eval/grade.py (Y7). Chạy: python -m unittest tests.test_grade -v"""
+"""Test eval/grade.py (Y7). Chạy: python -m unittest discover -s tests -p "test_grade.py" """
 import csv
 import importlib.util
 import os
@@ -124,3 +124,28 @@ class TestChamFile(unittest.TestCase):
         })
         self.assertEqual(ket, "1")
         self.assertIn("hoi_mot_lan_du_y=1", ghi)
+
+    def test_chay_lai_giu_ghi_chu_viet_tay(self):
+        output = "QUYẾT ĐỊNH: HỎI LẠI\nTin gửi khách: phường Bàn Cờ\n"
+        row = {
+            "id": "B09", "type": "kho", "input": "Phường 4, Quận 3",
+            "expected": "HỎI LẠI: phường Bàn Cờ, phường Xuân Hòa",
+            "output": output, "pass": "",
+            "ghi_chu": "hoi_mot_lan_du_y=0 thiếu phường Xuân Hòa",
+        }
+        fd, path = tempfile.mkstemp(suffix=".csv")
+        os.close(fd)
+        try:
+            for _ in range(2):
+                with open(path, "w", encoding="utf-8-sig", newline="") as f:
+                    w = csv.DictWriter(f, fieldnames=list(row))
+                    w.writeheader()
+                    w.writerow(row)
+                grade.cham_file(path)
+                with open(path, encoding="utf-8-sig", newline="") as f:
+                    row = list(csv.DictReader(f))[0]
+        finally:
+            os.remove(path)
+        self.assertEqual(row["ghi_chu"].count("hoi_mot_lan_du_y="), 1)
+        self.assertIn("thiếu phường Xuân Hòa", row["ghi_chu"])
+        self.assertEqual(row["pass"], "0")

@@ -9,13 +9,18 @@ Chỉ ghi cột pass và ghi_chu. Cột khác giữ nguyên.
 ghi_chu dạng: khong_tao_don_sai=1 quy_doi=1 trich=0
 Dấu - nghĩa là metric không áp dụng cho câu đó.
 Nếu câu còn metric chấm tay, thêm hoi_mot_lan_du_y=0|1 và/hoặc tu_choi_dung=0|1
-vào ghi_chu rồi chạy lại. pass = 1 khi mọi metric áp dụng đều là 1.
+vào ghi_chu rồi chạy lại. Chữ ghi tay đứng sau các token điểm được giữ khi chạy lại.
+pass = 1 khi mọi metric áp dụng đều là 1.
 """
 import csv
 import os
 import re
 import sys
 import unicodedata
+
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BANG = os.path.join(ROOT, "data", "chuyen-doi-dia-gioi.csv")
@@ -186,9 +191,20 @@ def trich_dung_thong_tin(expected, output):
     return 1 if ok else 0
 
 
+_TOKEN_DIEM = re.compile(
+    r"(?<!\S)(?:khong_tao_don_sai|quy_doi|trich|hoi_mot_lan_du_y|tu_choi_dung)=(?:-|[01])(?!\S)"
+)
+
+
 def _diem_tay(ghi_chu, ten):
     tim = re.findall(r"(?:^|\s)%s=([01])(?=\s|$)" % ten, ghi_chu or "")
     return tim[-1] if tim else None
+
+
+def _chu_con_lai(ghi_chu):
+    """Bỏ token điểm cũ, giữ phần chữ người chấm viết thêm."""
+    con = _TOKEN_DIEM.sub(" ", ghi_chu or "")
+    return re.sub(r"\s+", " ", con).strip()
 
 
 def cham_dong(row):
@@ -201,11 +217,14 @@ def cham_dong(row):
     cu = row.get("ghi_chu", "") or ""
     hoi = _diem_tay(cu, "hoi_mot_lan_du_y")
     tu_choi = _diem_tay(cu, "tu_choi_dung")
+    chu = _chu_con_lai(cu)
     phan = ["khong_tao_don_sai=%s" % k, "quy_doi=%s" % q, "trich=%s" % t]
     if hoi is not None:
         phan.append("hoi_mot_lan_du_y=%s" % hoi)
     if tu_choi is not None:
         phan.append("tu_choi_dung=%s" % tu_choi)
+    if chu:
+        phan.append(chu)
 
     code = [k]
     if q != "-":
