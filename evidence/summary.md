@@ -60,9 +60,9 @@ Giả thuyết ở `evidence/hypothesis.md`:
 
 | Vai | Giờ hẹn | Đã xong? |
 |---|---|---|
-| P1 · chủ shop thời trang nữ | 27/11 [giờ: cần điền] | ☑ |
-| P2 · chủ shop phụ kiện điện thoại | 27/11 [giờ: cần điền] | ☑ |
-| P3 · chủ shop mỹ phẩm | 27/11 [giờ: cần điền] | ☑ |
-| P4 · chủ shop đồ gia dụng | 27/11 [giờ: cần điền] | ☑ |
+| P1 · chủ shop thời trang nữ | 27/11, 12:00 (gọi điện) | ☑ |
+| P2 · chủ shop phụ kiện điện thoại | 27/11, <hh:mm> (<hình thức>) | ☑ |
+| P3 · chủ shop mỹ phẩm | 27/11, <hh:mm> (<hình thức>) | ☑ |
+| P4 · chủ shop đồ gia dụng | 27/11, <hh:mm> (<hình thức>) | ☑ |
 
 **Tình trạng lúc CP2:** đã viết giả thuyết trước khi hỏi (`evidence/hypothesis.md`, commit `555b0aa`) · đã phỏng vấn 4 chủ shop bán lẻ ở TP HCM theo bộ 15 câu hỏi ở `docs/question.md` · đã viết cách đếm review Google Play trước khi đếm, chưa đếm.
