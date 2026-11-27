@@ -87,7 +87,7 @@ flowchart LR
   | G11 — giải thích vì sao AI quyết định vậy | ô "create_draft_order": phần "Cho chủ shop" ghi `Phường/xã: <mới> (quy đổi từ <cũ> theo khoản <N> Nghị quyết 1685/NQ-UBTVQH15[; khách chọn])` |
   | G8/G9 — dễ sửa, dễ bỏ | ô "D · Màn hình duyệt": đơn chỉ là nháp, chủ shop sửa từng trường hoặc huỷ; sửa xong code kiểm lại |
 
-- **Phần còn giả:** model đang chạy chế độ giả (chưa nối model thật, nối ở CP3) · `codebase/tools.py` và `codebase/agent.py` đang là khung của đề, bốn công cụ trên làm sau CP2 · bảng chuyển đổi địa giới (`data/chuyen-doi-dia-gioi.csv`) đang dựng từ Nghị quyết 1685/NQ-UBTVQH15 cho toàn TP Hồ Chí Minh; khoản nào văn bản không ghi quận cũ thì phải tra nguồn chính thức khác, chưa tra được thì để trống · mã vận đơn `GHN-NHAP-` là mã giả, không gọi GHN.
+- **Phần còn giả:** bản chạy mặc định dùng model giả khi chưa có `.env`; đã có code gọi Claude (`codebase/ai.py`), đã chạy thử trên hộp thư mẫu, chưa chạy lượt đánh giá · bốn công cụ (`codebase/tools.py`) và luồng chính (`codebase/agent.py`) đã viết; `get_customer_history` (luồng C) làm ở CP3 · bảng chuyển đổi địa giới (`data/chuyen-doi-dia-gioi.csv`) đang dựng từ Nghị quyết 1685/NQ-UBTVQH15 cho toàn TP Hồ Chí Minh; khoản nào văn bản không ghi quận cũ thì phải tra nguồn chính thức khác, chưa tra được thì để trống · mã vận đơn `GHN-NHAP-` là mã giả, không gọi GHN.
 
 ## §5. Chỗ khó — 4 lớp + ≥6 kịch bản + 2 tấn công *(guide 2.3)*
 
@@ -130,7 +130,7 @@ flowchart LR
 
 | Thời điểm | Đổi gì | Vì sao (trỏ về câu thử / lỗi / bằng chứng nào) |
 |---|---|---|
-|  |  |  |
+| 27/11 sau khi nộp CP2 | `data/DATA_CARD.md` Dataset 1: ghi đúng mức trích review B16–B19 (chỉ B16 nguyên văn). `spec.md` §4 "Phần còn giả": cập nhật theo code hiện có | Review sau CP2: data card ghi "nguyên văn" cho cả 4 câu trong khi B17–B19 đã rút gọn; §4 còn ghi `tools.py`, `agent.py` là khung dù đã viết xong. Không đổi câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
