@@ -28,7 +28,8 @@ Khung chỉ dùng thư viện chuẩn của Python. Thêm thư viện thì ghi v
 | `codebase/ai.py` | nhóm | `call_model(system, user) -> {"text", "model", "tokens_in", "tokens_out"}`, giữ `@model_call`. Token lấy từ `usage` của API, không ước lượng |
 | `codebase/tools.py` | nhóm | mỗi công cụ một hàm có `@tool`, docstring: tên · input · output · có tác động ra ngoài không |
 | `codebase/inbox.py` | nhóm | luồng A: `xu_ly_hop_thu(hoi_thoai) -> [{"ma_hoi_thoai", **xu_ly(...)}]`, đọc `data/hop-thu-mau.jsonl` |
-| `codebase/web.py` | nhóm | luồng D + B: màn hình duyệt ở `http://127.0.0.1:8000` (chỉ thư viện chuẩn, chỉ bind 127.0.0.1). Duyệt chỉ đổi trạng thái, không gọi GHN, không gửi tin. Nhật ký `data/nhat-ky-duyet.jsonl` không commit |
+| `codebase/web.py` | nhóm | luồng D + B: màn hình duyệt ở `http://127.0.0.1:8000` (chỉ thư viện chuẩn, chỉ bind 127.0.0.1). Duyệt chỉ đổi trạng thái, không gọi GHN, không gửi tin. Hội thoại mới `POST /api/moi`, trace + chi phí từng lần chạy AI |
+| `codebase/kho.py` | nhóm | nhật ký duyệt + lần chạy AI: Postgres khi có `DATABASE_URL` (psycopg, tuỳ chọn), không thì `data/*.jsonl` (không commit) |
 | `codebase/app.py` | khung | bản dòng lệnh, giữ làm dự phòng: `python codebase/app.py` |
 | `codebase/tracing.py`, `eval/run_eval.py`, `cost/simulate.py`, `run.py` | **khung — không sửa** | ghi trace, chạy bộ câu thử, mô phỏng chi phí. Ngoại lệ nhóm đã chốt: `run_app()` trong `run.py` mở `codebase/web.py` |
 

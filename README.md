@@ -31,6 +31,8 @@ python run.py                               # mở màn hình duyệt ở http:/
 
 - **Màn hình duyệt** (`codebase/web.py`): hộp thư 10 hội thoại mẫu (`data/hop-thu-mau.jsonl`). Bấm từng hội thoại để xem đơn nháp, sửa trường, Duyệt hoặc Huỷ; hội thoại đang chờ khách thì dán câu trả lời của khách để chạy lại (luồng B). Chỉ mở trên máy này (`127.0.0.1`).
 - **Lần đầu mở web phải chờ khoảng 1 phút:** trước khi mở cổng, bản chạy thử gọi model cho cả 10 hội thoại (khoảng 6 giây / hội thoại với model thật). Terminal in `Màn hình duyệt — đang xử lý 10 hội thoại…` rồi `Mở trình duyệt: http://127.0.0.1:8000`; thoát bằng Ctrl+C.
+- **Hội thoại mới khi demo** (`POST /api/moi`): gõ một hội thoại bất kỳ (vd câu thử giám khảo đưa tại chỗ), AI chạy ngay, hội thoại lên đầu hộp thư với mã `HT-M01`, `HT-M02`… Mỗi lần chạy AI giữ trace: các bước model / công cụ, token, thời gian, chi phí theo giá trong `cost/personas.yaml` (model chưa có giá thì chỉ hiện token).
+- **Nhật ký duyệt và lần chạy AI:** mặc định ghi `data/nhat-ky-duyet.jsonl` và `data/lan-chay-web.jsonl` (không commit). Muốn lưu vào **Postgres** (tuỳ chọn): `python -m pip install "psycopg[binary]"`, điền `DATABASE_URL` trong `.env` (vd `postgresql://user:pass@127.0.0.1:5432/j97`); bảng tự tạo khi mở màn hình. Postgres không kết nối được thì màn hình báo rồi ghi file, demo vẫn chạy. Xem lại: `GET /api/nhat-ky`.
 - **Bản dòng lệnh dự phòng:** `python codebase/app.py`, gõ một hội thoại, nhận QUYẾT ĐỊNH (TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI).
 - **Chưa có `.env`:** chạy chế độ giả (model giả, không cần `pip install`). Luồng vẫn đi hết, nhưng model giả không trả JSON nên mọi hội thoại ra HỎI LẠI.
 - Chạy bộ câu thử, chấm, mô phỏng chi phí: xem mục "Lệnh" bên dưới.
