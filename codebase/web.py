@@ -364,17 +364,32 @@ body{margin:0;font:15px/1.5 var(--chu-than);background:var(--nen);color:var(--mu
 main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;padding:20px 28px;align-items:start}
 
 .cot-hop-thu{background:var(--giay);border:1px solid var(--vien);border-radius:10px;overflow:hidden;position:sticky;top:20px}
-.tieu-de-cot{font:600 15px/1 var(--chu-nhan);padding:14px 16px 10px;margin:0;border-bottom:1px solid var(--vien)}
-#hop-thu{list-style:none;margin:0;padding:0}
-#hop-thu li{padding:11px 16px 12px;border-bottom:1px solid #E4E9EE;cursor:pointer;border-left:4px solid transparent}
-#hop-thu li:last-child{border-bottom:0}
-#hop-thu li:hover{background:#F5F7FA}
-#hop-thu li.chon{background:#EEF3FB;border-left-color:var(--muc)}
+.tieu-de-cot{font:600 20px/1 var(--chu-nhan);padding:16px 16px 12px;margin:0}
+#loc{display:flex;gap:4px;flex-wrap:wrap;padding:0 10px 12px;border-bottom:1px solid var(--vien)}
+#loc button{font:600 13px/1 var(--chu-than);padding:8px 11px;border-radius:999px;border:0;background:transparent;color:var(--mo)}
+#loc button:hover{background:#EEF2F6;color:var(--muc)}
+#loc button[aria-pressed="true"]{background:#E3ECF8;color:var(--muc)}
+#loc .so{margin-left:5px;font:600 12px/1 var(--chu-nhan);color:var(--mo)}
+#hop-thu{list-style:none;margin:0;padding:6px}
+#hop-thu li{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;cursor:pointer}
+#hop-thu li:hover{background:#F2F5F8}
+#hop-thu li.chon{background:#E3ECF8}
+#hop-thu li.trong-loc{display:block;cursor:default;color:var(--mo);font-size:13px;text-align:center;padding:28px 10px}
+#hop-thu li.trong-loc:hover{background:transparent}
+.noi-dung{min-width:0;flex:1}
 .dong-1{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .ten-khach{font-weight:600}
-.xem-truoc{color:var(--mo);font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ma-ht{font:12px var(--chu-nhan);color:var(--mo);margin-top:4px}
+.xem-truoc{color:var(--mo);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ma-ht{font:12px var(--chu-nhan);color:var(--mo);margin-top:3px}
 .ma-ht .hoi-lai{margin-left:8px;color:var(--vang)}
+
+.avt{flex:none;width:46px;height:46px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;overflow:hidden}
+.avt svg{width:100%;height:100%;display:block}
+.avt.khach{background:#DDE3EA;color:#A3AFBC}
+.avt.shop{background:var(--muc);color:#fff}
+.avt.shop svg{width:56%;height:56%}
+.avt.vua{width:44px;height:44px}
+.avt.nho{width:30px;height:30px}
 
 .chip{font:600 12px/1 var(--chu-nhan);padding:5px 9px;border-radius:999px;white-space:nowrap}
 .cho_duyet{background:var(--xanh-nhat);color:var(--xanh)}
@@ -385,14 +400,23 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;padding:20p
 #chi-tiet{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,440px);gap:20px;align-items:start}
 .trong{grid-column:1/-1;background:var(--giay);border:1px dashed var(--vien);border-radius:10px;padding:48px;text-align:center;color:var(--mo)}
 
-.cot-chat{background:var(--chat);border:1px solid var(--vien);border-radius:10px;padding:18px 20px 22px;min-height:420px}
+.cot-chat{background:var(--chat);border:1px solid var(--vien);border-radius:10px;padding:16px 20px 22px;min-height:420px}
+.dau-chat{display:flex;gap:12px;align-items:center;padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--vien)}
 .cot-chat h2{font:600 18px/1.25 var(--chu-nhan);margin:0}
-.cot-chat .tai-khoan{margin:2px 0 16px}
-.bong{max-width:78%;padding:9px 13px;border-radius:16px;margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
-.bong.khach{background:var(--giay);border:1px solid #DCE2E8;border-bottom-left-radius:4px}
-.bong.shop{background:var(--bong-shop);margin-left:auto;border-bottom-right-radius:4px}
-.ai-noi{font-size:12px;color:var(--mo);margin:12px 0 0}
-.ai-noi.ben-phai{text-align:right}
+.cot-chat .tai-khoan{margin:2px 0 0}
+.nhom{display:flex;gap:8px;align-items:flex-end;margin-top:14px}
+.nhom.shop{flex-direction:row-reverse}
+.cac-bong{display:flex;flex-direction:column;gap:3px;max-width:78%;min-width:0}
+.nhom.khach .cac-bong{align-items:flex-start}
+.nhom.shop .cac-bong{align-items:flex-end}
+.ten-nhom{font-size:12px;color:var(--mo);margin:0 6px 2px}
+.bong{padding:9px 13px;border-radius:18px;white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}
+.bong.khach{background:var(--giay);border:1px solid #DCE2E8}
+.bong.shop{background:var(--bong-shop)}
+.nhom.khach .bong{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.nhom.khach .bong:nth-child(2){border-top-left-radius:18px}
+.nhom.shop .bong{border-top-right-radius:6px;border-bottom-right-radius:6px}
+.nhom.shop .bong:nth-child(2){border-top-right-radius:18px}
 
 .cot-phai{display:flex;flex-direction:column;gap:14px}
 .phieu{position:relative;background:var(--giay);border:2px solid var(--muc);border-radius:6px;padding:0 0 18px}
@@ -458,7 +482,7 @@ details.them-tin .nut{padding-left:0}
 <header class="dau"><div><h1>Duyệt đơn từ tin nhắn</h1>
 <p class="phu">Duyệt chỉ đổi trạng thái đơn nháp, không gọi GHN và không gửi tin cho khách.</p></div>
 <div id="dem" aria-live="polite"></div></header>
-<main><nav class="cot-hop-thu" aria-label="Hộp thư"><p class="tieu-de-cot">Hộp thư</p><ul id="hop-thu"></ul></nav>
+<main><nav class="cot-hop-thu" aria-label="Hộp thư"><p class="tieu-de-cot">Hộp thư</p><div id="loc" role="group" aria-label="Lọc hội thoại theo loại"></div><ul id="hop-thu"></ul></nav>
 <section id="chi-tiet" aria-live="polite"><p class="trong">Chọn một hội thoại bên trái để xem đoạn chat và đơn nháp.</p></section></main>
 <datalist id="ds-phuong"></datalist>
 <script src="/app.js"></script></body></html>
@@ -470,7 +494,26 @@ const NHAN = {cho_duyet: "Đơn nháp", cho_khach: "Chờ khách", tu_choi: "T�
 const DEM = [["cho_duyet", "đơn nháp chờ duyệt"], ["cho_khach", "chờ khách trả lời"], ["tu_choi", "từ chối"], ["da_duyet", "đã duyệt"], ["da_huy", "đã huỷ"]];
 const TRUONG = [["ten_nguoi_nhan", "Người nhận"], ["sdt", "SĐT"], ["dia_chi_chi_tiet", "Địa chỉ"],
                 ["phuong_xa", "Phường/xã"], ["san_pham", "Sản phẩm"], ["so_luong", "Số lượng"]];
-let phien = [], chon = null, hen = null, vuaDong = null;
+const LOC = [["tat_ca", "Tất cả", () => true], ["cho_duyet", "Đơn nháp", p => p.trang_thai === "cho_duyet"],
+             ["cho_khach", "Chờ khách", p => p.trang_thai === "cho_khach"], ["tu_choi", "Từ chối", p => p.trang_thai === "tu_choi"],
+             ["xong", "Đã xử lý", p => p.trang_thai === "da_duyet" || p.trang_thai === "da_huy"]];
+let phien = [], chon = null, hen = null, vuaDong = null, loc = "tat_ca";
+
+// avatar vẽ bằng SVG dựng qua createElementNS (không tải ảnh, không dùng innerHTML)
+const SVG_NS = "http://www.w3.org/2000/svg";
+function hinh(tag, attrs) { const e = document.createElementNS(SVG_NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; }
+function avt(loai, co) {
+  const net = {fill: "none", stroke: "currentColor", "stroke-width": "1.7", "stroke-linejoin": "round", "stroke-linecap": "round"};
+  const s = loai === "shop"
+    ? hinh("svg", {viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false"})
+    : hinh("svg", {viewBox: "0 0 40 40", "aria-hidden": "true", focusable: "false"});
+  if (loai === "shop") s.append(hinh("path", Object.assign({d: "M4 9.5 5.6 4h12.8L20 9.5"}, net)),
+    hinh("path", Object.assign({d: "M4 9.5h16v1.2a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0 2.7 2.7 0 0 1-5.3 0z"}, net)),
+    hinh("path", Object.assign({d: "M5.5 13.2V20h13v-6.8"}, net)), hinh("path", Object.assign({d: "M10 20v-4h4v4"}, net)));
+  else s.append(hinh("circle", {cx: "20", cy: "15.5", r: "7.5", fill: "currentColor"}),
+    hinh("path", {d: "M4.5 41c1.4-8.6 7.6-12.8 15.5-12.8S34.1 32.4 35.5 41z", fill: "currentColor"}));
+  return el("span", {class: "avt " + loai + (co ? " " + co : "")}, s);
+}
 
 function el(tag, attrs, ...con) {
   const e = document.createElement(tag);
@@ -507,22 +550,31 @@ function cacLuot(text) {  // "Mã khách: KH-1 | Khách: … | Shop: …" → [{
 function tinKhachCuoi(p) { const k = cacLuot(p.text).filter(l => l.ai === "Khách"); return k.length ? k[k.length - 1].nd : ""; }
 
 function veHopThu() {
-  // vẽ lại cả danh sách thì phần tử đang focus bị thay: nhớ dòng đang focus rồi trả focus về dòng đó
-  const dangFocus = document.activeElement && document.activeElement.closest ? document.activeElement.closest("#hop-thu li") : null;
-  const maFocus = dangFocus ? dangFocus.getAttribute("data-ma") : null;
+  // vẽ lại cả danh sách thì phần tử đang focus bị thay: nhớ dòng / tab đang focus rồi trả focus về đó
+  const a = document.activeElement && document.activeElement.closest ? document.activeElement : null;
+  const maFocus = a && a.closest("#hop-thu li") ? a.closest("#hop-thu li").getAttribute("data-ma") : null;
+  const locFocus = a && a.closest("#loc button") ? a.closest("#loc button").getAttribute("data-loc") : null;
   document.getElementById("dem").replaceChildren(...DEM.map(([t, chu]) => {
     const n = phien.filter(p => p.trang_thai === t).length;
     return n ? el("span", {class: "chip " + t, text: n + " " + chu}) : null;
   }).filter(Boolean));
+  const tab = document.getElementById("loc");
+  tab.replaceChildren(...LOC.map(([k, ten, f]) => el("button", {type: "button", "data-loc": k, "aria-pressed": k === loc ? "true" : "false",
+      on: {click: () => { loc = k; veHopThu(); }}}, document.createTextNode(ten), el("span", {class: "so", text: String(phien.filter(f).length)}))));
+  const hien = phien.filter(LOC.find(x => x[0] === loc)[2]);
   const ds = document.getElementById("hop-thu");
-  ds.replaceChildren(...phien.map(p => el("li", {class: p.ma_hoi_thoai === chon ? "chon" : null, "data-ma": p.ma_hoi_thoai,
+  ds.replaceChildren(...(hien.length ? hien.map(p => el("li", {class: p.ma_hoi_thoai === chon ? "chon" : null, "data-ma": p.ma_hoi_thoai,
       tabindex: "0", "aria-current": p.ma_hoi_thoai === chon ? "true" : null,
       on: {click: () => chonHoiThoai(p.ma_hoi_thoai), keydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); chonHoiThoai(p.ma_hoi_thoai); } }}},
-    el("div", {class: "dong-1"}, el("span", {class: "ten-khach", text: p.ma_khach || "Khách mới"}), el("span", {class: "chip " + p.trang_thai, text: NHAN[p.trang_thai]})),
-    el("div", {class: "xem-truoc", text: p.loi_doc ? "Không đọc được hội thoại này" : tinKhachCuoi(p)}),
-    el("div", {class: "ma-ht"}, document.createTextNode(p.ma_hoi_thoai),
-      p.so_luot_hoi_lai ? el("span", {class: "hoi-lai", text: "hỏi lại " + p.so_luot_hoi_lai + " lần"}) : null))));
+    avt("khach"),
+    el("div", {class: "noi-dung"},
+      el("div", {class: "dong-1"}, el("span", {class: "ten-khach", text: p.ma_khach || "Khách mới"}), el("span", {class: "chip " + p.trang_thai, text: NHAN[p.trang_thai]})),
+      el("div", {class: "xem-truoc", text: p.loi_doc ? "Không đọc được hội thoại này" : tinKhachCuoi(p)}),
+      el("div", {class: "ma-ht"}, document.createTextNode(p.ma_hoi_thoai),
+        p.so_luot_hoi_lai ? el("span", {class: "hoi-lai", text: "hỏi lại " + p.so_luot_hoi_lai + " lần"}) : null))))
+    : [el("li", {class: "trong-loc", text: "Không có hội thoại nào ở mục này."})]));
   if (maFocus) { const li = [...ds.children].find(x => x.getAttribute("data-ma") === maFocus); if (li) li.focus(); }
+  if (locFocus) { const b = [...tab.children].find(x => x.getAttribute("data-loc") === locFocus); if (b) b.focus(); }
 }
 function chonHoiThoai(ma) { clearTimeout(hen); chon = ma; veHopThu(); veChiTiet(phien.find(p => p.ma_hoi_thoai === ma)); }
 
@@ -541,15 +593,19 @@ function veChiTiet(p) {
   const ct = document.getElementById("chi-tiet");
   if (!p) { ct.replaceChildren(el("p", {class: "trong", text: "Chọn một hội thoại bên trái để xem đoạn chat và đơn nháp."})); return; }
   const luot = cacLuot(p.text), tk = luot.find(l => l.ai === "Mã khách");
-  const chat = el("div", {class: "cot-chat"}, el("h2", {text: "Hội thoại với " + (p.ma_khach || "khách mới")}),
-    el("p", {class: "phu tai-khoan", text: tk ? "Tài khoản chat " + tk.nd + ", mã hội thoại " + p.ma_hoi_thoai : "Khách chưa có tài khoản, mã hội thoại " + p.ma_hoi_thoai}));
+  const chat = el("div", {class: "cot-chat"}, el("div", {class: "dau-chat"}, avt("khach", "vua"),
+    el("div", {}, el("h2", {text: "Hội thoại với " + (p.ma_khach || "khách mới")}),
+      el("p", {class: "phu tai-khoan", text: tk ? "Tài khoản chat " + tk.nd + ", mã hội thoại " + p.ma_hoi_thoai : "Khách chưa có tài khoản, mã hội thoại " + p.ma_hoi_thoai}))));
   if (p.loi_doc) chat.append(el("p", {class: "loi", text: "Không đọc được dòng này trong hộp thư: " + p.loi_doc}));
-  let truoc = null;
+  let nhom = null, truoc = null;  // tin liền nhau của cùng một người gom thành một nhóm, avatar cạnh nhóm
   for (const l of luot) {
     if (l.ai === "Mã khách") continue;
     const shop = l.ai === "Shop";
-    if (l.ai !== truoc) chat.append(el("p", {class: "ai-noi" + (shop ? " ben-phai" : ""), text: shop ? "Shop" : (l.ai || "Tin nhắn")}));
-    chat.append(el("div", {class: "bong " + (shop ? "shop" : "khach"), text: l.nd}));
+    if (l.ai !== truoc) {
+      nhom = el("div", {class: "cac-bong"}, el("p", {class: "ten-nhom", text: shop ? "Shop" : (l.ai || "Tin nhắn")}));
+      chat.append(el("div", {class: "nhom " + (shop ? "shop" : "khach")}, avt(shop ? "shop" : "khach", "nho"), nhom));
+    }
+    nhom.append(el("div", {class: "bong " + (shop ? "shop" : "khach"), text: l.nd}));
     truoc = l.ai;
   }
   const phai = el("div", {class: "cot-phai"});
