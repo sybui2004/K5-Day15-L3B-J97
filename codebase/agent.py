@@ -14,30 +14,27 @@ Luồng C (giao chỗ cũ) chưa làm ở đây: P3 thêm bước 3 vào chỗ �
 """
 import json
 import re
-import unicodedata
 
 from ai import call_model
 from tracing import note
 
-try:
-    from tools import validate_phone, convert_old_address, lookup_address, create_draft_order
-except ImportError:  # X2 chưa merge — dùng stub tạm; xoá nhánh này cùng codebase/tools_stub.py khi X2 merge
-    from tools_stub import validate_phone, convert_old_address, lookup_address, create_draft_order
+from tools import validate_phone, convert_old_address, lookup_address, create_draft_order, chuan_hoa_tinh
 
 SYSTEM = """Bạn đọc một đoạn chat giữa shop bán lẻ và khách đã đồng ý mua, rồi trích thông tin nhận hàng.
 Chỉ trả MỘT object JSON, không viết gì khác, đúng các khoá sau (không có thì để null):
 ten_nguoi_nhan, sdt, dia_chi_chi_tiet, tinh_thanh, phuong_xa, quan_huyen_cu, phuong_xa_cu,
-phuong_xa_moi_de_xuat, do_chac, can_cu, san_pham, so_luong, dung_dia_chi_lan_truoc, yeu_cau_ngoai_pham_vi.
+san_pham, so_luong, dung_dia_chi_lan_truoc, yeu_cau_ngoai_pham_vi.
 
 Quy tắc:
 - Không đoán trường không có trong hội thoại. Thiếu thì để null.
 - ten_nguoi_nhan, sdt là của người NHẬN hàng; người nhận khác người nhắn thì lấy người nhận.
 - Khách đổi thông tin giữa chừng thì lấy lượt mới nhất.
-- dia_chi_chi_tiet: số nhà, tên đường, thôn. tinh_thanh: tên đầy đủ, vd "TP Hồ Chí Minh".
+- dia_chi_chi_tiet: số nhà, tên đường, thôn.
+- tinh_thanh: ghi NHƯ KHÁCH VIẾT, kể cả tỉnh cũ, vd "TP Hồ Chí Minh", "Bình Dương", "Bà Rịa - Vũng Tàu".
 - Khách ghi địa chỉ KIỂU MỚI (không có quận/huyện) thì điền phuong_xa.
-- Khách ghi KIỂU CŨ (có quận/huyện) thì điền quan_huyen_cu và phuong_xa_cu, viết đầy đủ, vd "Quận 3", "Phường 7".
-  Có thể đề xuất phường mới ở phuong_xa_moi_de_xuat. Chỉ ghi do_chac "cao" khi hội thoại có căn cứ cụ thể
-  (tên đường, mốc) và chép NGUYÊN VĂN chữ đó trong hội thoại vào can_cu, không diễn đạt lại. Không thì do_chac "thap".
+- Khách ghi KIỂU CŨ (có quận/huyện) thì điền quan_huyen_cu và phuong_xa_cu, viết đầy đủ, vd "Quận 3", "Phường 4",
+  "thành phố Thuận An".
+- Không tự chọn phường mới. phuong_xa chỉ ghi tên phường/xã mới do chính khách viết hoặc khách đã chọn.
 - Shop đã đưa danh sách phường và khách đã chọn một phường thì ghi tên phường đó vào phuong_xa.
 - so_luong là số nguyên.
 - dung_dia_chi_lan_truoc: true khi khách nói "giao chỗ cũ", "như lần trước".
@@ -50,37 +47,16 @@ TEN_TRUONG = {  # tên trường → cách nói với khách
     "dia_chi_chi_tiet": "số nhà, tên đường",
     "tinh_thanh": "tỉnh/thành phố",
     "phuong_xa": "phường/xã",
+    "quan_huyen_cu": "quận/huyện cũ của địa chỉ",
     "san_pham": "sản phẩm anh/chị muốn lấy",
     "so_luong": "số lượng",
 }
 NHAN_NGAN = {"ten_nguoi_nhan": "tên", "sdt": "sđt", "dia_chi_chi_tiet": "địa chỉ", "tinh_thanh": "tỉnh",
-             "phuong_xa": "phường/xã", "san_pham": "sản phẩm", "so_luong": "số lượng", "dia_chi": "địa chỉ"}
+             "phuong_xa": "phường/xã", "quan_huyen_cu": "quận/huyện cũ",
+             "san_pham": "sản phẩm", "so_luong": "số lượng", "dia_chi": "địa chỉ"}
 
 
 # ---------- chuẩn hoá ----------
-
-def bo_dau(s: str) -> str:
-    s = unicodedata.normalize("NFD", str(s))
-    s = "".join(ch for ch in s if unicodedata.category(ch) != "Mn")
-    return s.replace("đ", "d").replace("Đ", "D")
-
-
-def chuan_hoa_chu(s: str) -> str:
-    """Bỏ dấu, viết thường, bỏ dấu câu, gộp khoảng trắng — để so chuỗi con."""
-    s = re.sub(r"[^\w\s]", " ", bo_dau(s).lower())
-    return " ".join(s.split())
-
-
-def chuan_hoa_ten(s: str) -> str:
-    """Tên địa danh để so khớp: bỏ dấu, viết thường, bỏ tiền tố theo cả từ (docs/cp2-ke-hoach.md X2).
-    `p`/`q` chỉ bỏ khi theo sau là số hoặc dấu chấm, để "Phú Nhuận" không thành "hu nhuan"."""
-    s = bo_dau(s).lower().strip()
-    s = re.sub(r"^(phuong|xa|thi tran|quan|huyen|thanh pho|tp|tinh)\b\.?\s*", "", s)
-    s = re.sub(r"^[pq](\.\s*|(?=\d))", "", s)
-    s = re.sub(r"[^\w\s]", " ", s)
-    s = re.sub(r"\b0+(\d)", r"\1", s)
-    return " ".join(s.split())
-
 
 def lam_sach_luot(s: str) -> str:
     """Một lượt chat trên một dòng, không chứa ` | ` (docs/cp2-ke-hoach.md 1.3 (a))."""
@@ -136,10 +112,9 @@ def _kiem(info: dict, text: str):
     """Kiểm theo 1.3 (d) bước 4–6. Trả (truong đã chuẩn hoá, loi, goi_y_phuong, quy_doi)."""
     truong = {k: info.get(k) for k in info}
     for k in ("ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "tinh_thanh", "phuong_xa", "quan_huyen_cu",
-              "phuong_xa_cu", "phuong_xa_moi_de_xuat", "do_chac", "can_cu", "san_pham"):
+              "phuong_xa_cu", "san_pham"):
         truong[k] = _chuoi(info.get(k))
     loi, goi_y, quy_doi = [], [], None
-    hoi_thoai = chuan_hoa_chu(text)
 
     # LUỒNG C (P3): dung_dia_chi_lan_truoc → get_customer_history(doc_ma_khach(text)) đặt ở đây, trước bước 4.
 
@@ -151,7 +126,7 @@ def _kiem(info: dict, text: str):
             loi.append({"truong": k, "ly_do": "thiếu"})
     kieu_cu = bool(truong["phuong_xa_cu"])
     if kieu_cu and not truong["quan_huyen_cu"]:
-        loi.append({"truong": "phuong_xa", "ly_do": "thiếu quận/huyện cũ"})
+        loi.append({"truong": "quan_huyen_cu", "ly_do": "thiếu"})
     if not kieu_cu and not truong["phuong_xa"]:
         loi.append({"truong": "phuong_xa", "ly_do": "thiếu"})
     if not _co(info.get("so_luong")):
@@ -181,33 +156,28 @@ def _kiem(info: dict, text: str):
         cu = "%s, %s" % (truong["phuong_xa_cu"], truong["quan_huyen_cu"])
         kq = convert_old_address(tinh, truong["quan_huyen_cu"], truong["phuong_xa_cu"])
         moi = kq.get("phuong_moi") or []
+        chon = None
         if kq.get("ket_qua") == "mot" and moi:
-            truong["phuong_xa"] = moi[0]
-            quy_doi = {"tu": cu, "theo": None}
+            chon = moi[0]
         elif kq.get("ket_qua") == "nhieu" and moi:
-            theo_ten = {chuan_hoa_ten(p): p for p in moi}
-            khach_chon = theo_ten.get(chuan_hoa_ten(truong["phuong_xa"])) if truong["phuong_xa"] else None
-            de_xuat = theo_ten.get(chuan_hoa_ten(truong["phuong_xa_moi_de_xuat"])) \
-                if truong["phuong_xa_moi_de_xuat"] else None
-            can_cu = truong["can_cu"]
-            can_cu_that = bool(can_cu) and chuan_hoa_chu(can_cu) in hoi_thoai
-            if khach_chon:
-                truong["phuong_xa"] = khach_chon
-                quy_doi = {"tu": cu, "theo": "khách chọn"}
-            elif de_xuat and truong["do_chac"] == "cao" and can_cu_that:
-                truong["phuong_xa"] = de_xuat
-                quy_doi = {"tu": cu, "theo": "AI chọn theo: " + can_cu}
-            else:
-                if can_cu and not can_cu_that:
-                    note("chặn: can_cu không có trong hội thoại")
-                goi_y = moi[:3]
-                loi.append({"truong": "dia_chi", "ly_do": "%s nay tách thành nhiều phường" % cu})
+            # phường cũ bị tách: chỉ nhận phường khách đã chọn và có trong danh sách
+            if truong["phuong_xa"]:
+                tra = lookup_address(kq["tinh_moi"], truong["phuong_xa"])
+                if tra.get("ok") and tra["khop"] in moi:
+                    chon = tra["khop"]
+            if not chon:
+                goi_y = list(moi)
+                loi.append({"truong": "dia_chi", "ly_do": "phường cũ bị tách, chờ khách chọn phường"})
         else:
             loi.append({"truong": "dia_chi", "ly_do": "không tìm thấy %s trong bảng chuyển đổi" % cu})
+        if chon:
+            quy_doi = {"tu": "%s, %s" % (cu, chuan_hoa_tinh(tinh)), "khoan": kq["khoan"],
+                       "khach_chon": kq["ket_qua"] == "nhieu"}
+            truong["phuong_xa"], truong["tinh_thanh"] = chon, kq["tinh_moi"]
     elif tinh and not kieu_cu and truong["phuong_xa"]:
         kq = lookup_address(tinh, truong["phuong_xa"])
         if kq.get("ok"):
-            truong["phuong_xa"] = kq["khop"]
+            truong["phuong_xa"], truong["tinh_thanh"] = kq["khop"], kq["tinh"]
         else:
             goi_y = (kq.get("goi_y") or [])[:3]
             loi.append({"truong": "dia_chi", "ly_do": kq.get("ly_do") or "không tìm thấy phường/xã"})
@@ -246,7 +216,8 @@ def _tin_hoi_lai(loi, goi_y, truong):
 def _cho_chu_shop_hoi_lai(truong, loi):
     co = [NHAN_NGAN[k] for k in ("ten_nguoi_nhan", "sdt", "san_pham") if truong.get(k)
           and k not in {l["truong"] for l in loi}]
-    thieu = ["%s %s" % (NHAN_NGAN.get(l["truong"], l["truong"]), l["ly_do"]) for l in loi]
+    thieu = [l["ly_do"] if l["ly_do"].startswith("phường cũ bị tách")
+             else "%s %s" % (NHAN_NGAN.get(l["truong"], l["truong"]), l["ly_do"]) for l in loi]
     dau = ("đã có " + ", ".join(co) + " · ") if co else ""
     return "Cho chủ shop: " + dau + " · ".join(thieu) + " · chưa tạo đơn nháp"
 
@@ -254,9 +225,9 @@ def _cho_chu_shop_hoi_lai(truong, loi):
 def _dong_phuong(truong, quy_doi):
     if not quy_doi:
         return truong["phuong_xa"]
-    if quy_doi["theo"]:
-        return "%s (quy đổi từ %s; %s)" % (truong["phuong_xa"], quy_doi["tu"], quy_doi["theo"])
-    return "%s (quy đổi từ %s)" % (truong["phuong_xa"], quy_doi["tu"])
+    return "%s (quy đổi từ %s theo khoản %s Nghị quyết 1685/NQ-UBTVQH15%s)" % (
+        truong["phuong_xa"], quy_doi["tu"], ", ".join(str(k) for k in quy_doi["khoan"]),
+        "; khách chọn" if quy_doi["khach_chon"] else "")
 
 
 # ---------- luồng chính ----------
