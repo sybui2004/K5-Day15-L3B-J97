@@ -4,19 +4,19 @@
 > Một trang. Mỗi dataset một mục. Dữ liệu chạy thử (bài mẫu, thông báo mẫu, đoạn transcript…) để trong thư mục `data/` này.
 > Không commit nguyên tài liệu khoá, dữ liệu cá nhân thật hay nguyên file data BTC cấp — chỉ đoạn trích ngắn, bản viết lại, hoặc số đã tổng hợp.
 
-## Dataset 1 · [tên]
+## Dataset 1 · Hội thoại chốt đơn (`eval/benchmark.csv`)
 
 | | |
 |---|---|
-| Dùng để làm gì | nguồn cho công cụ `…` · bộ câu thử · đào bằng chứng |
-| Từ đâu | data BTC cấp (`…` trong repo đề) · tài liệu khoá (trích / viết lại) · nhóm tự viết · sinh có seed |
-| Xử lý những bước gì | lọc __ · làm sạch __ · ẩn danh __ · chia __ (script: `…`) |
-| Số dòng / số đoạn | __ |
-| Phiên bản / ngày lấy | __ |
-| Nhãn | thật · `synthetic` |
-| Giới hạn | thiếu gì, lệch về phía nào |
+| Dùng để làm gì | bộ câu thử: quyết định TẠO ĐƠN NHÁP, HỎI LẠI hoặc TỪ CHỐI trước khi tạo đơn nháp và vận đơn nháp |
+| Từ đâu | Chưa dùng đoạn chat trong `evidence/interviews/P1.md`–`P4.md` (phỏng vấn 4 chủ shop ngày 27/11/2026, có 8 đoạn chat đã che); sẽ đưa vào khi mở rộng bộ câu thử cho CP3. **12 câu nhóm tự viết** (`tu_viet`, B03, B05–B15). **7 câu ghép từ văn bản công khai** (`data_that`): B01, B02, B04 lấy ví dụ địa chỉ trên https://since98.vn/vi/cong-cu/chuyen-doi-dia-chi-sau-sap-nhap ("12 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM" → "12 Nguyễn Huệ, Phường Sài Gòn, Thành phố Hồ Chí Minh"; trang nói ví dụ dùng được khi không dấu). B16–B19 lấy nguyên văn review App Store của GHN qua https://opportunitymarket.org/vi/ung-dung/ghn (người dùng 5ef8 ngày 22/05/2026, cc8d, 585f app v4.14.0, 2638 app v4.13.9) |
+| Xử lý những bước gì | Bộ câu thử hiện chưa dùng tin thật của shop nên chưa cần che. Tên (Lan, Hoa, Mai, Hùng), số điện thoại, số nhà và mã `KH-xxx` là giá trị dựng, không có trên trang nguồn. Câu since98 chỉ giữ cụm địa chỉ công khai, rồi bọc thành một dòng input. Câu review GHN giữ câu khiếu nại, không chép biệt danh đầy đủ, bọc thành một dòng input. Phường cũ và phường mới trong câu tự viết lấy từ `data/chuyen-doi-dia-gioi.csv`, trừ B13 cố ý dùng Phường 99 (không có trong bảng) |
+| Số dòng / số đoạn | 19 câu: thuong 4 · kho 9 · tu_choi 6. Nguồn: `tu_viet` 12 · `data_that` 7 · `nguoi_dung` 0 · `sinh_seed` 0 |
+| Phiên bản / ngày lấy | since98 và opportunitymarket lấy ngày 27/11/2026. 12 câu tự viết viết cùng ngày, theo lưới input ở `docs/cp2-ke-hoach.md` mục Y3 |
+| Nhãn | `synthetic` cho hội thoại, tên, số điện thoại, số nhà. Cụm địa chỉ since98 và câu review GHN là trích công khai, không phải tin khách chốt đơn của shop |
+| Giới hạn | Không đo pain của chủ shop và không thay phỏng vấn. Review GHN là khiếu nại app giao hàng hoặc xin số người khác, không phải tin chốt mua. since98 là ví dụ công cụ chuyển địa chỉ, không phải đơn hàng. 12 câu tự viết có thể lệch cách khách nhắn thật |
 
-**Data `synthetic` (nhóm tự sinh):** ghi cách sinh (prompt / script), seed, người kiểm, số dòng đã kiểm tay. Data tự dựng **không phải bằng chứng pain**.
+**Data `synthetic`:** viết tay theo lưới Y3 (kiểu địa chỉ, mức thiếu, độ lộn xộn, người nhận, hành vi mong đợi). Không có script sinh và không có seed. Đã đối tên phường trong câu địa chỉ với `data/chuyen-doi-dia-gioi.csv`. Data tự dựng **không phải bằng chứng pain**.
 
 ## Dataset 2 · Bảng chuyển đổi địa giới TP Hồ Chí Minh (`data/chuyen-doi-dia-gioi.csv`)
 
