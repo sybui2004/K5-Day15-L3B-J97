@@ -10,7 +10,8 @@ Hợp đồng:
     answer(text) -> {"output": str} theo 1.3 (c) — `run.py`, eval, simulate dùng.
 
 Tin hỏi lại là câu mẫu do code ghép từ lỗi đã gom, không gọi model lần hai.
-Luồng C (giao chỗ cũ) chưa làm ở đây: P3 thêm bước 3 vào chỗ đánh dấu "LUỒNG C".
+Luồng C (giao chỗ cũ, P3): bước 3 trong _kiem lấy địa chỉ lần trước bằng get_customer_history, theo mã khách
+đọc ở đầu hội thoại (doc_ma_khach), không theo mã khách gõ trong lượt chat.
 """
 import json
 import re
@@ -19,6 +20,7 @@ from ai import call_model
 from tracing import note
 
 from tools import validate_phone, convert_old_address, lookup_address, create_draft_order, chuan_hoa_tinh, chuan_hoa_ten
+from tools import get_customer_history, TRUONG_DIA_CHI
 
 SYSTEM = """Bạn đọc một đoạn chat giữa shop bán lẻ và khách đã đồng ý mua, rồi trích thông tin nhận hàng.
 Chỉ trả MỘT object JSON, không viết gì khác, đúng các khoá sau (không có thì để null):
@@ -40,7 +42,13 @@ Quy tắc:
   đồng thời giữ quan_huyen_cu và phuong_xa_cu của địa chỉ cũ.
 - so_luong là số nguyên.
 - dung_dia_chi_lan_truoc: true khi khách nói "giao chỗ cũ", "như lần trước".
-- yeu_cau_ngoai_pham_vi: chép nguyên câu khi khách không chốt đơn mà khiếu nại, xin số điện thoại shipper hoặc nhân viên,
+- yeu_cau_ngoai_pham_vi: chép ngắn câu khách đòi việc KHÔNG phải lên một đơn mới. Gồm:
+  đòi bỏ qua kiểm tra hoặc tạo đơn khi chưa đủ thông tin; đổi giá, xin bớt giá; hỏi tên, sđt, địa chỉ của khách khác;
+  khiếu nại đơn cũ (giao trễ, giao sai, thái độ nhân viên), hàng hoàn chưa được lấy;
+  xin sđt hoặc tên shipper, nhân viên giao hàng; hỏi địa chỉ bưu cục, kho, cửa hàng; đổi trả, hoàn tiền.
+  Tin có lời phàn nàn nhưng khách VẪN đặt đơn mới và đưa thông tin nhận hàng thì đó là đơn: để null, trích như bình thường.
+  Khách nhắc mã khách hoặc "địa chỉ lần trước" để giao cho chính mình là đặt đơn: để null.
+  Không có thì null. chép nguyên câu khi khách không chốt đơn mà khiếu nại, xin số điện thoại shipper hoặc nhân viên,
   xin địa chỉ bưu cục hoặc cửa hàng, xin thông tin khách khác, đòi bỏ qua kiểm tra hoặc đổi giá.
   Không có các ý đó thì null."""
 
@@ -123,7 +131,7 @@ def _suy_tinh(quan, phuong_cu):
 # ---------- bước 2: kiểm ----------
 
 def _kiem(info: dict, text: str):
-    """Kiểm theo 1.3 (d) bước 4–6. Trả (truong đã chuẩn hoá, loi, goi_y_phuong, quy_doi)."""
+    """Kiểm theo 1.3 (d) bước 3–6. Trả (truong đã chuẩn hoá, loi, goi_y_phuong, quy_doi)."""
     truong = {k: info.get(k) for k in info}
     for k in ("ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "tinh_thanh", "phuong_xa", "quan_huyen_cu",
               "phuong_xa_cu", "san_pham"):
@@ -135,11 +143,30 @@ def _kiem(info: dict, text: str):
             truong["tinh_thanh"] = suy
             note("suy tỉnh từ quận/huyện trong bảng chuyển đổi")
 
-    # LUỒNG C (P3): dung_dia_chi_lan_truoc → get_customer_history(doc_ma_khach(text)) đặt ở đây, trước bước 4.
+    # Bước 3 · luồng C (P3): "giao chỗ cũ" → địa chỉ lần trước của CHÍNH tài khoản chat này.
+    # Mã khách chỉ đọc ở đầu hội thoại (doc_ma_khach), không lấy từ model hay lời khách gõ.
+    khong_co_lan_truoc = False
+    if info.get("dung_dia_chi_lan_truoc") is True or str(info.get("dung_dia_chi_lan_truoc")).lower() == "true":
+        ma = doc_ma_khach(text)
+        ls = get_customer_history(ma) if ma else {"co": False}
+        if ls.get("co"):
+            for k in TRUONG_DIA_CHI:
+                truong[k] = _chuoi(ls["dia_chi_lan_truoc"].get(k))
+            note("luồng C: dùng địa chỉ lần trước của %s (%s)" % (ma, ls.get("ngay")))
+        else:
+            khong_co_lan_truoc = True
+            loi.append({"truong": "dia_chi", "ly_do": "không có địa chỉ lần trước"})
+            note("luồng C: không có mã khách hoặc không có lịch sử → hỏi lại địa chỉ")
+    if khong_co_lan_truoc:
+        # một lỗi dia_chi là đủ: bước 4 không ghi thêm lỗi địa chỉ, bước 6 bỏ qua
+        for k in TRUONG_DIA_CHI:
+            truong[k] = None
 
     # Bước 4 · thiếu trường bắt buộc
     for k in BAT_BUOC:
         if k == "so_luong":
+            continue
+        if khong_co_lan_truoc and k in TRUONG_DIA_CHI:
             continue
         if not truong[k]:
             loi.append({"truong": k, "ly_do": "thiếu"})
@@ -156,7 +183,7 @@ def _kiem(info: dict, text: str):
         loi.append({"truong": "quan_huyen_cu", "ly_do": "thiếu"})
         # Chỉ thiếu quận/huyện cũ thì không hỏi thêm tỉnh (expected của câu này chỉ có quan_huyen_cu).
         loi = [l for l in loi if not (l["truong"] == "tinh_thanh" and l["ly_do"] == "thiếu")]
-    if not kieu_cu and not truong["phuong_xa"]:
+    if not kieu_cu and not truong["phuong_xa"] and not khong_co_lan_truoc:
         loi.append({"truong": "phuong_xa", "ly_do": "thiếu"})
     if not _co(info.get("so_luong")):
         loi.append({"truong": "so_luong", "ly_do": "thiếu"})
@@ -232,7 +259,10 @@ def _tin_hoi_lai(loi, goi_y, truong):
         phan.append(cau)
     for l in loi:
         if l["truong"] == "dia_chi":
-            if goi_y:
+            if l["ly_do"] == "không có địa chỉ lần trước":
+                phan.append("địa chỉ nhận hàng (số nhà, đường, phường/xã, tỉnh/thành), vì shop chưa có "
+                            "địa chỉ lần trước của anh/chị trên tài khoản này")
+            elif goi_y:
                 cu = truong.get("phuong_xa_cu")
                 dau = "địa chỉ %s, %s nay thuộc" % (cu, truong.get("quan_huyen_cu")) if cu else "phường/xã nhận hàng là"
                 phan.append("%s phường nào trong các phường sau ạ: %s" % (dau, ", ".join(goi_y)))
@@ -245,7 +275,7 @@ def _tin_hoi_lai(loi, goi_y, truong):
 def _cho_chu_shop_hoi_lai(truong, loi):
     co = [NHAN_NGAN[k] for k in ("ten_nguoi_nhan", "sdt", "san_pham") if truong.get(k)
           and k not in {l["truong"] for l in loi}]
-    thieu = [l["ly_do"] if l["ly_do"].startswith("phường cũ bị tách")
+    thieu = [l["ly_do"] if l["ly_do"].startswith(("phường cũ bị tách", "không có địa chỉ lần trước"))
              else "%s %s" % (NHAN_NGAN.get(l["truong"], l["truong"]), l["ly_do"]) for l in loi]
     dau = ("đã có " + ", ".join(co) + " · ") if co else ""
     return "Cho chủ shop: " + dau + " · ".join(thieu) + " · chưa tạo đơn nháp"

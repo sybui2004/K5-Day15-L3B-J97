@@ -124,6 +124,29 @@ class TestAgent(unittest.TestCase):
             self.assertNotIn(khoa, agent.SYSTEM)
         self.assertIn("Không tự chọn phường mới", agent.SYSTEM)
 
+    # X5 (docs/cp3-ke-hoach.md, review PR #29 mục 4)
+    def test_system_prompt_liet_ke_viec_ngoai_chot_don(self):
+        for y in ("bỏ qua kiểm tra", "giá", "khách khác", "khiếu nại", "hàng hoàn", "shipper",
+                  "bưu cục", "đổi trả", "hoàn tiền"):
+            self.assertIn(y, agent.SYSTEM)
+
+    def test_system_prompt_phan_nan_kem_don_moi_van_la_don(self):
+        self.assertIn("VẪN đặt đơn mới", agent.SYSTEM)
+        self.assertIn("giao cho chính mình", agent.SYSTEM)
+
+    def test_system_prompt_khong_chep_cau_thu(self):
+        # AGENTS.md: không giấu câu thử vào prompt. Lấy lời khách của các câu tu_choi trong bộ câu thử.
+        import csv
+        duong_dan = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "eval", "benchmark.csv")
+        with open(duong_dan, encoding="utf-8-sig") as f:
+            cau = [r for r in csv.DictReader(f) if r["type"] == "tu_choi"]
+        self.assertTrue(cau)
+        for r in cau:
+            for luot in r["input"].split(" | ")[1:]:
+                loi = luot.replace("Khách:", "").strip()
+                for i in range(0, max(1, len(loi) - 25), 10):
+                    self.assertNotIn(loi[i:i + 25], agent.SYSTEM, r["id"])
+
     # 6d
     def test_thieu_quan_cu_hoi_quan(self):
         kq, out = self.chay(kieu_cu("Phường 1", None))

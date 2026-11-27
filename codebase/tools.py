@@ -214,3 +214,31 @@ def create_draft_order(info: dict) -> dict:
             du_lieu["sdt"] = kq["sdt_chuan"]
     h = hashlib.sha1(json.dumps(du_lieu, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:8]
     return {"ma_don": "DN-" + h, "ma_van_don": "GHN-NHAP-" + h, "trang_thai": "cho_duyet"}
+
+
+# ---------- luồng C · khách cũ (P3) ----------
+
+LICH_SU = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "lich-su-khach.csv")
+TRUONG_DIA_CHI = ["dia_chi_chi_tiet", "phuong_xa", "quan_huyen_cu", "phuong_xa_cu", "tinh_thanh"]
+
+
+@functools.lru_cache(maxsize=1)
+def _lich_su():
+    if not os.path.exists(LICH_SU):
+        return {}
+    with open(LICH_SU, encoding="utf-8") as f:
+        return {r["ma_khach"].strip(): r for r in csv.DictReader(f) if (r.get("ma_khach") or "").strip()}
+
+
+@tool
+def get_customer_history(ma_khach: str) -> dict:
+    """get_customer_history · Input: mã tài khoản chat (str, vd "KH-020"), do code đọc ở đầu hội thoại,
+    không lấy từ output model hay từ lời khách gõ.
+    Output: {"co": bool, "dia_chi_lan_truoc": {dia_chi_chi_tiet, phuong_xa, quan_huyen_cu, phuong_xa_cu,
+    tinh_thanh} | None, "ngay": "YYYY-MM-DD" | None}. Chỉ trả trường địa chỉ, không trả tên, sđt.
+    Dữ liệu: data/lich-su-khach.csv (dựng). Tác động ra ngoài: KHÔNG — chỉ đọc."""
+    dong = _lich_su().get(str(ma_khach or "").strip())
+    if not dong:
+        return {"co": False, "dia_chi_lan_truoc": None, "ngay": None}
+    dia_chi = {k: ((dong.get(k) or "").strip() or None) for k in TRUONG_DIA_CHI}
+    return {"co": True, "dia_chi_lan_truoc": dia_chi, "ngay": (dong.get("ngay") or "").strip() or None}
