@@ -187,5 +187,38 @@ class TestAgent(unittest.TestCase):
         self.assertHoiLai(kq, out)
 
 
+    # 17 · huyện Côn Đảo không có phường/xã cũ (khoản 163): chỉ có huyện cũng quy đổi được
+    def test_con_dao_khong_co_phuong_cu(self):
+        for phuong_cu in (None, "Côn Đảo"):
+            with self.subTest(phuong_xa_cu=phuong_cu):
+                kq, out = self.chay(kieu_cu(phuong_cu, "huyện Côn Đảo", tinh_thanh="Bà Rịa - Vũng Tàu"))
+                self.assertTaoDon(kq, out)
+                self.assertIn("Phường/xã: đặc khu Côn Đảo (quy đổi từ huyện Côn Đảo, Bà Rịa - Vũng Tàu "
+                              "theo khoản 163 Nghị quyết 1685/NQ-UBTVQH15)", out)
+
+    # 17b · phường trùng tên với thành phố của nó thì vẫn ghi đủ cả hai
+    def test_phuong_trung_ten_quan_ghi_du_ca_hai(self):
+        kq, out = self.chay(kieu_cu("phường Đông Hòa", "thành phố Dĩ An", tinh_thanh="Bình Dương"))
+        self.assertTaoDon(kq, out)
+        self.assertIn("quy đổi từ phường Đông Hòa, thành phố Dĩ An, Bình Dương", out)
+        kq, out = self.chay(kieu_cu("phường Dĩ An", "thành phố Dĩ An", tinh_thanh="Bình Dương"))
+        self.assertIn("phường Dĩ An, thành phố Dĩ An",
+                      out if kq["quyet_dinh"] == "TAO_DON_NHAP" else kq["tin_gui_khach"])
+
+    # 17c · quận có phường mà chỉ ghi quận thì vẫn hỏi phường/xã
+    def test_chi_co_quan_co_phuong_thi_hoi_phuong(self):
+        kq, out = self.chay(du_truong(phuong_xa=None, quan_huyen_cu="Quận 3"))
+        self.assertHoiLai(kq, out)
+        self.assertEqual(kq["loi"], [{"truong": "phuong_xa", "ly_do": "thiếu"}])
+
+    # 18 · '²'.isdigit() là True nhưng int('²') lỗi
+    def test_so_luong_chu_so_khong_phai_ascii(self):
+        for sl in ("²", "２", "٣"):
+            with self.subTest(so_luong=sl):
+                kq, out = self.chay(du_truong(so_luong=sl))
+                self.assertHoiLai(kq, out)
+                self.assertIn("so_luong", [l["truong"] for l in kq["loi"]])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -18,7 +18,7 @@ import re
 from ai import call_model
 from tracing import note
 
-from tools import validate_phone, convert_old_address, lookup_address, create_draft_order, chuan_hoa_tinh
+from tools import validate_phone, convert_old_address, lookup_address, create_draft_order, chuan_hoa_tinh, chuan_hoa_ten
 
 SYSTEM = """Bạn đọc một đoạn chat giữa shop bán lẻ và khách đã đồng ý mua, rồi trích thông tin nhận hàng.
 Chỉ trả MỘT object JSON, không viết gì khác, đúng các khoá sau (không có thì để null):
@@ -97,7 +97,7 @@ def _so_luong(v):
     """Trả (giá trị int hoặc None, lỗi hoặc None)."""
     if isinstance(v, bool):
         return None, "phải là số nguyên từ 1"
-    if isinstance(v, str) and v.strip().isdigit():
+    if isinstance(v, str) and re.fullmatch(r"[0-9]+", v.strip()):  # không dùng isdigit(): nó nhận cả '²'
         v = int(v.strip())
     if not isinstance(v, int):
         return None, "phải là số nguyên từ 1"
@@ -124,7 +124,15 @@ def _kiem(info: dict, text: str):
             continue
         if not truong[k]:
             loi.append({"truong": k, "ly_do": "thiếu"})
-    kieu_cu = bool(truong["phuong_xa_cu"])
+    # huyện không có phường/xã cũ (Côn Đảo): công cụ quy đổi được chỉ với tên huyện
+    ca_huyen = False
+    quan, phuong_cu = truong["quan_huyen_cu"], truong["phuong_xa_cu"]
+    if truong["tinh_thanh"] and quan and (chuan_hoa_ten(phuong_cu) == chuan_hoa_ten(quan) if phuong_cu
+                                          else not truong["phuong_xa"]):
+        ca_huyen = convert_old_address(truong["tinh_thanh"], quan, "")["ket_qua"] == "mot"
+    if ca_huyen:
+        truong["phuong_xa_cu"] = None
+    kieu_cu = ca_huyen or bool(truong["phuong_xa_cu"])
     if kieu_cu and not truong["quan_huyen_cu"]:
         loi.append({"truong": "quan_huyen_cu", "ly_do": "thiếu"})
     if not kieu_cu and not truong["phuong_xa"]:
@@ -153,8 +161,8 @@ def _kiem(info: dict, text: str):
     # Bước 6 · địa chỉ (chỉ gọi công cụ khi đủ tham số)
     tinh = truong["tinh_thanh"]
     if tinh and kieu_cu and truong["quan_huyen_cu"]:
-        cu = "%s, %s" % (truong["phuong_xa_cu"], truong["quan_huyen_cu"])
-        kq = convert_old_address(tinh, truong["quan_huyen_cu"], truong["phuong_xa_cu"])
+        cu = ", ".join(t for t in (truong["phuong_xa_cu"], truong["quan_huyen_cu"]) if t)
+        kq = convert_old_address(tinh, truong["quan_huyen_cu"], truong["phuong_xa_cu"] or "")
         moi = kq.get("phuong_moi") or []
         chon = None
         if kq.get("ket_qua") == "mot" and moi:

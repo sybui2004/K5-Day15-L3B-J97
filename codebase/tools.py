@@ -214,11 +214,3 @@ def create_draft_order(info: dict) -> dict:
             du_lieu["sdt"] = kq["sdt_chuan"]
     h = hashlib.sha1(json.dumps(du_lieu, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:8]
     return {"ma_don": "DN-" + h, "ma_van_don": "GHN-NHAP-" + h, "trang_thai": "cho_duyet"}
-
-
-@tool
-def search_example(query: str) -> list:
-    """(TẠM, giữ tương thích) Hàm ví dụ của khung, codebase/agent.py hiện còn import.
-    XOÁ cùng lúc X3 (feature/cp3-x3-agent) thay agent.py, để mỗi lần merge vào develop `python run.py` vẫn chạy.
-    Input: câu hỏi (str). Output: danh sách đoạn {"code", "text"}. Không tác động ra ngoài."""
-    return [{"code": "VD-1", "text": "(ví dụ) đoạn dữ liệu giả — thay bằng dữ liệu thật của bài toán"}]
