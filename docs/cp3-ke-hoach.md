@@ -26,14 +26,14 @@
 
 # Phần 2 · Chia cặp chặng 4 và ai giữ phần nào của `spec.md`
 
-Guide ("Cách chia việc", mục 2): **hết chặng thì đổi cặp hoặc đổi việc.** Từ giờ đến CP3 đổi cặp như sau, để người duyệt là người hiểu file bị sửa:
+Guide ("Cách chia việc", mục 2) cho phép **đổi cặp hoặc đổi việc** khi hết chặng. Nhóm **giữ nguyên hai cặp như CP2, chỉ đổi việc**, vì mỗi cặp đã quen code và file của nhau:
 
-| Cặp | Người | Việc | Vì sao ghép vậy |
-|---|---|---|---|
-| **Cặp X'** · chặn rủi ro | Sỹ, Việt Anh | X5 prompt từ chối · P3 luồng C | Cả hai đều sửa `codebase/agent.py` (Sỹ viết X3) |
-| **Cặp Y'** · đo | Hưng, An | câu thử 20–30 · Y7 `grade.py` · lượt 1 · video · mô phỏng | Hưng viết `tools.py` và màn hình duyệt, kiểm được `expected` phường và quay video; An chạy lượt 1 |
+| Cặp | Người | Việc đến CP3 |
+|---|---|---|
+| **Cặp X** | Sỹ, Hưng | Sỹ: X5 prompt từ chối, tự soát và nộp · Hưng: Y8 câu thử B23–B26, V1 video + mô phỏng thử |
+| **Cặp Y** | Việt Anh, An | Việt Anh: P3 luồng C + câu thử B20–B22 · An: Y7 `grade.py`, P4 lượt 1 |
 
-Người duyệt PR: **Sỹ ↔ Việt Anh**, **Hưng ↔ An**. Riêng hai PR spec/kế hoạch đêm nay do Hưng duyệt vì Hưng đã review PR #29.
+Người duyệt PR: **Sỹ ↔ Hưng**, **Việt Anh ↔ An** (như CP2).
 
 **`spec.md` — mỗi mục một người giữ** (người khác muốn sửa thì nhắn người giữ; ai cũng thêm dòng §10 cho thay đổi của mình):
 
@@ -56,7 +56,7 @@ Người duyệt PR: **Sỹ ↔ Việt Anh**, **Hưng ↔ An**. Riêng hai PR sp
 | 23:15–23:45 | Mở PR sửa spec + PR kế hoạch này | **Duyệt, merge** PR kế hoạch rồi PR sửa spec | Đọc P3 ở Phần 4 · tạo nhánh | Đọc Y7 ở Phần 4 · tạo nhánh |
 | 23:45–0:30 | **X5** prompt từ chối + test · thử tay B16, B17 | **Y8** câu thử B23–B26 (`thuong`) | **P3** `lich-su-khach.csv`, `get_customer_history`, bước 3 trong `agent.py`, test | **Y7** `eval/grade.py` + test |
 | 0:30 | **Mốc cắt luồng C** (xem dưới) · mở PR · đi ngủ | mở PR · đi ngủ | mở PR · đi ngủ | mở PR · đi ngủ |
-| 7:00–7:45 | Duyệt, merge P3 (Việt Anh) | Duyệt, merge Y7 (An) | Duyệt, merge X5 (Sỹ) | Duyệt, merge Y8 (Hưng) |
+| 7:00–7:45 | Duyệt, merge Y8 (Hưng) | Duyệt, merge X5 (Sỹ) | Duyệt, merge Y7 (An) | Duyệt, merge P3 (Việt Anh) **sau** khi Y8 đã merge |
 | 7:45–8:00 | `python3 -m unittest discover -s tests` + `run.py check` sạch trên `develop` | `simulate --try 10` · **quay video** trên `develop` mới | DATA_CARD dataset lịch sử khách · §5 dòng B22 | `python3 run.py eval --try 3` trên `develop` mới |
 | 8:00–8:30 | **Cả nhóm (guide chặng 4):** chốt bằng chứng + bảng impact §2 — số nào lấy từ file nào, ai cũng đọc được | | | |
 | 8:30–9:15 | **Cả nhóm: lượt 1 (P4).** An chạy · Việt Anh + An chấm tay 2 metric `nguoi` · Sỹ + Hưng đọc câu trượt, ghi nhóm lỗi | | | |
@@ -76,11 +76,11 @@ Người duyệt PR: **Sỹ ↔ Việt Anh**, **Hưng ↔ An**. Riêng hai PR sp
 |---|---|---|---|---|---|
 | 17 | `feature/cp3-ke-hoach` | kế hoạch này | Sỹ → Hưng | 23:30 | — |
 | 18 | `feature/cp3-spec-sua-review` | sửa spec theo review PR #29 | Sỹ → Hưng | 23:45 | — |
-| 19 | `feature/cp3-x5-prompt-tu-choi` | X5 | Sỹ → Việt Anh | 7:30 | — |
-| 20 | `feature/cp3-y7-grade` | Y7 | An → Hưng | 7:30 | — |
-| 21 | `feature/cp3-y8-cau-thu-26` | Y8 câu thử B23–B26 | Hưng → An | 7:30 | — |
-| 22 | `feature/cp3-p3-khach-cu` | P3 + câu thử B20–B22 | Việt Anh → Sỹ | 7:45 | rebase sau #19, #21 |
-| 23 | `feature/cp3-p4-luot-1` | P4 lượt 1 | An → Hưng | 9:30 | #19–#22 |
+| 19 | `feature/cp3-x5-prompt-tu-choi` | X5 | Sỹ → Hưng | 7:30 | — |
+| 20 | `feature/cp3-y7-grade` | Y7 | An → Việt Anh | 7:30 | — |
+| 21 | `feature/cp3-y8-cau-thu-26` | Y8 câu thử B23–B26 | Hưng → Sỹ | 7:30 | — |
+| 22 | `feature/cp3-p3-khach-cu` | P3 + câu thử B20–B22 | Việt Anh → An | 7:45 | rebase sau #19, #21 |
+| 23 | `feature/cp3-p4-luot-1` | P4 lượt 1 | An → Việt Anh | 9:30 | #19–#22 |
 | 24 | PR `develop` → `main` | F2, nộp CP3 | Sỹ | 9:45 | #23 |
 
 **Tránh xung đột:**
@@ -177,4 +177,4 @@ python3 run.py score eval/run-1.csv
 
 # Phần 5 · Sau CP3 (10:00 → CP4 14:30) — để biết trước
 
-Theo guide chặng 5–6: 10:00 **cả nhóm ngồi đọc câu trượt** → chọn **một** cải tiến · Cặp X': cải tiến → lượt 2 (`eval/run-2.csv`) · Cặp Y': `simulate` thật + `cost/cost-estimate.md` + §8 (Hưng) · Việt Anh §9 · bonus người dùng thử (`validation/log.md`) · 13:00 go / iterate / stop, slide, video dự phòng. Kế hoạch chi tiết viết ở `docs/cp4-ke-hoach.md` sau khi có lượt 1.
+Theo guide chặng 5–6: 10:00 **cả nhóm ngồi đọc câu trượt** → chọn **một** cải tiến · Cặp X (Sỹ, Hưng): cải tiến → lượt 2 (`eval/run-2.csv`); Hưng thêm `simulate` thật + `cost/cost-estimate.md` + §8 · Cặp Y (Việt Anh, An): chấm lượt 2, Việt Anh §9 · bonus người dùng thử (`validation/log.md`) · 13:00 go / iterate / stop, slide, video dự phòng. Kế hoạch chi tiết viết ở `docs/cp4-ke-hoach.md` sau khi có lượt 1.
