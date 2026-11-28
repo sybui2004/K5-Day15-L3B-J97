@@ -329,3 +329,30 @@ dialog[open] { animation: mo-hop 200ms var(--ease); }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .quay { border-top-color: var(--p-action); }
 }
+
+/* ---------- chat tài khoản khách, đăng nhập shop ---------- */
+.an-chu { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tag-shop, .tag-bot { font: 600 11px/1 var(--font-text); padding: 3px 7px; border-radius: 999px; margin-left: 6px; white-space: nowrap; }
+.tag-shop { background: var(--wait-bg); color: var(--wait); }
+.tag-bot { background: var(--ok-bg); color: var(--ok); }
+.nhom.bot .bong { background: #eef4f0; border: 1px dashed rgba(31, 107, 58, .35); }
+.tin-he-thong { align-self: center; margin-top: var(--s-3); font-size: var(--t-label); color: var(--p-muted);
+  background: var(--p-surface); padding: 4px 10px; border-radius: 999px; }
+.nhan-khach { margin-bottom: var(--s-3); }
+.nhan-khach.dang-tiep-quan { border-top: 3px solid var(--wait); }
+.nhan-khach .dau-the { display: flex; align-items: center; justify-content: space-between; padding: 0 0 var(--s-2); border: 0; }
+.nhan-khach textarea { width: 100%; font: 400 var(--t-body)/1.45 var(--font-text); padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--line-strong); border-radius: var(--r-btn); resize: vertical; background: var(--card); color: var(--p-ink); }
+.nhan-khach .hang-nut { padding: var(--s-3) 0 0; }
+.nhan-khach .phu { margin-top: var(--s-2); }
+.canh-bao { color: var(--wait); }
+.don-cu-hop { margin-top: var(--s-3); }
+.don-cu-hop summary { cursor: pointer; font-weight: 600; font-size: var(--t-small); }
+.don-cu { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-2); font-size: var(--t-small); }
+.hop-dang-nhap { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-5); width: min(380px, calc(100vw - 32px)); }
+.hop-dang-nhap::backdrop { background: rgba(10, 10, 10, .45); }
+.form-dn-shop { display: grid; gap: var(--s-2); }
+.form-dn-shop label { font: 600 var(--t-label)/1.3 var(--font-text); margin-top: var(--s-2); }
+.form-dn-shop input { font: 400 16px/1.4 var(--font-text); min-height: 44px; padding: 0 var(--s-3);
+  border: 1px solid var(--line-strong); border-radius: var(--r-btn); }
+.form-dn-shop .btn { margin-top: var(--s-3); min-height: 44px; }

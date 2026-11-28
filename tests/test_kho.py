@@ -32,6 +32,54 @@ class _ChungKho:
         self.assertEqual(lan["trace"]["buoc"][0]["ten"], "validate_phone")
         self.assertEqual(lan["nguon"], "moi")
 
+    # ---- chat khách (spec 2026-11-28-chat-khach-hitl §5.7) ----
+    def test_tai_khoan_trung_ten(self):
+        i = self.k.tao_tai_khoan("lan", "scrypt$a$b", "khach", "1.2.3.4")
+        self.assertIsInstance(i, int)
+        with self.assertRaises(kho.TrungTen):
+            self.k.tao_tai_khoan("lan", "scrypt$c$d", "khach", "1.2.3.4")
+        tk = self.k.tim_tai_khoan("lan")
+        self.assertEqual((tk["id"], tk["username"], tk["mat_khau_bam"], tk["vai"]), (i, "lan", "scrypt$a$b", "khach"))
+        self.assertIsNone(self.k.tim_tai_khoan("khong-co"))
+
+    def test_phien(self):
+        i = self.k.tao_tai_khoan("mai", "x", "khach", "1.1.1.1")
+        self.k.luu_phien("bam1", i, 2_000_000_000.0)
+        p = self.k.doc_phien("bam1")
+        self.assertEqual((p["tai_khoan_id"], p["username"], p["vai"]), (i, "mai", "khach"))
+        self.assertAlmostEqual(p["het_han"], 2_000_000_000.0, places=0)
+        self.k.xoa_phien("bam1")
+        self.assertIsNone(self.k.doc_phien("bam1"))
+
+    def test_tin_theo_thu_tu_va_sau_id(self):
+        i = self.k.tao_tai_khoan("hoa", "x", "khach", "1.1.1.1")
+        j = self.k.tao_tai_khoan("binh", "x", "khach", "1.1.1.1")
+        t1 = self.k.ghi_tin(i, "khach", "lấy 1 áo")
+        self.k.ghi_tin(j, "khach", "của người khác")
+        t2 = self.k.ghi_tin(i, "bot", "dạ cho em xin sđt")
+        t3 = self.k.ghi_tin(i, "khach", "0900000001")
+        self.assertLess(t1["id"], t2["id"])
+        self.assertEqual([t["noi_dung"] for t in self.k.doc_tin(i)], ["lấy 1 áo", "dạ cho em xin sđt", "0900000001"])
+        self.assertEqual([t["id"] for t in self.k.doc_tin(i, sau_id=t1["id"])], [t2["id"], t3["id"]])
+        self.assertEqual(t2["nguoi_noi"], "bot")
+
+    def test_cuoc_chat_va_don_cu_ben_sau_khi_mo_lai(self):
+        i = self.k.tao_tai_khoan("an", "x", "khach", "1.1.1.1")
+        d = {"che_do": "shop", "trang_thai": "cho_duyet", "phien_ban": 3, "kq": {"quyet_dinh": "TAO_DON_NHAP"},
+             "ma_don": "DN-1", "ma_van_don": "GHN-NHAP-1", "co_tin_chua_doc": True, "moc_tin_id": 7}
+        self.k.luu_cuoc_chat(i, d)
+        self.k.luu_cuoc_chat(i, dict(d, phien_ban=4))  # ghi đè
+        self.k.ghi_don_cu(i, {"moc_tin_id": 5, "ket_qua": "da_duyet", "ma_don": "DN-0", "truong": {"sdt": "0900000001"},
+                              "luc": "2026-11-28T10:00:00"})
+        k2 = self.mo_lai()
+        [c] = k2.doc_cac_cuoc_chat()
+        self.assertEqual((c["tai_khoan_id"], c["username"], c["phien_ban"], c["che_do"], c["kq"]),
+                         (i, "an", 4, "shop", {"quyet_dinh": "TAO_DON_NHAP"}))
+        self.assertTrue(c["co_tin_chua_doc"])
+        [dc] = k2.doc_don_cu(i)
+        self.assertEqual((dc["ma_don"], dc["ket_qua"], dc["truong"]), ("DN-0", "da_duyet", {"sdt": "0900000001"}))
+        self.assertEqual(k2.tim_tai_khoan("an")["id"], i)
+
     def test_gioi_han(self):
         for i in range(5):
             self.k.ghi_duyet(dict(DUYET, ma_hoi_thoai="HT-%d" % i))
@@ -42,6 +90,9 @@ class TestKhoFile(_ChungKho, unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.k = kho.KhoFile(os.path.join(self.tmp.name, "nk.jsonl"))
+
+    def mo_lai(self):
+        return kho.KhoFile(os.path.join(self.tmp.name, "nk.jsonl"))
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -91,6 +142,9 @@ class TestKhoPostgres(_ChungKho, unittest.TestCase):
         sep = "&" if "?" in url else "?"
         self.url = url + sep + "options=-csearch_path%3D" + self.schema
         self.k = kho.KhoPostgres(self.url)
+
+    def mo_lai(self):
+        return kho.KhoPostgres(self.url)
 
     def tearDown(self):
         import psycopg

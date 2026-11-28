@@ -49,6 +49,15 @@ Thêm `NAP_NEN=1` vào `.env` rồi chạy `python run.py`:
 - Có trục trặc thì xoá dòng `NAP_NEN=1`, chạy lại: về cách cũ (xử lý xong hộp thư rồi mới mở trang).
 - Lời nói gợi ý: "Đây là lúc đông khách: nhiều khách nhắn chốt đơn cùng lúc. AI tự đọc từng hội thoại, cái nào đủ và chắc thì lên đơn nháp, cái nào thiếu thì soạn sẵn tin hỏi lại, cái nào lừa thì từ chối. Chủ shop chỉ việc duyệt."
 
+### Người xem đóng vai khách (luồng E, trên j97.sunstack.org)
+
+- Bạn mở https://j97.sunstack.org/ → đăng nhập shop `admin` / mật khẩu (`ADMIN_PASSWORD`, mặc định `admin`).
+- Đưa người xem link **https://j97.sunstack.org/khach.html** (QR trên slide nếu có): đăng ký (tên đăng nhập, mật khẩu, nhập lại), rồi nhắn chốt đơn với dữ liệu dựng, vd "lấy 1 áo, Lan 0904444444, 12 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM".
+- Trên màn hình shop, cuộc chat `TK-<tên>` lên đầu hộp thư trong vài giây. Bot tự trả lời (tin "Bot (tự động)"), thiếu gì thì hỏi lại, đủ thì nhắn "shop đã ghi nhận đơn" và lên phiếu nháp.
+- **HITL:** gõ vào ô **Nhắn khách** → khách thấy tin "Shop", cuộc chat chuyển nhãn **Shop đang trả lời**, bot thôi trả lời khách đó. Khách nhắn thêm lúc này thì có nút **Cho AI đọc lại** để cập nhật phiếu (không nhắn khách). Bấm **Trả lại cho bot** để bot trả lời từ tin kế tiếp.
+- Bấm **Duyệt đơn** → khách nhận "Đơn DN-… đã được shop xác nhận". Khách nhắn tiếp là đơn mới; đơn cũ ở mục "Đơn trước của khách".
+- Nhiều người nhắn cùng lúc: AI trả lời lần lượt, khách thấy "Shop đang soạn tin…". Gửi quá 5 tin / phút → "Gửi nhanh quá, thử lại sau N giây".
+
 ## 3. Kịch bản demo (slide trang 4, khoảng 2 phút)
 
 Bấm **Hội thoại mới** (góc phải trên), điền mã khách, dán đoạn chat (mỗi dòng một tin; dòng bắt đầu `Shop:` là tin của shop), bấm **Chạy AI**. Mỗi ca mất khoảng 5–10 giây.
@@ -100,6 +109,8 @@ Nói trong lúc chạy:
 | Phiếu báo "phiếu đang mở đã cũ" | Khách vừa nhắn thêm và AI đã đọc lại: xem phiếu mới rồi mới duyệt. |
 
 ## 8. Sau buổi demo
+
+- Bản deploy: xoá tài khoản và chat người xem đã tạo (`docs/deploy.md` mục 4).
 
 - Ctrl+C để tắt màn hình duyệt.
 - Xoá `data/lan-chay-web.jsonl` và `data/nhat-ky-duyet.jsonl` (hoặc bảng Postgres `lan_chay`, `nhat_ky_duyet` nếu có bật) vì có tên, sđt, địa chỉ của các hội thoại đã chạy.

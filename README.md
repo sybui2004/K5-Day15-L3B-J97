@@ -111,7 +111,8 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 | Lịch sử khách cũ (luồng C) | Thật, dữ liệu dựng | `get_customer_history` đọc `data/lich-su-khach.csv`: 6 khách tự dựng, không phải khách thật |
 | Hộp thư, màn hình duyệt | Thật, dữ liệu dựng | `data/hop-thu-mau.jsonl`: 10 hội thoại tự dựng. Duyệt chỉ đổi trạng thái đơn trên máy, không lưu vào hệ thống bán hàng nào |
 | Tạo đơn, vận đơn GHN | **Giả** | `create_draft_order` chỉ tạo đơn nháp; mã vận đơn `GHN-NHAP-…` là mã giả, **không gọi API GHN**, không bàn giao đơn thật |
-| Gửi tin cho khách | **Giả** | Tin hỏi lại chỉ hiện để chủ shop bấm Chép, **không gửi Facebook / website** |
+| Gửi tin cho khách | **Giả** với hộp thư mẫu, **thật trong trang demo** | Hộp thư mẫu / Hội thoại mới: tin hỏi lại chỉ hiện để chủ shop bấm Chép, **không gửi Facebook / website**. Tài khoản khách trên `/khach.html` (luồng E): bot và shop nhắn thẳng vào khung chat của khách trong bản demo; vẫn không gửi Facebook / website |
+| Đăng nhập | **Thật** | Khách tự đăng ký ở `/khach.html` (mật khẩu băm scrypt, chặn spam); shop đăng nhập `admin` (mật khẩu `ADMIN_PASSWORD`, mặc định `admin`) mới vào được màn hình duyệt và mọi API của shop |
 | Bộ câu thử | Thật + dựng | 30 câu: 3 từ chat thật đã che (P2–P4), 7 trích nguồn công khai (3 địa chỉ ví dụ trên since98.vn, 4 review app GHN), 20 tự viết (`data/DATA_CARD.md`) |
 
 ## Dùng AI vào việc gì

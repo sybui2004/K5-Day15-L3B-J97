@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Nhắn tin chốt đơn với shop (bản demo nhóm J97).">
+<meta name="theme-color" content="#f8f8f8">
+<title>Nhắn shop · J97</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/khach.css">
+</head>
+<body class="trang-khach">
+<div class="khung-khach">
+  <header class="dau-khach">
+    <div>
+      <h1>Nhắn shop</h1>
+      <p class="phu" id="xin-chao">Bản demo nhóm J97</p>
+    </div>
+    <button type="button" class="btn" id="dang-xuat" hidden>Đăng xuất</button>
+  </header>
+  <p class="nhac-demo" role="note">Bản demo — đừng nhập tên, số điện thoại, địa chỉ thật.</p>
+
+  <section id="man-vao" class="man-vao" aria-labelledby="tieu-de-vao">
+    <h2 id="tieu-de-vao" class="an-chu">Đăng nhập hoặc đăng ký</h2>
+    <div class="tab-vao" role="tablist">
+      <button type="button" role="tab" id="tab-dang-nhap" aria-selected="true" aria-controls="form-dang-nhap">Đăng nhập</button>
+      <button type="button" role="tab" id="tab-dang-ky" aria-selected="false" aria-controls="form-dang-ky">Đăng ký</button>
+    </div>
+    <form id="form-dang-nhap" class="form-vao" novalidate>
+      <label for="dn-ten">Tên đăng nhập</label>
+      <input id="dn-ten" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required>
+      <label for="dn-mk">Mật khẩu</label>
+      <input id="dn-mk" type="password" autocomplete="current-password" maxlength="128" required>
+      <p class="loi" id="loi-dang-nhap" aria-live="polite"></p>
+      <button type="submit" class="btn btn--chinh">Đăng nhập</button>
+    </form>
+    <form id="form-dang-ky" class="form-vao" novalidate hidden>
+      <label for="dk-ten">Tên đăng nhập</label>
+      <input id="dk-ten" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required
+             aria-describedby="dk-ten-goi-y">
+      <p class="phu" id="dk-ten-goi-y">3–32 ký tự: chữ thường không dấu, số, dấu _ và dấu .</p>
+      <label for="dk-mk">Mật khẩu</label>
+      <input id="dk-mk" type="password" autocomplete="new-password" minlength="6" maxlength="128" required>
+      <label for="dk-mk2">Nhập lại mật khẩu</label>
+      <input id="dk-mk2" type="password" autocomplete="new-password" minlength="6" maxlength="128" required>
+      <p class="loi" id="loi-dang-ky" aria-live="polite"></p>
+      <button type="submit" class="btn btn--chinh">Đăng ký</button>
+    </form>
+  </section>
+
+  <section id="man-chat" class="man-chat" hidden aria-label="Cuộc chat với shop">
+    <ol id="ds-tin" class="ds-tin" aria-live="polite"></ol>
+    <p id="dang-soan" class="dang-soan" hidden>Shop đang soạn tin…</p>
+    <form id="form-gui" class="form-gui" novalidate>
+      <label for="o-tin" class="an-chu">Tin nhắn</label>
+      <textarea id="o-tin" rows="2" maxlength="500" placeholder="Nhắn shop: sản phẩm, tên, số điện thoại, địa chỉ nhận hàng…"></textarea>
+      <button type="submit" class="btn btn--chinh" id="nut-gui">Gửi</button>
+    </form>
+    <p class="loi" id="loi-gui" aria-live="polite"></p>
+  </section>
+</div>
+<script src="/khach.js"></script>
+</body>
+</html>

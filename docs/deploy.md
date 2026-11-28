@@ -60,13 +60,14 @@ Tài khoản sunstack.org có app Access **sunstack-internal** phủ `*.sunstack
 - **Chỉ người được mời (khuyên dùng):** Action **Allow**, Include **Emails** (email nhóm, giám khảo), bật Login method **One-time PIN**.
 - **Công khai:** Action **Bypass**, Include **Everyone**. Action **Allow** + Everyone vẫn bắt đăng nhập (302 sang trang login).
 
-Màn hình duyệt là màn hình vận hành, không có đăng nhập riêng. Khi để **Bypass**, mọi người vào đều:
+Từ luồng E (chat khách, sau CP4), **trang công khai nhưng dữ liệu có đăng nhập** ở web.py (nginx trả file tĩnh tự do, chỉ `/api/*` qua web.py):
 
-- **đọc được dữ liệu người khác đã nhập**: tab Hộp thư hiện mọi hội thoại (cả hội thoại gõ ở **Hội thoại mới**), tab Nhật ký đọc từ Postgres các lần chạy AI kèm trace: output model, dữ liệu công cụ, có thể chứa tên, SĐT, địa chỉ. Volume `j97_pgdata` giữ các bản ghi này qua mỗi lần khởi động lại;
-- duyệt / huỷ đơn được;
-- gọi model bằng key của nhóm qua **Hội thoại mới**, **Khách trả lời** và **Nhận tin mới**. nginx giới hạn chung ba thao tác này 6 lần/phút mỗi IP, không chặn được người dùng nhiều IP.
+- **Shop:** màn hình duyệt (`/`) hiện hộp đăng nhập; tài khoản `admin`, mật khẩu `ADMIN_PASSWORD` trong `.env` (compose truyền vào `be`; để trống là `admin`, máy chủ in cảnh báo). Hộp thư, Nhật ký, duyệt / huỷ, Hội thoại mới, Khách trả lời, Nhận tin mới, nhắn khách đều cần đăng nhập shop.
+- **Khách:** `/khach.html`, tự đăng ký, chỉ đọc / gửi tin trong cuộc chat của mình.
+- **Chặn spam / tốn tiền model:** nginx zone `tk` 5 lần/phút/IP cho `/api/dang-ky`, `/api/dang-nhap`; zone `ai` 6 lần/phút/IP cho `/api/moi`, `/api/tra-loi`, `/api/nhan-them`, `/api/chat/gui`. web.py thêm: 5 tài khoản / IP / giờ, 10 lần đăng nhập sai / 10 phút, 5 tin / phút / tài khoản, 60 tin khách / phút toàn máy.
+- **IP thật:** nginx ghi đè `X-Real-IP` bằng `CF-Connecting-IP` và tự đặt `X-Forwarded-Proto` (cookie có `Secure` khi https); web.py chỉ tin hai header này từ `TRUSTED_PROXY` (mạng nội bộ compose).
 
-Chỉ để công khai khi demo với dữ liệu dựng: nhắc người xem không nhập dữ liệu thật, và sau demo xoá lịch sử (`docker compose down -v` xoá cả DB, hoặc `truncate nhat_ky_duyet, lan_chay`).
+Để **Bypass** (công khai) được, nhưng vẫn chỉ dùng dữ liệu dựng: trang khách nhắc người xem không nhập dữ liệu thật, đặt `ADMIN_PASSWORD` khác `admin` nếu không muốn người xem đoán được tài khoản shop, và sau demo xoá lịch sử (`docker compose down -v` xoá cả DB, hoặc `truncate tai_khoan, tin_nhan, cuoc_chat, don_cu, phien_dang_nhap, nhat_ky_duyet, lan_chay cascade`).
 
 ## Lỗi hay gặp
 

@@ -47,6 +47,8 @@ services:
       WEB_HOST: 0.0.0.0
       WEB_PORT: "8000"
       WEB_ALLOWED_HOSTS: ${PUBLIC_HOST:-j97.sunstack.org},127.0.0.1:${FE_PORT:-8080},localhost:${FE_PORT:-8080}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}    # tài khoản shop "admin"; đặt trong .env khi mở công khai
+      TRUSTED_PROXY: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16   # chỉ fe (nginx) gọi được be; tin X-Real-IP / X-Forwarded-Proto từ đây
     networks: [backend, frontend]
 
   fe:
