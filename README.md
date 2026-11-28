@@ -103,7 +103,7 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 | Thành phần | Thật / Giả | Ghi chú |
 |---|---|---|
-| Lời gọi AI ở quyết định trung tâm | **Thật** (bắt buộc từ CP3) | Model: `claude-sonnet-5-5`, `MODEL_EFFORT=low`, qua SDK `anthropic` (`codebase/ai.py`). Mỗi hội thoại gọi model 1 lần: đọc hội thoại, trả JSON. Chưa có `.env` thì chạy chế độ giả |
+| Lời gọi AI ở quyết định trung tâm | **Thật** (bắt buộc từ CP3) | Model: `claude-sonnet-5-5`, `MODEL_EFFORT=low`, qua SDK `anthropic` (`codebase/ai.py`). Mỗi hội thoại gọi model 1 lần để đọc hội thoại, trả JSON; với `GUARD=nemo` (mặc định) lớp chặn NeMo gọi thêm 1 lần trước đó, bị chặn thì dừng ở lần đầu (`codebase/guard.py`). Chưa có `.env` thì chạy chế độ giả |
 | Kiểm sđt, quy đổi và tra phường/xã | **Thật** | Code, không dùng AI: `validate_phone`, `convert_old_address`, `lookup_address` (`codebase/tools.py`) trên bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15 (`data/chuyen-doi-dia-gioi.csv`) |
 | Lịch sử khách cũ (luồng C) | Thật, dữ liệu dựng | `get_customer_history` đọc `data/lich-su-khach.csv`: 6 khách tự dựng, không phải khách thật |
 | Hộp thư, màn hình duyệt | Thật, dữ liệu dựng | `data/hop-thu-mau.jsonl`: 10 hội thoại tự dựng. Duyệt chỉ đổi trạng thái đơn trên máy, không lưu vào hệ thống bán hàng nào |
@@ -115,7 +115,9 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 2–3 dòng (bắt buộc): nhóm dùng công cụ AI nào để làm gì, người kiểm lại phần nào. Chi tiết: [docs/ai-usage.md](docs/ai-usage.md). Coding agent đọc [AGENTS.md](AGENTS.md).
 
-- **Claude Code** (Sỹ, Việt Anh): viết code luồng chính, hộp thư, luồng khách cũ; soạn data tự dựng (`hop-thu-mau.jsonl`, `lich-su-khach.csv`); viết các mục spec và README. Mọi PR có người cặp kia duyệt, 119 test chạy trước khi merge.
+- **Claude Code** (Sỹ, Việt Anh): viết code luồng chính, hộp thư, luồng khách cũ; soạn data tự dựng (`hop-thu-mau.jsonl`, `lich-su-khach.csv`); viết các mục spec và README. Mọi PR có người cặp kia duyệt, bộ test (`python -m unittest discover -s tests`, 179 test) chạy trước khi merge.
+- **Claude Code** (Sỹ, CP4): soạn `cost/personas.yaml`, chạy mô phỏng `simulate-1`, viết `cost/cost-estimate.md`, `spec.md` §8 và slide 8 trang. Sỹ đối chiếu số với `simulate-1-summary.md`, xem từng trang PDF.
+- **Codex**: rà văn phong câu hỏi phỏng vấn (Sỹ); trả lời đoạn 11 của Y1, ghi riêng, không chấm (Việt Anh); sửa kế hoạch CP4 và bảng người nói (Sỹ).
 - **ChatGPT** (Việt Anh, task Y1): chạy tay đoạn chat chốt đơn để tìm lỗi trước khi viết tiêu chí chấm. Chấm `pass` bằng code (`eval/grade.py`), không dùng LLM.
 - Số liệu, trích dẫn phỏng vấn không do AI tạo. Phần của Hưng, An: *chờ xác nhận*.
 

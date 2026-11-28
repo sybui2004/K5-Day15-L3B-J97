@@ -68,7 +68,7 @@ Tỷ giá: **26.030 đ / USD** (Vietcombank, bán ra, niêm yết 05:42 ngày 28
   | claude-opus-5-5 | $11.58 ≈ 301.400đ | 618% (không đủ bù) | 244% (không đủ bù) |
 
   f\* = chi phí / shop / tháng ÷ phí ship đang mất: tỉ lệ phí ship AI phải giúp tránh để hoà vốn. f\* > 100% nghĩa là riêng phí ship không đủ bù, kể cả tránh hết lỗi.
-- **Kết luận một dòng — đáng làm không:** với Sonnet 5.5 (model đang chạy), riêng phí ship không đủ bù (f\* 122–309%), phải tính thêm ≈ 214 phút / shop / tháng đổi địa chỉ cũ mới có thể đáng; với Haiku 5.5 chỉ cần tránh 6–15% phí ship đang mất, **nếu** Haiku đạt tỉ lệ như Sonnet. Kết luận phụ thuộc ba số chưa đo: tỉ lệ lỗi AI tránh được, tỉ lệ đạt eval của Haiku, và ba tỉ lệ tự ước tính của số shop. Go / iterate / stop: nhóm chốt.
+- **Kết luận một dòng — đáng làm không:** với Sonnet 5.5 (model đang chạy), riêng phí ship không đủ bù (f\* 122–309%), phải tính thêm ≈ 214 phút / shop / tháng đổi địa chỉ cũ mới có thể đáng; với Haiku 5.5 chỉ cần tránh 6–15% phí ship đang mất, **nếu** Haiku đạt tỉ lệ như Sonnet. Kết luận phụ thuộc ba số chưa đo: tỉ lệ lỗi AI tránh được, tỉ lệ đạt eval của Haiku, và ba tỉ lệ tự ước tính của số shop. **Nhóm chốt: iterate** (28/11) — giữ lát cắt và ba tỉ lệ tự ước tính hiện tại; trước khi go phải chạy eval trên Haiku và đo tỉ lệ lỗi AI tránh được.
 
 ## 4. Độ nhạy và chi phí ngoài model
 
