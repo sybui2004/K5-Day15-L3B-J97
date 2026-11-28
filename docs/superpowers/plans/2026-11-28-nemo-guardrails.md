@@ -264,9 +264,9 @@ def test_trace_dem_hai_lan_goi_model(self):
 - Consumes: lượt chạy thêm với `GUARD=nemo` (`python run.py eval` → file `eval/run-N.csv` mới, dự kiến `run-6.csv`) và trace cùng số; lượt 2 (`run-5`) làm số `GUARD=tat`; số §8 từ `simulate --try` do Hưng chạy.
 
 - [ ] **Step 0: Kiểm guard có chạy, rồi ghi `eval/report.md`**
-  - Mỗi câu trong trace của lượt chạy thêm có **2** sự kiện `model`; có note "lớp chặn NeMo lỗi" thì ghi tên câu, không tính câu đó là "guard cho qua".
+  - Trong trace của lượt chạy thêm, câu cho qua có **2** sự kiện `model`, câu bị guard chặn có **1** kèm note "từ chối: lớp chặn đầu vào (NeMo)"; có note "lớp chặn NeMo lỗi" thì ghi tên câu, không tính câu đó là "guard cho qua".
   - Ghi: guard tự chặn x/8 câu `tu_choi` (note "từ chối: lớp chặn đầu vào (NeMo)"); guard chặn nhầm y/22 câu `thuong`/`kho`; kết quả cuối theo nhóm so với lượt 2; số lần gọi model và token mỗi câu.
-  - Ghi rõ: số này cần `nemoguardrails` đã cài; máy chưa cài thì guard fail-open, thực chất là `GUARD=tat`. Cách kiểm: trace có 2 sự kiện `model` mỗi câu.
+  - Ghi rõ: số này cần `nemoguardrails` đã cài; máy chưa cài thì guard fail-open, thực chất là `GUARD=tat`. Cách kiểm: câu cho qua có 2 sự kiện `model`, câu bị chặn có note "từ chối: lớp chặn đầu vào (NeMo)".
 
 - [ ] **Step 1: spec §4**
   - Sơ đồ: thêm ô `"Lớp chặn đầu vào · NeMo Guardrails self check input (1 lần gọi model)"` giữa `A[Một hội thoại]` và Bước 1, nhánh "bị chặn" đi tới `R`.

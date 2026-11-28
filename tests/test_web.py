@@ -10,6 +10,9 @@ import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "codebase"))
+# Test luồng cũ không gọi lớp chặn NeMo (máy có .env thật sẽ gọi API). Guard có test riêng: tests/test_guard.py,
+# TestGuardTrongAgent.
+os.environ["GUARD"] = "tat"
 
 import agent  # noqa: E402
 import tracing  # noqa: E402
