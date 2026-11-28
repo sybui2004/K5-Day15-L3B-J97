@@ -23,6 +23,7 @@
     <button type="button" class="tab" data-xem="nhat-ky" aria-pressed="false">Nhật ký</button>
   </nav>
   <div class="nut-tren">
+    <button type="button" class="btn" id="dang-xuat" hidden>Đăng xuất</button>
     <button type="button" class="btn" id="nhan-them" hidden title="Mô phỏng 5 tin chốt đơn đến cùng lúc (data/hop-thu-them.jsonl)">Nhận tin mới (5)</button>
     <button type="button" class="btn btn--chinh" id="mo-moi">
       <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10"/></svg>
@@ -104,6 +105,19 @@
 </dialog>
 
 <datalist id="ds-phuong"></datalist>
+
+<dialog id="hop-dang-nhap" class="hop-dang-nhap" aria-labelledby="dn-shop-tieu-de">
+  <form id="form-dn-shop" class="form-dn-shop" novalidate>
+    <h2 id="dn-shop-tieu-de">Đăng nhập shop</h2>
+    <p class="phu">Màn hình duyệt đơn chỉ dành cho shop. Khách nhắn shop ở <a href="/khach.html">trang khách</a>.</p>
+    <label for="dn-shop-ten">Tên đăng nhập</label>
+    <input id="dn-shop-ten" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32" required>
+    <label for="dn-shop-mk">Mật khẩu</label>
+    <input id="dn-shop-mk" type="password" autocomplete="current-password" maxlength="128" required>
+    <p class="loi" id="loi-dn-shop" aria-live="polite"></p>
+    <button type="submit" class="btn btn--chinh">Đăng nhập</button>
+  </form>
+</dialog>
 <script src="/app.js"></script>
 </body>
 </html>

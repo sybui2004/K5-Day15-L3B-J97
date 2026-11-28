@@ -43,9 +43,38 @@ function el(tag, attrs, ...con) {
 async function goi(duong, body) {
   const r = await fetch(duong, body === undefined ? {} : {method: "POST",
     headers: {"Content-Type": "application/json", "X-Man-Hinh-Duyet": "1"}, body: JSON.stringify(body)});
-  const d = await r.json();
-  if (!r.ok) { const e = new Error(d.loi || r.statusText); e.chi_tiet = d.chi_tiet; throw e; }
+  let d = {};
+  try { d = await r.json(); } catch (e) { /* trang lỗi không phải JSON */ }
+  if (r.status === 401) hienDangNhap();
+  if (!r.ok) { const e = new Error(d.loi || r.statusText); e.chi_tiet = d.chi_tiet; e.status = r.status; throw e; }
   return d;
+}
+
+/* ---------- đăng nhập shop ---------- */
+function hienDangNhap(loi) {
+  clearTimeout(henNap);
+  const h = $("hop-dang-nhap");
+  $("loi-dn-shop").textContent = loi || "";
+  if (!h.open) { h.showModal(); $("dn-shop-ten").focus(); }
+}
+async function dangNhapShop(e) {
+  e.preventDefault();
+  const nut = e.target.querySelector("button[type=submit]"); nut.disabled = true;
+  try {
+    const d = await goi("/api/dang-nhap", {username: $("dn-shop-ten").value.trim(), mat_khau: $("dn-shop-mk").value});
+    if (d.vai !== "shop") { await goi("/api/dang-xuat", {}); hienDangNhap("Tài khoản này là khách. Khách nhắn shop ở /khach.html"); return; }
+    $("dn-shop-mk").value = ""; $("hop-dang-nhap").close(); $("dang-xuat").hidden = false;
+    await tai(false);
+  } catch (err) { $("loi-dn-shop").textContent = err.message; }
+  finally { nut.disabled = false; }
+}
+async function batDau() {
+  try {
+    const d = await goi("/api/toi");
+    if (d.vai !== "shop") { hienDangNhap("Đang đăng nhập tài khoản khách. Đăng nhập tài khoản shop để duyệt đơn."); return; }
+    $("dang-xuat").hidden = false;
+    await tai(false);
+  } catch (e) { if (e.status !== 401) $("cot-giua").replaceChildren(el("p", {class: "trong", text: "Không tải được hộp thư: " + e.message})); }
 }
 // `ma`: hội thoại phát ra thông báo. Kết quả về muộn của hội thoại khác thì không hiện lên khung đang xem.
 function bao(text, sai, ma) {
@@ -65,7 +94,8 @@ async function tai(giu) {
   if (giu && chon) {
     const moi = phien.find(p => p.ma_hoi_thoai === chon);
     // lúc tự làm mới (giu === "nen"): chỉ vẽ lại khung chi tiết khi hội thoại đang xem đổi, để không xoá chữ chủ shop đang gõ
-    if (giu !== "nen" || !cu || !moi || cu.trang_thai !== moi.trang_thai || cu.phien_ban !== moi.phien_ban) veChiTiet(moi);
+    if (giu !== "nen" || !cu || !moi || cu.trang_thai !== moi.trang_thai || cu.phien_ban !== moi.phien_ban ||
+        (cu.tin || []).length !== (moi.tin || []).length || cu.che_do !== moi.che_do) veChiTiet(moi);
   }
   henTuLamMoi();
 }
@@ -73,7 +103,10 @@ async function tai(giu) {
 function henTuLamMoi() {
   clearTimeout(henNap);
   // tính cả từ danh sách: còn dòng "đang xử lý" thì vẫn tự làm mới
-  if (tong && (tong.dang_xu_ly > 0 || phien.some(p => p.trang_thai === "dang_xu_ly"))) henNap = setTimeout(() => tai("nen").catch(() => henTuLamMoi()), 1500);
+  // khách có thể nhắn bất cứ lúc nào: shop đã đăng nhập thì luôn tự làm mới (nhanh hơn khi AI đang xử lý)
+  if (!tong) return;
+  const nhanh = tong.dang_xu_ly > 0 || phien.some(p => p.trang_thai === "dang_xu_ly");
+  henNap = setTimeout(() => tai("nen").catch(e => { if (e.status !== 401) henTuLamMoi(); }), nhanh ? 1500 : 2000);
 }
 async function nhanThem() {
   const b = $("nhan-them"); b.disabled = true;
@@ -112,6 +145,7 @@ function veTong() {
 function cacLuot(text) {  // "Mã khách: KH-1 | Khách: … | Shop: …" → [{ai, nd}]
   return (text ? text.split(" | ") : []).map(l => { const i = l.indexOf(": "); return i > 0 ? {ai: l.slice(0, i), nd: l.slice(i + 2)} : {ai: "", nd: l}; });
 }
+function tinCuoiChat(p) { const t = (p.tin || []).filter(x => x.nguoi_noi !== "he_thong"); return t.length ? (t[t.length - 1].nguoi_noi === "khach" ? "" : "Shop: ") + t[t.length - 1].noi_dung : ""; }
 function tinKhachCuoi(p) { const k = cacLuot(p.text).filter(l => l.ai === "Khách"); return k.length ? k[k.length - 1].nd : ""; }
 
 function veHopThu() {
@@ -130,9 +164,10 @@ function veHopThu() {
       tabindex: "0", "aria-current": p.ma_hoi_thoai === chon ? "true" : null,
       on: {click: () => chonHoiThoai(p.ma_hoi_thoai), keydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); chonHoiThoai(p.ma_hoi_thoai); } }}},
     el("div", {class: "dong-1"},
-      el("span", {class: "ten-khach"}, p.ma_khach || "Khách mới", p.nguon === "moi" ? el("span", {class: "moi-tag", text: "mới"}) : null),
+      el("span", {class: "ten-khach"}, p.ma_khach || "Khách mới", p.nguon === "moi" ? el("span", {class: "moi-tag", text: "mới"}) : null,
+        p.nguon === "khach" && p.che_do === "shop" ? el("span", {class: "tag-shop", text: "Shop đang trả lời"}) : null),
       el("span", {class: "chip " + p.trang_thai, text: NHAN[p.trang_thai]})),
-    el("div", {class: "xem-truoc", text: p.loi_doc ? "Không đọc được hội thoại này" : tinKhachCuoi(p)}),
+    el("div", {class: "xem-truoc", text: p.loi_doc ? "Không đọc được hội thoại này" : p.nguon === "khach" ? tinCuoiChat(p) : tinKhachCuoi(p)}),
     el("div", {class: "ma-ht"}, el("span", {text: p.ma_hoi_thoai}),
       p.so_luot_hoi_lai ? el("span", {class: "hoi-lai", text: "hỏi lại " + p.so_luot_hoi_lai + " lần"}) : null)))
     : [el("li", {class: "trong-loc", text: "Không có hội thoại nào ở mục này."})]));
@@ -145,6 +180,23 @@ function chonHoiThoai(ma) {
 }
 
 /* ---------- cột giữa: chat + AI đã làm gì ---------- */
+// chat của tài khoản khách: dựng từ p.tin, ghi rõ ai nói (khách / bot tự động / shop / hệ thống)
+const AI_NOI = {khach: "Khách", bot: "Bot (tự động)", shop: "Shop", he_thong: "Hệ thống"};
+function veChatKhach(tin) {
+  const khung = el("div", {class: "chat"});
+  let nhom = null, truoc = null;
+  for (const t of tin) {
+    if (t.nguoi_noi === "he_thong") { khung.append(el("p", {class: "tin-he-thong", text: t.noi_dung})); truoc = null; continue; }
+    if (t.nguoi_noi !== truoc) {
+      nhom = el("div", {class: "nhom " + (t.nguoi_noi === "khach" ? "khach" : "shop " + t.nguoi_noi)}, el("p", {class: "ten-nhom", text: AI_NOI[t.nguoi_noi]}));
+      khung.append(nhom);
+    }
+    nhom.append(el("div", {class: "bong", text: t.noi_dung}));
+    truoc = t.nguoi_noi;
+  }
+  if (!tin.length) khung.append(el("p", {class: "phu", text: "Chưa có tin nhắn."}));
+  return khung;
+}
 function veChat(luot, lop) {
   const khung = el("div", {class: "chat" + (lop ? " " + lop : "")});
   let nhom = null, truoc = null;  // tin liền nhau của cùng một người gom thành một nhóm
@@ -250,7 +302,8 @@ function veChiTiet(p) {
         el("p", {class: "phu", text: (tk ? "Tài khoản chat " + tk.nd : "Khách chưa có tài khoản") + " · mã hội thoại " + p.ma_hoi_thoai})),
       el("span", {class: "chip " + p.trang_thai, text: NHAN[p.trang_thai]})));
   if (p.loi_doc) chat.append(el("p", {class: "loi", text: "Không đọc được dòng này trong hộp thư: " + p.loi_doc}));
-  chat.append(veChat(luot));
+  chat.append(p.nguon === "khach" ? veChatKhach(p.tin || []) : veChat(luot));
+  const giuChu = $("o-nhan-khach") && $("o-nhan-khach").dataset.ma === p.ma_hoi_thoai ? $("o-nhan-khach").value : "";
   giua.replaceChildren(chat, veTrace(p));
   giua.scrollTop = 0;
   if (p.trang_thai === "dang_xu_ly") phai.replaceChildren(el("section", {class: "hop vang"},
@@ -259,6 +312,49 @@ function veChiTiet(p) {
   else if (p.trang_thai === "cho_duyet") phai.replaceChildren(veDon(p));
   else if (p.trang_thai === "da_duyet" || p.trang_thai === "da_huy") phai.replaceChildren(veDaXong(p));
   else phai.replaceChildren(veChoKhach(p));
+  if (p.nguon === "khach") { phai.prepend(veNhanKhach(p, giuChu)); if ((p.don_cu || []).length) phai.append(veDonCu(p)); }
+}
+
+/* ---------- shop nhắn khách / tiếp quản (chat tài khoản khách) ---------- */
+function veNhanKhach(p, giuChu) {
+  const shop = p.che_do === "shop";
+  const o = el("textarea", {id: "o-nhan-khach", rows: "2", maxlength: "2000", "data-ma": p.ma_hoi_thoai,
+    placeholder: shop ? "Nhắn khách…" : "Nhắn khách (bot sẽ dừng trả lời khách này)…"});
+  o.value = giuChu || "";
+  const gui = el("button", {type: "button", class: "btn btn--chinh", text: "Gửi cho khách"});
+  const hop = el("section", {class: "hop nhan-khach" + (shop ? " dang-tiep-quan" : ""), "aria-labelledby": "tieu-de-nhan"},
+    el("div", {class: "dau-the"}, el("h3", {id: "tieu-de-nhan", text: "Nhắn khách"}),
+      el("span", {class: shop ? "tag-shop" : "tag-bot", text: shop ? "Shop đang trả lời" : "Bot đang trả lời"})),
+    el("label", {for: "o-nhan-khach", class: "an-chu", text: "Tin gửi khách"}), o);
+  const nut = el("div", {class: "hang-nut"}, gui);
+  async function lam(duong, body, viec) {
+    for (const b of hop.querySelectorAll("button")) b.disabled = true;
+    try { const moi = await goi(duong, Object.assign({ma: p.ma_hoi_thoai}, body)); viec && viec(); capNhat(moi); }
+    catch (e) { bao(e.message, true, p.ma_hoi_thoai); for (const b of hop.querySelectorAll("button")) b.disabled = false; }
+  }
+  gui.addEventListener("click", () => { const tin = o.value.trim(); if (tin) lam("/api/shop/nhan", {tin}, () => { o.value = ""; }); });
+  o.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) gui.click(); });
+  if (shop) {
+    const tra = el("button", {type: "button", class: "btn", text: "Trả lại cho bot"});
+    tra.addEventListener("click", () => lam("/api/shop/tra-bot", {}));
+    nut.append(tra);
+  }
+  if (p.co_tin_chua_doc) {
+    const doc = el("button", {type: "button", class: "btn", text: "Cho AI đọc lại"});
+    doc.addEventListener("click", () => lam("/api/shop/doc-lai", {}));
+    nut.append(doc);
+    hop.append(el("p", {class: "phu canh-bao", text: "Khách vừa nhắn thêm khi shop đang trả lời: đơn nháp chưa tính các tin này."}));
+  }
+  hop.append(nut);
+  if (!shop) hop.append(el("p", {class: "phu", text: "Bot tự trả lời khách. Shop gửi tin thì bot dừng ở cuộc chat này đến khi bấm Trả lại cho bot."}));
+  return hop;
+}
+function veDonCu(p) {
+  const ds = el("ul", {class: "don-cu"}, ...p.don_cu.slice().reverse().map(d => el("li", {},
+    el("span", {class: "chip " + d.ket_qua, text: d.ket_qua === "da_duyet" ? "Đã duyệt" : "Đã huỷ"}), " ",
+    el("span", {class: "mono", text: d.ma_don || ""}), " ",
+    el("span", {text: [d.truong && d.truong.ten_nguoi_nhan, d.truong && d.truong.sdt, d.truong && d.truong.san_pham].filter(Boolean).join(" · ")}))));
+  return el("details", {class: "hop don-cu-hop"}, el("summary", {text: "Đơn trước của khách (" + p.don_cu.length + ")"}), ds);
 }
 
 /* ---------- cột phải ---------- */
@@ -332,7 +428,7 @@ function veDon(p) {
     try { const r = await goi("/api/huy", {ma: p.ma_hoi_thoai}); vuaDong = r.ma_hoi_thoai; capNhat(r); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); }
   });
   phieu.append(luoi, el("div", {class: "hang-nut"}, duyet, huy), el("div", {id: "bao", class: "bao", role: "status"}));
-  phieu.append(el("details", {class: "them-tin"}, el("summary", {text: "Khách nhắn thêm sau khi chốt đơn"}), ...oTraLoi(p, "Dán tin khách vừa nhắn")));
+  if (p.nguon !== "khach") phieu.append(el("details", {class: "them-tin"}, el("summary", {text: "Khách nhắn thêm sau khi chốt đơn"}), ...oTraLoi(p, "Dán tin khách vừa nhắn")));
   setTimeout(kiem, 0);
   return phieu;
 }
@@ -352,6 +448,12 @@ function oTraLoi(p, goiY) {
 }
 
 function veChoKhach(p) {
+  if (p.nguon === "khach" && !p.kq.quyet_dinh) {  // đơn mới trong cuộc chat (vừa mở hoặc sau duyệt / huỷ)
+    return el("section", {class: "hop", "aria-labelledby": "tieu-de-hop"},
+      el("h3", {id: "tieu-de-hop", text: "Chờ khách nhắn đơn mới"}),
+      el("p", {class: "phu", text: p.don_cu && p.don_cu.length ? "Đơn trước đã xử lý. Khách nhắn tiếp thì AI đọc như một đơn mới." : "Khách chưa gửi tin nào cần AI đọc."}),
+      el("div", {id: "bao", class: "bao", role: "status"}));
+  }
   const tuChoi = p.trang_thai === "tu_choi", tin = p.kq.tin_gui_khach || "", loi = p.kq.loi || [];
   const hop = el("section", {class: "hop " + (tuChoi ? "do" : "vang"), "aria-labelledby": "tieu-de-hop"},
     el("h3", {id: "tieu-de-hop", text: tuChoi ? "Từ chối, chưa tạo đơn" : "Cần hỏi lại khách trước khi lên đơn"}),
@@ -360,6 +462,11 @@ function veChoKhach(p) {
     hop.append(el("p", {class: "nhan nhan-tin", text: "Vì sao AI chưa lên đơn"}),
       el("ul", {class: "vi-sao"}, ...loi.map(l => el("li", {}, el("span", {}, el("b", {text: (TEN_TRUONG[l.truong] || l.truong) + ": "}), l.ly_do)))));
     if ((p.kq.goi_y_phuong || []).length) hop.append(el("p", {class: "goi-y", text: "Phường mới có thể là: " + p.kq.goi_y_phuong.join(", ")}));
+  }
+  if (p.nguon === "khach") {
+    hop.append(el("p", {class: "phu", text: p.che_do === "shop" ? "Shop đang trả lời khách này." : "Bot đã nhắn khách (xem khung chat)."}),
+      el("div", {id: "bao", class: "bao", role: "status"}));
+    return hop;
   }
   if (tin) {
     const chep = el("button", {type: "button", class: "btn", text: "Chép tin"});
@@ -460,6 +567,12 @@ for (const b of document.querySelectorAll(".che-do .tab")) b.addEventListener("c
 $("nk-tai").addEventListener("click", taiNhatKy);
 $("mo-moi").addEventListener("click", moHopMoi);
 $("nhan-them").addEventListener("click", nhanThem);
+$("form-dn-shop").addEventListener("submit", dangNhapShop);
+$("hop-dang-nhap").addEventListener("cancel", e => e.preventDefault());
+$("dang-xuat").addEventListener("click", async () => {
+  try { await goi("/api/dang-xuat", {}); } catch (e) { /* vẫn về màn đăng nhập */ }
+  phien = []; chon = null; veHopThu(); veChiTiet(null); $("dang-xuat").hidden = true; hienDangNhap();
+});
 $("dong-moi").addEventListener("click", dongHopMoi);
 $("huy-moi").addEventListener("click", dongHopMoi);
 $("hop-moi").addEventListener("cancel", e => { if (dangTaoMoi) e.preventDefault(); });
@@ -470,4 +583,4 @@ for (const b of document.querySelectorAll("[data-mau]")) b.addEventListener("cli
   $("moi-ma").value = ma; $("moi-chat").value = dong.join("\n"); veXemTruoc(); $("moi-chat").focus();
 });
 
-tai(false).catch(e => { $("cot-giua").replaceChildren(el("p", {class: "trong", text: "Không tải được hộp thư: " + e.message})); });
+batDau();
