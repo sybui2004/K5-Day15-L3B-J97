@@ -218,10 +218,10 @@ flowchart LR
 - Kết quả: lượt 1 28/30 (93%, chưa đạt: `tu_choi` 7/8) · lượt 2 28/30 (93%, đạt: không tạo đơn sai, `tu_choi` 8/8) — run ID: run-3@20261128-014137 / run-5@20261128-021955, cùng bộ 30 câu. `run-1`, `run-2` (bộ 19 câu) và `run-4` (có code khớp cụm từ câu thử, đã gỡ) giữ file, không tính → chi tiết `eval/report.md`, hồ sơ `eval/README.md`
 
 ## §8. Chi phí khi dùng thật *(guide 4.2)*
-- Persona + giá: `cost/personas.yaml` · lượt mô phỏng: `cost/simulate-__.csv` (__ phiên)
-- Chi phí / task thành công: __ (model __) · __ (model __)
-- Chi phí / tháng ở quy mô thật: thấp __ · cơ sở __ · cao __ → chi tiết `cost/cost-estimate.md`
-- So với impact / người / tháng (§2): đáng làm không, vì sao:
+- Persona + giá: `cost/personas.yaml` (3 kiểu shop từ phỏng vấn P1–P4: nhỏ 260 · vừa 400 · lớn 650 đơn / tháng; giá Haiku 5.5, Sonnet 5.5, Opus 5.5) · lượt mô phỏng: `cost/simulate-1.csv` (50 phiên, `simulate-1@20261128-030455`, seed 42, có lớp chặn NeMo)
+- Chi phí / task thành công: $0.0159 (model `claude-sonnet-5-5`, đo thật) · $0.00079 (model `claude-haiku-5-5`). Dòng Haiku dùng token đo trên Sonnet và tỉ lệ đạt 28/30 của Sonnet (`run-5`); chưa chạy eval trên Haiku
+- Chi phí / tháng ở quy mô thật (Sonnet 5.5): thấp $3,358 (580 shop) · cơ sở $10,081 (1.741 shop) · cao $33,600 (5.803 shop). Số shop = 11.606 người nộp thuế TMĐT TP.HCM (mốc tham chiếu) × ba tỉ lệ *(tự ước tính)* → chi tiết `cost/cost-estimate.md`
+- So với impact / người / tháng (§2): đáng làm không, vì sao: mỗi shop đang mất ≈ 48.750–123.500đ phí ship và ≈ 214 phút / tháng. Chi phí / shop / tháng (cơ sở): Sonnet ≈ 150.700đ, lớn hơn phí ship đang mất (f\* 122–309%), nên riêng phí ship không đủ bù; Haiku ≈ 7.500đ, chỉ cần tránh 6–15% phí ship đang mất, **nếu** Haiku đạt như Sonnet. Chưa đo AI tránh được bao nhiêu lỗi. Go / iterate / stop: nhóm chốt
 
 ## §9. Rủi ro & an toàn
 - **Dữ liệu: đã ẩn danh gì, không thu gì, không đưa gì vào model gói miễn phí:**
@@ -281,6 +281,7 @@ flowchart LR
 | 28/11 (review PR #52) | §9 "Đưa vào model": với `GUARD=nemo`, NeMo gửi lời khách để kiểm; cho qua thì model chính nhận cả hội thoại (lời khách gửi hai lần), chặn thì dừng sau lần đầu; `GUARD=tat` chỉ model chính nhận · §9 "TỪ CHỐI": hai lớp NeMo + cờ `yeu_cau_ngoai_pham_vi`, NeMo lỗi thì đi tiếp và ghi trace; giữ ba nhánh khi model bỏ sót cờ · README: lần gọi thêm chỉ khi NeMo chạy và cho qua | Review PR #52, đối chiếu `codebase/agent.py` (`xu_ly`, lớp chặn đầu vào), `codebase/guard.py` (`kiem_dau_vao`). Không đổi số bằng chứng, câu thử, §7, metric, code |
 | 28/11 | README: điền link video demo 34 giây (màn hình duyệt, `claude-sonnet-5-5`, log token ở đầu video) | Guide 3.4: video 30 giây, thao tác thật, AI trả kết quả thật |
 | 28/11 | §9 dòng "Đưa vào model": thay "chờ Việt Anh xác nhận" bằng xác nhận Y1: soạn 11 đoạn tự viết, dán đoạn 1–10 vào ChatGPT (27/11), đoạn 11 hỏi Codex (28/11), không có thông tin khách thật · thêm `eval/chay-tay-y1.md` (trước chỉ nằm trên nhánh Y1, chưa merge) · `eval/README.md`: Việt Anh kiểm lại điểm chấm tay run-5 | Việt Anh xác nhận nội dung đã dán khi chạy tay Y1 (review PR #51 để chờ). Không đổi số bằng chứng, câu thử, §7, metric, code |
+| 28/11 | §8, `cost/`: `personas.yaml` 3 kiểu shop từ phỏng vấn P1–P4, số shop = 11.606 (mốc tham chiếu) × hệ số phủ × tỉ lệ thuộc lát cắt × tỉ lệ sử dụng (580 / 1.741 / 5.803, ba tỉ lệ *(tự ước tính)*), giá 3 model; `simulate-1` 50 phiên, tỉ lệ đạt từ `run-5`; `cost-estimate.md` §1–§4 với ngưỡng hoà vốn theo phí ship · `eval/README.md` mục 1–2 · `slides/demo-slides.html` + `demo-slides.pdf` | Guide 4.2, 5.1. 11.606 là số người nộp thuế TMĐT, không phải số shop dùng sản phẩm, nên tách thành thừa số. Không đổi câu thử, §7, metric, kết quả các lượt đã chạy |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
