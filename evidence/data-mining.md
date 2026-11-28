@@ -26,6 +26,8 @@ Lấy ngày **28/11/2026**: 100 review mới nhất của app GHN (`vn.ghn.app.g
 
 ## 3. Kết quả
 
+Script lấy review: `evidence/fetch_review.py`. File thô 100 review (toàn văn) không commit, nhóm giữ ngoài repo; SHA-256 `fc82f6948e703070f22726046ec7a76a6785030ca7e3d477fda58d6f1b77f9d6`.
+
 Dữ liệu từng review: `evidence/review-ghn.csv` (cột `stt, so_sao, nhan, nhac_dia_gioi_moi, cau_dau`). Đếm: `python evidence/count_review.py`.
 
 | Đếm gì | x / N | % | Ghi chú |

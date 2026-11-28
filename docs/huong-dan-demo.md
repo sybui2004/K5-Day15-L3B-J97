@@ -36,6 +36,7 @@ python run.py
 
 - Terminal in `Màn hình duyệt — đang xử lý 10 hội thoại…`. Chờ **1–2 phút** (10 hội thoại × 2 lần gọi model: lớp chặn NeMo + đọc hội thoại), đến khi in `Mở trình duyệt: http://127.0.0.1:8000`.
 - Mở http://127.0.0.1:8000. Chỉ mở được trên chính máy này (máy chủ chặn Host khác `127.0.0.1` / `localhost`).
+- Đăng nhập shop: `admin`, mật khẩu `ADMIN_PASSWORD` trong `.env` (không đặt thì là `admin`).
 - Đầu trang cộng số lần chạy, token và chi phí của cả phiên demo. Thoát bằng Ctrl+C.
 - **Mở sẵn trước khi lên** để khỏi chờ 1–2 phút trước giám khảo.
 
