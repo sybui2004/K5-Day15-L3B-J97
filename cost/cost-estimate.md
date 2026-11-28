@@ -62,7 +62,7 @@ Chi phí / task thành công = chi phí trung bình mỗi phiên ÷ tỉ lệ đ
 | claude-sonnet-5-5 | $0.01354 | $0.01451 | $0.01490 |
 | claude-opus-5-5 | $0.02709 | $0.02902 | $0.02980 |
 
-Số nhóm dùng khi cần một giá mỗi đơn ở quy mô triển khai: **≈ $0.0149 / phiên đạt với Sonnet 5.5** (trọng số đơn, điều chỉnh theo 20/22). Muốn đúng đơn vị "đơn thành công" phải theo dõi cùng một đơn đến khi tạo được đơn nháp đúng — chưa làm.
+Số nhóm dùng khi cần một giá mỗi đơn ở quy mô triển khai: **≈ $0.0149 / phiên đạt với Sonnet 5.5** (trọng số đơn, điều chỉnh theo 20/22). **Hai cấu hình trong một con số:** chi phí lấy từ `simulate-1` có bật lớp chặn NeMo, còn tỉ lệ 20/22 lấy từ `run-5` khi chưa có lớp chặn. Phép ước tính **giả định NeMo giữ nguyên tỉ lệ đạt**; lớp chặn có thể từ chối nhầm thêm câu thường hoặc khó, nên mẫu số của cấu hình demo chưa đo. Muốn thay giả định này thì chạy eval cùng cấu hình (`GUARD=nemo`) và ghi thành lượt mới. Muốn đúng đơn vị "đơn thành công" phải theo dõi cùng một đơn đến khi tạo được đơn nháp đúng — chưa làm.
 
 Hai giả định của dòng Haiku và Opus: (1) token đo trên Sonnet 5.5, chỉ đổi đơn giá; bộ tách token khác thì số thật có thể lệch. (2) Cột "chi phí / task thành công" dùng tỉ lệ đạt 28/30 của Sonnet (`run-5`); nhóm **chưa chạy eval** trên Haiku hay Opus.
 

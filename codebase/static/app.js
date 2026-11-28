@@ -282,7 +282,7 @@ function veDon(p) {
   async function kiem() {
     const lan = ++lanKiem;
     try {
-      const k = await goi("/api/kiem", {ma: p.ma_hoi_thoai, sua: sua()});
+      const k = await goi("/api/kiem", {ma: p.ma_hoi_thoai, sua: sua(), phien_ban: p.phien_ban});
       if (lan !== lanKiem) return;
       for (const [f] of TRUONG) {
         const l = k.loi[f] || "", g = (k.goi_y[f] || []).length ? ". Gần giống: " + k.goi_y[f].join(", ") : "";
@@ -295,7 +295,7 @@ function veDon(p) {
   }
   duyet.addEventListener("click", async () => {
     duyet.disabled = true;
-    try { const r = await goi("/api/duyet", {ma: p.ma_hoi_thoai, sua: sua()}); vuaDong = r.ma_hoi_thoai; capNhat(r); }
+    try { const r = await goi("/api/duyet", {ma: p.ma_hoi_thoai, sua: sua(), phien_ban: p.phien_ban}); vuaDong = r.ma_hoi_thoai; capNhat(r); }
     catch (e) { bao(e.message, true, p.ma_hoi_thoai); if (chon === p.ma_hoi_thoai) kiem(); }
   });
   huy.addEventListener("click", async () => {
@@ -312,8 +312,12 @@ function oTraLoi(p, goiY) {
   const o = el("textarea", {rows: "2", id: "tra-loi", placeholder: goiY}), them = el("button", {type: "button", class: "btn", text: "Thêm vào hội thoại"});
   them.addEventListener("click", async () => {
     if (!o.value.trim()) { bao("Câu khách trả lời đang trống", true); return; }
-    them.disabled = true; bao("AI đang đọc lại cả hội thoại…");
-    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); } catch (e) { bao(e.message, true, p.ma_hoi_thoai); them.disabled = false; taiTong(); }  // lần lỗi vẫn được tính
+    // Khoá cả Duyệt / Huỷ của phiếu đang mở: AI đọc lại có thể đổi đơn nháp, không cho duyệt phiếu cũ.
+    const khoa = [...(them.closest("article.phieu")?.querySelectorAll(".hang-nut button") || [])].filter(b => b !== them);
+    const cu = khoa.map(b => b.disabled);
+    them.disabled = true; khoa.forEach(b => { b.disabled = true; }); bao("AI đang đọc lại cả hội thoại…");
+    try { capNhat(await goi("/api/tra-loi", {ma: p.ma_hoi_thoai, tra_loi: o.value})); }
+    catch (e) { bao(e.message, true, p.ma_hoi_thoai); them.disabled = false; khoa.forEach((b, i) => { b.disabled = cu[i]; }); taiTong(); }  // lần lỗi vẫn được tính
   });
   return [el("label", {for: "tra-loi", text: "Khách trả lời"}), o, el("div", {class: "hang-nut"}, them)];
 }

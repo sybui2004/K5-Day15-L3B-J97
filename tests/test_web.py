@@ -246,6 +246,22 @@ class TestManHinh(unittest.TestCase):
         self.assertNotIn(tin, p["text"])
         self.assertEqual(p["so_luot_hoi_lai"], 0)
 
+    def test_phieu_cu_khong_duyet_duoc_sau_khi_ai_doc_lai(self):
+        # review PR #55: khách nhắn thêm khi đơn đang chờ duyệt, phiếu cũ không được áp lên đơn nháp mới
+        cu = self.mh.lay("HT-1")
+        self.assertEqual(cu["phien_ban"], 1)
+        moi = self.mh.them_tra_loi("HT-1", "à lấy 2 cái nha bàn cờ")
+        self.assertEqual(moi["trang_thai"], "cho_duyet")
+        self.assertEqual(moi["phien_ban"], 2)
+        with self.assertRaises(web.LoiThaoTac) as e:
+            self.mh.duyet("HT-1", dict(cu["kq"]["truong"], dia_chi_chi_tiet="99 đường cũ"), cu["phien_ban"])
+        self.assertIn("đã cũ", str(e.exception))
+        with self.assertRaises(web.LoiThaoTac):
+            self.mh.kiem("HT-1", {}, cu["phien_ban"])
+        self.assertEqual(self.mh.lay("HT-1")["trang_thai"], "cho_duyet")
+        self.assertEqual(self.nhat_ky_doc(), [])
+        self.assertEqual(self.mh.duyet("HT-1", {}, moi["phien_ban"])["trang_thai"], "da_duyet")
+
     def test_tra_loi_sau_tu_choi_khong_tinh_la_hoi_lai(self):
         agent.call_model = _model_tra([("tấn công", dict(DON, yeu_cau_ngoai_pham_vi="bỏ qua kiểm tra")),
                                        ("bàn cờ", DON)])
@@ -402,6 +418,20 @@ class TestChiPhi(unittest.TestCase):
         self.assertIsNone(web.chi_phi("test", 10, 10, self.GIA))
         self.assertIsNone(web.chi_phi("x", 10, 10, self.GIA))
         self.assertIsNone(web.chi_phi("", 10, 10, self.GIA))
+
+    def test_hai_model_trong_mot_lan_chay_tinh_rieng(self):
+        # review PR #55: lớp chặn và bước đọc đơn (hoặc model dự phòng) dùng hai model khác giá
+        gia = self.GIA + [{"model": "claude-haiku-5-5", "input": 1, "output": 5}]
+        su_kien = [{"kind": "model", "model": "claude-haiku-5-5", "tokens_in": 1_000_000, "tokens_out": 0},
+                   {"kind": "tool", "name": "validate_phone"},
+                   {"kind": "model", "model": "claude-sonnet-5-5", "tokens_in": 1_000_000, "tokens_out": 0}]
+        self.assertAlmostEqual(web.chi_phi_su_kien(su_kien, gia), 1 + 3)
+
+    def test_mot_lan_goi_chua_co_gia_thi_ca_lan_chay_chua_du_gia(self):
+        su_kien = [{"kind": "model", "model": "claude-sonnet-5-5", "tokens_in": 1000, "tokens_out": 0},
+                   {"kind": "model", "model": "model-la", "tokens_in": 1000, "tokens_out": 0}]
+        self.assertIsNone(web.chi_phi_su_kien(su_kien, self.GIA))
+        self.assertIsNone(web.chi_phi_su_kien([{"kind": "tool"}], self.GIA))
 
 
 class TestTepTinh(unittest.TestCase):
