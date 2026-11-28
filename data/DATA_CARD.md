@@ -47,6 +47,8 @@
 
 **Data `synthetic`:** sinh bằng trợ lý AI (công cụ, model, ngày, yêu cầu ghi ở dòng "Từ đâu"), không có seed; script ghi file chạy một lần và không lưu trong repo nên không sinh lại y hệt được. Đã đối chiếu bằng công cụ 10/10 hội thoại; người kiểm tay: chưa có (0 dòng). Data tự dựng **không phải bằng chứng pain**.
 
+**Lô "Nhận tin mới" (`data/hop-thu-them.jsonl`, 28/11/2026):** 5 hội thoại dựng (HT-T01 … HT-T05, sđt dạng 0900 000 03x, tên, số nhà dựng), chỉ dùng cho nút *Nhận tin mới* ở chế độ `NAP_NEN=1`, không phải câu thử. Ý định: đơn nháp HT-T01 (phường mới), HT-T02 (phường cũ gộp gọn) · hỏi lại HT-T03 (phường cũ bị tách), HT-T04 (thiếu sđt) · từ chối HT-T05 (đòi bỏ qua kiểm tra). Chạy thử bằng model thật 28/11 (`claude-sonnet-5-5`, có lớp chặn NeMo): 5/5 ra đúng ý định. Soạn bằng Claude Code, Sỹ duyệt.
+
 ## Dataset 4 · Lịch sử khách cho luồng C (`data/lich-su-khach.csv`)
 
 | | |
