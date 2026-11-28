@@ -575,6 +575,179 @@ class TestKiemYeuCau(unittest.TestCase):
         self.assertFalse(web.post_hop_le({"X-Man-Hinh-Duyet": "1", "Content-Type": "text/plain"}))
 
 
+class TestChatKhach(unittest.TestCase):
+    """Cuộc chat của tài khoản khách (spec chat khách HITL §5.4)."""
+
+    def setUp(self):
+        import tai_khoan
+        self._goc = agent.call_model
+        self.goi_model = []
+        self.cho_model = threading.Event()
+        self.cho_model.set()
+        self.model_bat_dau = threading.Event()
+        tra = _model_tra([("đủ-tin Mai 0900000001", DON), ("thiếu-sdt", dict(DON, sdt=None))])
+
+        def model(system, user):
+            self.goi_model.append(user)
+            self.model_bat_dau.set()
+            self.cho_model.wait(5)
+            return tra(system, user)
+        agent.call_model = model
+        self.tmp = tempfile.TemporaryDirectory()
+        self.kho = __import__("kho").KhoFile(os.path.join(self.tmp.name, "nk.jsonl"))
+        self.mh = web.ManHinh(kho=self.kho)
+        self.ql = tai_khoan.QuanLyTaiKhoan(self.kho, "admin")
+        self.lan = self.ql.dang_ky("lan", "matkhau1", "matkhau1", "1.1.1.1")
+        self.mai = self.ql.dang_ky("mai", "matkhau1", "matkhau1", "1.1.1.2")
+
+    def tearDown(self):
+        self.cho_model.set()
+        self.mh.cho_chat_xong(5)
+        agent.call_model = self._goc
+        self.tmp.cleanup()
+
+    def gui(self, tk, tin, cho=True):
+        t = self.mh.khach_gui(tk, tin)
+        if cho:
+            self.assertTrue(self.mh.cho_chat_xong(5))
+        return t
+
+    def tin(self, tk, nguoi=None):
+        ds = self.mh.khach_doc(tk, 0)["tin"]
+        return [t for t in ds if nguoi is None or t["nguoi_noi"] == nguoi]
+
+    def test_bot_tra_loi_hoi_lai(self):
+        self.gui(self.lan, "lấy 1 áo thiếu-sdt")
+        [bot] = self.tin(self.lan, "bot")
+        self.assertTrue(bot["noi_dung"])
+        self.assertEqual(self.mh.lay("TK-lan")["trang_thai"], "cho_khach")
+
+    def test_tao_don_nhap_khong_hua_len_don(self):
+        self.gui(self.lan, "lấy 1 áo đủ-tin Mai 0900000001")
+        [bot] = self.tin(self.lan, "bot")
+        self.assertIn("Dạ shop đã ghi nhận đơn của anh/chị: Mai · 0900000001 · 12 hẻm 5, phường Bàn Cờ, TP Hồ Chí Minh",
+                      bot["noi_dung"])
+        self.assertIn("Shop kiểm lại rồi xác nhận ngay ạ.", bot["noi_dung"])
+        self.assertNotIn("đã lên đơn", bot["noi_dung"])
+        p = self.mh.lay("TK-lan")
+        self.assertEqual((p["trang_thai"], p["nguon"], p["che_do"]), ("cho_duyet", "khach", "bot"))
+
+    def test_khach_chi_thay_tin_cua_minh(self):
+        self.gui(self.lan, "của lan thiếu-sdt")
+        self.gui(self.mai, "của mai thiếu-sdt")
+        self.assertTrue(all("lan" in t["noi_dung"] for t in self.tin(self.lan, "khach")))
+        self.assertEqual([t["noi_dung"] for t in self.tin(self.mai, "khach")], ["của mai thiếu-sdt"])
+
+    def test_gop_tin_trong_hang_doi(self):
+        self.cho_model.clear()
+        self.gui(self.lan, "tin 1 thiếu-sdt", cho=False)
+        self.assertTrue(self.model_bat_dau.wait(5))
+        self.assertTrue(self.mh.khach_doc(self.lan, 0)["dang_soan"])
+        self.gui(self.lan, "tin 2", cho=False)
+        self.gui(self.lan, "tin 3 đủ-tin Mai 0900000001", cho=False)
+        self.cho_model.set()
+        self.assertTrue(self.mh.cho_chat_xong(5))
+        bot = self.tin(self.lan, "bot")
+        self.assertEqual(len(bot), 1)  # chỉ trả lời theo văn bản mới nhất
+        self.assertIn("đã ghi nhận đơn", bot[0]["noi_dung"])
+        self.assertIn("tin 3", self.goi_model[-1])
+        self.assertFalse(self.mh.khach_doc(self.lan, 0)["dang_soan"])
+
+    def test_tiep_quan_giua_luc_ai_chay(self):
+        self.cho_model.clear()
+        self.gui(self.lan, "lấy áo đủ-tin Mai 0900000001", cho=False)
+        self.assertTrue(self.model_bat_dau.wait(5))
+        self.mh.shop_nhan("TK-lan", "Dạ chị chờ shop chút ạ")
+        self.cho_model.set()
+        self.assertTrue(self.mh.cho_chat_xong(5))
+        nguoi = [t["nguoi_noi"] for t in self.tin(self.lan)]
+        self.assertEqual(nguoi, ["khach", "shop"])  # không có tin bot sau tin shop
+        p = self.mh.lay("TK-lan")
+        self.assertEqual((p["che_do"], p["trang_thai"]), ("shop", "cho_duyet"))  # đơn nháp vẫn cập nhật
+
+    def test_che_do_shop_tin_khach_khong_chay_ai_va_phieu_cu(self):
+        self.gui(self.lan, "lấy áo đủ-tin Mai 0900000001")
+        self.mh.shop_nhan("TK-lan", "Dạ chị xác nhận giúp shop ạ")
+        cu = self.mh.lay("TK-lan")["phien_ban"]
+        so_lan = len(self.goi_model)
+        self.gui(self.lan, "à đổi sang 2 áo")
+        p = self.mh.lay("TK-lan")
+        self.assertEqual(len(self.goi_model), so_lan)
+        self.assertGreater(p["phien_ban"], cu)
+        self.assertTrue(p["co_tin_chua_doc"])
+        with self.assertRaises(web.LoiThaoTac):
+            self.mh.duyet("TK-lan", {}, cu)
+        p = self.mh.shop_doc_lai("TK-lan")
+        self.assertFalse(p["co_tin_chua_doc"])
+        self.assertEqual(len(self.goi_model), so_lan + 1)
+        self.assertEqual(self.tin(self.lan, "bot")[-1]["id"], self.tin(self.lan, "bot")[0]["id"])  # đọc lại không nhắn
+
+    def test_tra_bot_chay_tu_tin_ke_tiep(self):
+        self.gui(self.lan, "xin chào thiếu-sdt")
+        self.mh.shop_nhan("TK-lan", "Dạ shop chào chị")
+        self.gui(self.lan, "cho chị 1 áo thiếu-sdt")
+        so_bot = len(self.tin(self.lan, "bot"))
+        so_lan = len(self.goi_model)
+        self.mh.shop_tra_bot("TK-lan")
+        self.assertTrue(self.mh.cho_chat_xong(5))
+        self.assertEqual(len(self.goi_model), so_lan)  # trả lại bot không tự chạy
+        self.gui(self.lan, "sđt chị đây đủ-tin Mai 0900000001")
+        self.assertEqual(len(self.tin(self.lan, "bot")), so_bot + 1)
+        self.assertEqual(self.mh.lay("TK-lan")["che_do"], "bot")
+
+    def test_duyet_them_tin_he_thong_va_mo_don_moi(self):
+        self.gui(self.lan, "đơn đầu đủ-tin Mai 0900000001")
+        p = self.mh.lay("TK-lan")
+        da = self.mh.duyet("TK-lan", {}, p["phien_ban"])
+        [ht] = self.tin(self.lan, "he_thong")
+        self.assertRegex(ht["noi_dung"], r"^Đơn DN-\w+ đã được shop xác nhận\.$")
+        self.assertEqual(len(da["don_cu"]), 1)
+        self.assertEqual(da["don_cu"][0]["ket_qua"], "da_duyet")
+        self.assertEqual(da["trang_thai"], "cho_khach")
+        self.gui(self.lan, "đơn thứ hai thiếu-sdt")
+        self.assertNotIn("đơn đầu", self.goi_model[-1])  # AI chỉ đọc tin sau mốc
+        self.assertIn("đơn thứ hai", self.goi_model[-1])
+
+    def test_huy_mo_don_moi_khong_nhan_khach(self):
+        self.gui(self.lan, "đơn đủ-tin Mai 0900000001")
+        p = self.mh.huy("TK-lan")
+        self.assertEqual(self.tin(self.lan, "he_thong"), [])
+        self.assertEqual((p["trang_thai"], p["don_cu"][0]["ket_qua"]), ("cho_khach", "da_huy"))
+
+    def test_gioi_han_tin(self):
+        import tai_khoan
+        with self.assertRaises(web.LoiThaoTac):
+            self.mh.khach_gui(self.lan, "x" * 501)
+        with self.assertRaises(web.LoiThaoTac):
+            self.mh.khach_gui(self.lan, "   ")
+        for i in range(5):
+            self.gui(self.mai, "tin %d thiếu-sdt" % i)
+        with self.assertRaises(tai_khoan.QuaGioiHan):
+            self.mh.khach_gui(self.mai, "tin 6")
+
+    def test_dung_lai_sau_khoi_dong(self):
+        self.gui(self.lan, "đơn lan đủ-tin Mai 0900000001")
+        self.gui(self.mai, "đơn mai đủ-tin Mai 0900000001")
+        self.mh.duyet("TK-mai", {}, self.mh.lay("TK-mai")["phien_ban"])
+        self.mh.shop_nhan("TK-mai", "cảm ơn chị")
+
+        def khong_duoc_goi(system, user):
+            raise AssertionError("không được gọi model khi dựng lại")
+        agent.call_model = khong_duoc_goi
+        mh2 = web.ManHinh(kho=self.kho)
+        mh2.nap_cuoc_chat()
+        lan, mai = mh2.lay("TK-lan"), mh2.lay("TK-mai")
+        self.assertEqual((lan["trang_thai"], lan["kq"]["quyet_dinh"]), ("cho_duyet", "TAO_DON_NHAP"))
+        self.assertEqual((mai["trang_thai"], mai["che_do"], len(mai["don_cu"])), ("cho_khach", "shop", 1))
+        self.assertEqual([t["nguoi_noi"] for t in mai["tin"]], ["khach", "bot", "he_thong", "shop"])
+        mh2.duyet("TK-lan", {}, lan["phien_ban"])  # phiếu chờ duyệt vẫn duyệt được
+
+    def test_them_tra_loi_tu_choi_hoi_thoai_khach(self):
+        self.gui(self.lan, "lấy áo thiếu-sdt")
+        with self.assertRaises(web.LoiThaoTac):
+            self.mh.them_tra_loi("TK-lan", "shop tự dán")
+
+
 class _MayChuThu:
     """Dựng máy chủ thật trên cổng tạm, có QuanLyTaiKhoan trên kho file tạm. Lớp con gán self.man_hinh_gia."""
 
@@ -626,6 +799,64 @@ class _MayChuThu:
         st, hd, _ = self.goi("POST", "/api/dang-nhap", {"username": "admin", "mat_khau": "admin"})
         assert st == 200, st
         return self.cookie_tu(hd)
+
+
+class TestChatHttp(_MayChuThu, unittest.TestCase):
+    def setUp(self):
+        self._goc = agent.call_model
+        agent.call_model = _model_tra([("thiếu-sdt", dict(DON, sdt=None))])
+        self.tmp = tempfile.TemporaryDirectory()
+        self.mh = web.ManHinh(kho=__import__("kho").KhoFile(os.path.join(self.tmp.name, "nk.jsonl")))
+        self.dung_may_chu(self.mh)
+        web.XuLyYeuCau.tai_khoan.kho = self.mh.kho  # cùng kho với màn hình
+
+    def tearDown(self):
+        self.mh.cho_chat_xong(5)
+        agent.call_model = self._goc
+        self.dung_lai()
+        self.tmp.cleanup()
+
+    def khach(self, u):
+        st, hd, _ = self.goi("POST", "/api/dang-ky", {"username": u, "mat_khau": "matkhau1", "nhap_lai": "matkhau1"})
+        self.assertEqual(st, 200)
+        return self.cookie_tu(hd)
+
+    def test_khach_khong_doc_duoc_chat_nguoi_khac(self):
+        a, b = self.khach("khach.a"), self.khach("khach.b")
+        self.assertEqual(self.goi("POST", "/api/chat/gui", {"tin": "bí mật của A thiếu-sdt"}, cookie=a)[0], 200)
+        self.mh.cho_chat_xong(5)
+        st, _, d = self.goi("GET", "/api/chat?sau=0", cookie=b)
+        self.assertEqual((st, d["tin"]), (200, []))
+        st, _, d = self.goi("GET", "/api/chat?sau=0", cookie=a)
+        self.assertEqual([t["nguoi_noi"] for t in d["tin"]], ["khach", "bot"])
+        self.assertNotIn("kq", json.dumps(d))  # khách không thấy kq / trace
+
+    def test_khach_goi_shop_nhan_403(self):
+        a = self.khach("khach.c")
+        self.assertEqual(self.goi("POST", "/api/shop/nhan", {"ma": "TK-khach.c", "tin": "x"}, cookie=a)[0], 403)
+
+    def test_chua_dang_nhap_khong_chat(self):
+        self.assertEqual(self.goi("GET", "/api/chat?sau=0")[0], 401)
+        self.assertEqual(self.goi("POST", "/api/chat/gui", {"tin": "x"})[0], 401)
+
+    def test_gui_qua_nhanh_429(self):
+        a = self.khach("khach.d")
+        for i in range(5):
+            self.assertEqual(self.goi("POST", "/api/chat/gui", {"tin": "t%d thiếu-sdt" % i}, cookie=a)[0], 200)
+        st, _, d = self.goi("POST", "/api/chat/gui", {"tin": "t6"}, cookie=a)
+        self.assertEqual(st, 429)
+        self.assertGreater(d["cho_giay"], 0)
+
+    def test_shop_nhan_khach_thay(self):
+        a = self.khach("khach.e")
+        self.goi("POST", "/api/chat/gui", {"tin": "chào thiếu-sdt"}, cookie=a)
+        self.mh.cho_chat_xong(5)
+        ad = self.dang_nhap_admin()
+        st, _, p = self.goi("POST", "/api/shop/nhan", {"ma": "TK-khach.e", "tin": "Dạ shop đây ạ"}, cookie=ad)
+        self.assertEqual((st, p["che_do"]), (200, "shop"))
+        d = self.goi("GET", "/api/chat?sau=0", cookie=a)[2]
+        self.assertEqual(d["tin"][-1]["nguoi_noi"], "shop")
+        self.assertEqual(self.goi("POST", "/api/shop/tra-bot", {"ma": "TK-khach.e"}, cookie=ad)[2]["che_do"], "bot")
 
 
 class TestDangNhapHttp(_MayChuThu, unittest.TestCase):
