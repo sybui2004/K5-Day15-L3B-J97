@@ -106,6 +106,7 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 | Thành phần | Thật / Giả | Ghi chú |
 |---|---|---|
 | Lời gọi AI ở quyết định trung tâm | **Thật** (bắt buộc từ CP3) | Model: `claude-sonnet-5-5`, `MODEL_EFFORT=low`, qua SDK `anthropic` (`codebase/ai.py`). Mỗi hội thoại gọi model 1 lần để đọc hội thoại, trả JSON; với `GUARD=nemo` (mặc định) lớp chặn NeMo gọi thêm 1 lần trước đó, bị chặn thì dừng ở lần đầu (`codebase/guard.py`). Chưa có `.env` thì chạy chế độ giả |
+| Model dự phòng khi Claude không gọi được | **Thật**, tuỳ chọn | Có `API_KEY_DEEPSEEK` trong `.env` thì khi Claude báo hết credit / sai key (chuyển hẳn cho cả phiên) hoặc quá tải / mất mạng (chỉ lần đó), `codebase/ai.py` gọi DeepSeek V4.1 Flash (`deepseek-flash`). Trace ghi tên model đã gọi. Bộ câu thử (`run-3`, `run-5`) chạy trên Claude, **chưa chạy eval đầy đủ trên DeepSeek**; DeepSeek chưa có giá trong `cost/personas.yaml` nên màn hình duyệt ghi "thiếu giá". Tắt: `FALLBACK_PROVIDER=tat` |
 | Kiểm sđt, quy đổi và tra phường/xã | **Thật** | Code, không dùng AI: `validate_phone`, `convert_old_address`, `lookup_address` (`codebase/tools.py`) trên bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15 (`data/chuyen-doi-dia-gioi.csv`) |
 | Lịch sử khách cũ (luồng C) | Thật, dữ liệu dựng | `get_customer_history` đọc `data/lich-su-khach.csv`: 6 khách tự dựng, không phải khách thật |
 | Hộp thư, màn hình duyệt | Thật, dữ liệu dựng | `data/hop-thu-mau.jsonl`: 10 hội thoại tự dựng. Duyệt chỉ đổi trạng thái đơn trên máy, không lưu vào hệ thống bán hàng nào |
