@@ -6,7 +6,7 @@
 
 ## 1. Đầu vào
 
-- **Persona** (`cost/personas.yaml`): 3 kiểu shop, lấy từ bảng "Số lần / tháng của từng kiểu người dùng" ở `spec.md` §2 (phỏng vấn P1–P4, n = 4). Một phiên = một đơn chốt qua tin nhắn.
+- **Persona** (`cost/personas.yaml`): 3 kiểu shop, lấy từ bảng "Số lần / tháng của từng kiểu người dùng" ở `spec.md` §2 (phỏng vấn P1–P4, n = 4). Khi nhân ra chi phí tháng, mỗi phiên được tính như một đơn chốt qua tin nhắn; nội dung một phiên là 1–3 hội thoại độc lập lấy ngẫu nhiên (xem §2, "Đọc bảng cho đúng").
 
   | Kiểu | Tỉ trọng | Đơn / shop / tháng | Lượt hỏi / phiên | Nguồn |
   |---|---:|---:|---:|---|
@@ -42,13 +42,27 @@ Chạy với `GUARD=nemo` (mặc định của bản chạy thử): mỗi lượ
 | shop_vua | 25 | 3 | 7072 | 535 | 6.0 | 9.0 |
 | shop_lon | 11 | 1 | 2333 | 177 | 2.0 | 3.5 |
 
-| Model | Chi phí / phiên | Chi phí / task thành công | / tháng — thấp (580) | / tháng — cơ sở (1.741) | / tháng — cao (5.803) | / người / tháng (cơ sở) |
+| Model | Chi phí / phiên (trung bình mẫu) | Chi phí / task thành công (= cột trước ÷ 28/30) | / tháng — thấp (580) | / tháng — cơ sở (1.741) | / tháng — cao (5.803) | / người / tháng (cơ sở) |
 |---|---:|---:|---:|---:|---:|---:|
 | claude-haiku-5-5 | $0.00074 | $0.00079 | $167.91 | $504.03 | $1,679.99 | $0.2895 |
 | claude-sonnet-5-5 | $0.0148 | $0.0159 | $3,358.25 | $10,080.53 | $33,599.82 | $5.79 |
 | claude-opus-5-5 | $0.0296 | $0.0317 | $6,716.49 | $20,161.05 | $67,199.65 | $11.58 |
 
 Chi phí / task thành công = chi phí trung bình mỗi phiên ÷ tỉ lệ đạt — **không coi như đạt 100%**.
+
+**Đọc bảng cho đúng:**
+- Hai cột đầu là **trung bình của 50 phiên mẫu** (`simulate.py` in sẵn). Mẫu có shop lớn 11/50 phiên (22%), nhưng ở kịch bản cơ sở shop lớn chiếm 0,25 × 650 / 427,5 ≈ 38% số đơn, nên trung bình mẫu chưa phải giá mỗi đơn khi triển khai. Các cột / tháng và / người / tháng đã tính theo tỉ trọng và số đơn từng kiểu shop, không bị lệch này.
+- "Task thành công" ở đây là **phiên mô phỏng sau điều chỉnh theo tỉ lệ đạt eval 28/30**, chưa phải chi phí để lên thành công một đơn: (1) 28/30 tính cả 8 câu `tu_choi`, còn mô phỏng chỉ lấy câu `thuong` và `kho` (lượt 2 đạt 20/22 ở hai nhóm này); (2) một phiên có 1–3 lượt hỏi, mỗi lượt là một hội thoại độc lập lấy ngẫu nhiên, không theo cùng một đơn đến khi tạo được đơn nháp đúng.
+
+**Chi phí / phiên theo tỉ trọng đơn ở kịch bản cơ sở** (tính từ `cost/simulate-1.csv`: chi phí trung bình từng kiểu shop × tỉ trọng × đơn / tháng ÷ 427,5 đơn / shop / tháng; nhân lại ra đúng cột / người / tháng ở trên):
+
+| Model | / phiên (trọng số đơn) | ÷ tỉ lệ đạt 28/30 | ÷ tỉ lệ đạt câu thường + khó 20/22 |
+|---|---:|---:|---:|
+| claude-haiku-5-5 | $0.00068 | $0.00073 | $0.00074 |
+| claude-sonnet-5-5 | $0.01354 | $0.01451 | $0.01490 |
+| claude-opus-5-5 | $0.02709 | $0.02902 | $0.02980 |
+
+Số nhóm dùng khi cần một giá mỗi đơn ở quy mô triển khai: **≈ $0.0149 / phiên đạt với Sonnet 5.5** (trọng số đơn, điều chỉnh theo 20/22). Muốn đúng đơn vị "đơn thành công" phải theo dõi cùng một đơn đến khi tạo được đơn nháp đúng — chưa làm.
 
 Hai giả định của dòng Haiku và Opus: (1) token đo trên Sonnet 5.5, chỉ đổi đơn giá; bộ tách token khác thì số thật có thể lệch. (2) Cột "chi phí / task thành công" dùng tỉ lệ đạt 28/30 của Sonnet (`run-5`); nhóm **chưa chạy eval** trên Haiku hay Opus.
 

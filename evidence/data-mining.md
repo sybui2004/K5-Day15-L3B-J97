@@ -26,14 +26,14 @@ Lấy ngày **28/11/2026**: 100 review mới nhất của app GHN (`vn.ghn.app.g
 
 ## 3. Kết quả
 
-Dữ liệu từng review: `evidence/review-ghn.csv` (cột `stt, so_sao, nhan, cau_dau`). Đếm: `python evidence/count_review.py`.
+Dữ liệu từng review: `evidence/review-ghn.csv` (cột `stt, so_sao, nhan, nhac_dia_gioi_moi, cau_dau`). Đếm: `python evidence/count_review.py`.
 
 | Đếm gì | x / N | % | Ghi chú |
 |---|---|---|---|
 | `sai_thieu_thong_tin_nhan_hang` | 7/100 | 7% | Nhầm mã vận đơn: STT 7, 47. Review nêu lý do giao không thành công là không liên lạc được hoặc khách không nghe máy: STT 5, 43, 63, 92, 100. |
 | `tra_loi_cham` | 0/100 | 0% | stt 6 ("Vô đợi gần 10p") chuyển sang `khac` sau đối chiếu: không rõ đợi gì |
 | `khac` | 93/100 | 93% | chậm lấy / giao hàng, app lỗi, giá, mất hàng, thái độ |
-| Nhắc địa chỉ sau sáp nhập / địa giới mới | 0/100 | 0% | tìm thêm theo từ khoá (sáp nhập, phường mới, địa giới, địa chỉ cũ/mới, phường, xã, quận): chỉ stt 22 có chữ "quận" ("quận đi quận về", nói về đường đi của hàng) |
+| Nhắc địa chỉ sau sáp nhập / địa giới mới | 0/100 | 0% | cột `nhac_dia_gioi_moi` trong `review-ghn.csv`, gắn khi rà toàn văn; script in tổng. Tìm thêm theo từ khoá trên toàn văn (sáp nhập, phường / xã mới, địa giới, địa chỉ cũ / mới, đơn vị hành chính): 0 review. stt 22 có chữ "quận" ("quận đi quận về", nói về đường đi của hàng); stt 12 "ko phải địa bàn của nó" không nói rõ do đổi địa giới nên ghi `khong` |
 
 **Rà lại 14 nhãn ban đầu.** Đối chiếu toàn văn với định nghĩa ở mục 1 (Sỹ duyệt). Giữ 7 dòng trong bảng. Chuyển 7 dòng sang `khac`: STT 29, 39, 48, 58, 62 kể việc không gọi rồi hoàn hàng, không ghi lý do hoàn là không liên lạc được người nhận. STT 69 nói địa chỉ rõ nhưng shipper không tìm thấy nhà. STT 89 nói sai thông tin đơn nhưng không nêu trường nào sai. Kết quả phản ánh lời kể của người viết; lý do giao thất bại do bên vận chuyển ghi chưa chứng minh số điện thoại sai.
 

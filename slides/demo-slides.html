@@ -196,18 +196,18 @@ Cho chủ shop: đã có tên, sđt, sản phẩm · phường cũ bị tách,
 <!-- 6 · Chi phí -->
 <section class="slide">
   <p class="kicker">6 / 8 · Chi phí khi dùng thật</p>
-  <h1>Sonnet 5.5: $0.0159 / đơn thành công, ≈ 150.700đ / shop / tháng</h1>
+  <h1>Sonnet 5.5: ≈ 150.700đ ($5.79) / shop / tháng ở kịch bản cơ sở</h1>
   <table style="margin-bottom:12pt;font-size:12pt">
-    <tr><th>Model · giá $/1M vào, ra</th><th class="n">/ phiên</th><th class="n">/ task đạt</th><th class="n">/ tháng thấp<br>580 shop</th><th class="n">/ tháng cơ sở<br>1.741 shop</th><th class="n">/ tháng cao<br>5.803 shop</th><th class="n">/ shop / tháng<br>cơ sở</th></tr>
+    <tr><th>Model · giá $/1M vào, ra</th><th class="n">/ phiên<br>TB mẫu</th><th class="n">/ phiên<br>÷ 28/30</th><th class="n">/ tháng thấp<br>580 shop</th><th class="n">/ tháng cơ sở<br>1.741 shop</th><th class="n">/ tháng cao<br>5.803 shop</th><th class="n">/ shop / tháng<br>cơ sở</th></tr>
     <tr><td style="white-space:nowrap">Haiku 5.5 · 0,10 / 0,50</td><td class="n">$0.00074</td><td class="n">$0.00079</td><td class="n">$167.91</td><td class="n">$504.03</td><td class="n">$1,679.99</td><td class="n">$0.29</td></tr>
     <tr class="pick"><td style="white-space:nowrap">Sonnet 5.5 · 2 / 10 · đang chạy</td><td class="n">$0.0148</td><td class="n">$0.0159</td><td class="n">$3,358.25</td><td class="n">$10,080.53</td><td class="n">$33,599.82</td><td class="n">$5.79</td></tr>
     <tr><td style="white-space:nowrap">Opus 5.5 · 4 / 20</td><td class="n">$0.0296</td><td class="n">$0.0317</td><td class="n">$6,716.49</td><td class="n">$20,161.05</td><td class="n">$67,199.65</td><td class="n">$11.58</td></tr>
   </table>
   <div class="grid2">
     <ul style="font-size:12.5pt">
-      <li><b>50</b> phiên mô phỏng qua bản chạy thử thật (seed 42), một phiên = một đơn chốt qua tin nhắn, có lớp chặn NeMo</li>
+      <li><b>50</b> phiên mô phỏng qua bản chạy thử thật (seed 42), có lớp chặn NeMo; mỗi phiên 1–3 hội thoại độc lập (câu thường + khó), tính như một đơn khi nhân ra tháng</li>
       <li>3 kiểu shop từ phỏng vấn: nhỏ 260 · vừa 400 · lớn 650 đơn / tháng; tỉ trọng 25–50–25% <i>(tự ước tính)</i></li>
-      <li>Chi phí / task thành công = chi phí / phiên ÷ tỉ lệ đạt 28/30 (run-5)</li>
+      <li>Hai cột đầu là trung bình mẫu. Theo tỉ trọng đơn (shop lớn ≈ 38% đơn) và tỉ lệ đạt câu thường + khó 20/22: <b>≈ $0.0149 / phiên đạt</b> (Sonnet) — chưa phải chi phí lên thành công một đơn</li>
     </ul>
     <ul style="font-size:12.5pt">
       <li><b>Số shop dùng</b> = 11.606 người nộp thuế TMĐT TP.HCM (mốc tham chiếu) × hệ số phủ 1–2 × thuộc lát cắt 0,5 × tỉ lệ dùng 0,1 / 0,3 / 0,5 — <i>ba thừa số tự ước tính</i></li>
