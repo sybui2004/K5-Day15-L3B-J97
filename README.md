@@ -152,5 +152,5 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 | 4 | Bản chạy thử làm trọn lát cắt | `codebase/` · lệnh ở mục "Lệnh" |
 | 5 | Định nghĩa "tốt" + bộ câu thử | `data/DATA_CARD.md` · `eval/` |
 | 6 | Mô phỏng chi phí khi dùng thật | `cost/` |
-| 7 | Slide + demo + video dự phòng | `demo-slides.pdf` ở thư mục gốc · link video (34 giây, màn hình duyệt chạy `claude-sonnet-5-5`): https://drive.google.com/file/d/1MWRXzBWJ2ZgzxyQcHus2Ad6dGNtcgOx9/view?usp=sharing · log trong video ghi cổng 8010, `web.py` mặc định 8000 |
+| 7 | Slide + demo + video dự phòng | `demo-slides.pdf` ở thư mục gốc · link video (59 giây, quay 28/11 trên bản CP4: màn hình duyệt chạy `claude-sonnet-5-5` có lớp chặn NeMo, 3 ca B04 tạo đơn nháp · B09 hỏi lại · B14 từ chối, có phụ đề): https://drive.google.com/file/d/1-nLW1kFJ7fItPac263rkEmtqukOFSLWW/view?usp=sharing |
 | + | *Bonus:* người dùng thử | `validation/log.md` |

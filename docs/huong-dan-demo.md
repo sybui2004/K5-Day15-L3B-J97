@@ -25,7 +25,7 @@ Kiểm nhanh, theo thứ tự:
 - [ ] `python run.py check` → "Không thấy vấn đề".
 - [ ] `python run.py eval --try 1` → câu B01 ra `QUYẾT ĐỊNH`, cột `model` là `claude-sonnet-5-5`, token > 0. Ra model `fake` hoặc token 0 nghĩa là `.env` chưa đúng.
 - [ ] Mở `demo-slides.pdf` ở gốc repo.
-- [ ] Mở link video dự phòng (README, mục 7) bằng **cửa sổ ẩn danh**, phát được.
+- [ ] Mở link video dự phòng bằng **cửa sổ ẩn danh**, phát được: https://drive.google.com/file/d/1-nLW1kFJ7fItPac263rkEmtqukOFSLWW/view?usp=sharing (59 giây, cùng 3 ca ở mục 3; cũng có trong README, mục 7).
 - [ ] Xoá nhật ký của lần chạy thử trước: `data/lan-chay-web.jsonl`, `data/nhat-ky-duyet.jsonl` (có tên, sđt, địa chỉ — spec §9).
 
 ## 2. Mở màn hình duyệt
