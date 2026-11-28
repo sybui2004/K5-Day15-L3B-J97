@@ -3,55 +3,63 @@
 # Mọi số phải có nguồn (data / phỏng vấn / khảo sát / quy mô khoá có nguồn) hoặc ghi rõ "(tự ước tính)".
 # Chạy: python run.py simulate --try   (10 phiên, kiểm khung — làm trước CP3)
 #       python run.py simulate         (đủ số phiên dưới đây — bản nộp CP4)
-# Thay mọi dòng "(ví dụ)" bằng số và nguồn của nhóm; simulate nhắc nếu còn sót.
+# Thay mọi dòng ví dụ của khung bằng số và nguồn của nhóm; simulate nhắc nếu còn sót.
 
 sessions: 50        # số phiên mô phỏng — bản nộp ≥50
 seed: 42            # giữ cố định để chạy lại ra cùng chuỗi phiên
 
 users:              # số người dùng thật nếu đưa vào dùng — 3 kịch bản, ở quy mô thật của sản phẩm
-                    # track A: khoá học · track B–F: người dùng của sản phẩm / nhóm nhắm tới, nguồn công khai có link
-  low: 300
-  base: 700
-  high: 1000
-  source: "(ví dụ) track A — thay bằng số của nhóm. Cơ sở: lớp L3 hơn 700 học viên (README hackathon); thấp, cao: (tự ước tính)"
+                    # nhóm nhắm tới: shop bán lẻ ở TP HCM tự chốt đơn qua tin nhắn rồi tạo vận đơn (spec §1)
+  # Số người dùng = quy mô tham chiếu × hệ số phủ × tỉ lệ thuộc lát cắt × tỉ lệ sử dụng (làm tròn).
+  #   thấp  11.606 × 1 × 0,5 × 0,1 =   580
+  #   cơ sở 11.606 × 1 × 0,5 × 0,3 = 1.741
+  #   cao   11.606 × 2 × 0,5 × 0,5 = 5.803
+  # 11.606 chỉ là mốc tham chiếu, không phải số shop dùng sản phẩm. Ba thừa số sau đều (tự ước tính), kể cả kịch bản cơ sở.
+  low: 580
+  base: 1741
+  high: 5803
+  source: "Quy mô tham chiếu: Cục Thuế TP.HCM rà soát, đưa vào quản lý 11.606 người nộp thuế kinh doanh TMĐT (luỹ kế đến hết 10/2024), Thanh Niên 04/12/2024 https://thanhnien.vn/doanh-nghiep-ca-nhan-kinh-doanh-thuong-mai-dien-tu-can-luu-y-thue-185241203172338583.htm · xem 27/11/2026. Số người dùng = 11.606 × hệ số phủ × tỉ lệ thuộc lát cắt × tỉ lệ sử dụng. Hệ số phủ (thêm người bán chưa đăng ký thuế): 1 / 1 / 2 (tự ước tính). Tỉ lệ thuộc lát cắt (tự chốt đơn qua tin nhắn rồi tạo vận đơn, spec §1): 0,5 cả ba kịch bản (tự ước tính: bài báo không tách người bán qua mạng xã hội). Tỉ lệ sử dụng (shop thuộc lát cắt dùng công cụ): 0,1 / 0,3 / 0,5 (tự ước tính). Thấp / cơ sở / cao = 580 / 1.741 / 5.803."
 
-# Một phiên = một hội thoại chốt đơn (task P2). simulate.py không nối các lượt: mỗi lượt lấy ngẫu nhiên một input
-# của eval/benchmark.csv rồi gọi answer() riêng; câu luồng B trong benchmark đã chứa cả hội thoại dài nên token vẫn sát.
-# turns_per_session = 1 + số lần hỏi lại trung bình. Nguồn: câu 2 phỏng vấn E2 "phải nhắn qua lại mấy lượt"
-#   P1 5 · P2 3 · P3 6 · P4 4 lượt nhắn (evidence/interviews/P1.md–P4.md), trung bình 4,5.
-#   Quy đổi (tự ước tính): đơn trôi chảy 3 lượt (khách chốt, shop xin thông tin, khách gửi), mỗi lần hỏi lại thêm 2 lượt
-#   → (4,5 − 3) / 2 = 0,75 lần, làm tròn lên 1 (simulate.py chỉ nhận số nguyên) → turns_per_session = 2.
+# Một phiên = một hội thoại chốt đơn (task P2), tức một đơn chốt qua tin nhắn.
+# simulate.py không nối các lượt: mỗi lượt lấy ngẫu nhiên một input của eval/benchmark.csv rồi gọi answer() riêng;
+# câu luồng B trong benchmark đã chứa cả hội thoại dài nên token vẫn sát.
+# Ba kiểu shop lấy từ bảng "Số lần / tháng của từng kiểu người dùng" ở spec §2 (phỏng vấn P1–P4, n = 4).
+# uses_per_month = số đơn chốt qua tin nhắn / tháng (câu 4).
+# turns_per_session = 1 + số lần hỏi lại. Lượt nhắn mỗi đơn lấy từ câu 2 (P1 5 · P2 3 · P3 6 · P4 4).
+#   Quy đổi (tự ước tính): đơn trôi chảy 3 lượt (khách chốt, shop xin thông tin, khách gửi), mỗi lần hỏi lại thêm 2 lượt,
+#   làm tròn lên (simulate.py chỉ nhận số nguyên).
+# share: mỗi kiểu bằng tỉ lệ trong 4 shop đã hỏi (1 lớn · 2 vừa · 1 nhỏ) (tự ước tính: chưa có số cả thị trường).
 personas:           # ≥3 kiểu người dùng; share cộng lại = 1
-  - name: dung_it
-    share: 0.5              # tỉ lệ người dùng kiểu này
-    uses_per_month: 4       # số phiên / người / tháng
-    turns_per_session: 2    # 1 + 1 lần hỏi lại, xem ghi chú trên (tự ước tính)
-    source: "(ví dụ) phỏng vấn P1, P3 — thay bằng nguồn của nhóm"
-  - name: dung_vua
-    share: 0.3
-    uses_per_month: 10
-    turns_per_session: 2    # 1 + 1 lần hỏi lại, xem ghi chú trên (tự ước tính)
-    source: "(ví dụ) khảo sát n = 24, câu 3"
-  - name: dung_nhieu
-    share: 0.2
-    uses_per_month: 20
-    turns_per_session: 2    # 1 + 1 lần hỏi lại, xem ghi chú trên (tự ước tính)
-    source: "(ví dụ) data/preclass: đếm số lượt / người — cách đếm ở evidence/data-mining.md"
+  - name: shop_nho
+    share: 0.25
+    uses_per_month: 260     # P4: khoảng 260 đơn / tháng
+    turns_per_session: 2    # P4 4 lượt → (4 − 3) / 2 = 0,5 → 1 lần hỏi lại
+    source: "phỏng vấn P4 (evidence/interviews/P4.md, câu 2, câu 4); share (tự ước tính)"
+  - name: shop_vua
+    share: 0.5
+    uses_per_month: 400     # P1 480 · P3 320 → trung bình 400
+    turns_per_session: 3    # P1 5 · P3 6 → 5,5 lượt → (5,5 − 3) / 2 = 1,25 → 2 lần hỏi lại
+    source: "phỏng vấn P1, P3 (evidence/interviews/P1.md, P3.md, câu 2, câu 4); share (tự ước tính)"
+  - name: shop_lon
+    share: 0.25
+    uses_per_month: 650     # P2: khoảng 650 đơn / tháng
+    turns_per_session: 1    # P2 3 lượt → không hỏi lại
+    source: "phỏng vấn P2 (evidence/interviews/P2.md, câu 2, câu 4); share (tự ước tính)"
 # Mỗi lượt hỏi lấy ngẫu nhiên một đầu vào trong eval/benchmark.csv (type thuong và kho).
-# Persona hỏi kiểu riêng: thêm vào persona đó
-#     types: [thuong, kho, tu_choi]
-# hoặc
-#     inputs: ["câu hỏi kiểu 1", "câu hỏi kiểu 2"]
 
 prices:             # USD / 1 triệu token — chép từ further-reading/model-prices.md của repo đề. ≥2 mức model
-  - model: gemini-3.1-flash-lite
-    input: 0.25
-    output: 1.50
-    source: "(ví dụ) https://ai.google.dev/gemini-api/docs/pricing · xem 25/11/2026"
-  - model: gemini-4-hydrogen
-    input: 1.50
-    output: 7.50
-    source: "(ví dụ) https://ai.google.dev/gemini-api/docs/pricing · xem 25/11/2026"
+  - model: claude-haiku-5-5
+    input: 0.10
+    output: 0.50
+    source: "Claude Haiku 5.5 (tầng Nhỏ, prompt ≤ 100.000 token) · further-reading/model-prices.md của repo đề, BTC xem https://platform.claude.com/docs/en/about-claude/pricing ngày 25/11/2026"
+  - model: claude-sonnet-5-5
+    input: 2.00
+    output: 10.00
+    source: "Claude Sonnet 5.5 (tầng Lớn, model nhóm chạy eval) · further-reading/model-prices.md của repo đề, BTC xem https://platform.claude.com/docs/en/about-claude/pricing ngày 25/11/2026"
+  - model: claude-opus-5-5
+    input: 4.00
+    output: 20.00
+    source: "Claude Opus 5.5 (tầng Rất lớn) · further-reading/model-prices.md của repo đề, BTC xem https://platform.claude.com/docs/en/about-claude/pricing ngày 25/11/2026"
 
 usd_to_vnd:         # tuỳ chọn: điền thì bản tóm tắt in thêm tiền Việt
   rate:
