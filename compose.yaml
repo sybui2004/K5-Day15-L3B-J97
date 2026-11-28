@@ -1,0 +1,89 @@
+# Triển khai màn hình duyệt J97: Postgres + BE (web.py) + FE (nginx) + Cloudflare Tunnel. Hướng dẫn: docs/deploy.md
+# Biến lấy từ .env cạnh file này (xem .env.example). cloudflared chỉ chạy khi .env có COMPOSE_PROFILES=tunnel.
+name: j97
+
+x-service: &service
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  postgres:
+    <<: *service
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: j97
+      POSTGRES_USER: j97
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?đặt POSTGRES_PASSWORD trong .env (chỉ chữ và số)}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [backend]
+    healthcheck:
+      test: [CMD, pg_isready, -U, j97, -d, j97]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  be:
+    <<: *service
+    build: .
+    image: local/j97-be:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MODEL_PROVIDER: ${MODEL_PROVIDER:-fake}
+      MODEL_NAME: ${MODEL_NAME:-}
+      API_KEY: ${API_KEY:-}
+      MODEL_EFFORT: ${MODEL_EFFORT:-}
+      GUARD: ${GUARD:-nemo}
+      API_KEY_DEEPSEEK: ${API_KEY_DEEPSEEK:-}     # dự phòng DeepSeek khi Claude lỗi (#60)
+      FALLBACK_PROVIDER: ${FALLBACK_PROVIDER:-}
+      FALLBACK_MODEL: ${FALLBACK_MODEL:-}
+      NAP_NEN: ${NAP_NEN:-}                       # 1 = mở trang ngay, AI xử lý hộp thư ở nền (#59)
+      DATABASE_URL: postgresql://j97:${POSTGRES_PASSWORD}@postgres:5432/j97
+      DATABASE_REQUIRED: "1"   # Postgres lỗi thì be dừng (không ghi file tạm trong container rồi mất khi recreate)
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: "8000"
+      WEB_ALLOWED_HOSTS: ${PUBLIC_HOST:-j97.sunstack.org},127.0.0.1:${FE_PORT:-8080},localhost:${FE_PORT:-8080}
+    networks: [backend, frontend]
+
+  fe:
+    <<: *service
+    image: nginx:1.28.3-alpine
+    depends_on: [be]
+    volumes:
+      - ./codebase/static:/usr/share/nginx/html:ro
+      - ./deploy:/etc/nginx/conf.d:ro   # cả thư mục: sửa file rồi `docker compose exec fe nginx -s reload`
+    ports:
+      - "127.0.0.1:${FE_PORT:-8080}:80"   # chỉ để kiểm tra trên máy; người ngoài vào qua Cloudflare Tunnel
+    networks: [frontend]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1/healthz]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  cloudflared:
+    <<: *service
+    image: cloudflare/cloudflared:2026.11.2
+    profiles: [tunnel]
+    depends_on: [fe]
+    command: [tunnel, --no-autoupdate, --metrics, "0.0.0.0:2000", run]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    networks: [frontend]
+    healthcheck:
+      test: [CMD, cloudflared, tunnel, --metrics, "127.0.0.1:2000", ready]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+networks:
+  backend:
+    internal: true   # Postgres không ra Internet, chỉ BE gọi được
+  frontend:
+
+volumes:
+  pgdata:
