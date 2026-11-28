@@ -17,4 +17,4 @@
 3. Một câu thử trượt của nhóm và mình học được gì từ nó:
    B12: khách ghi "3 Lê Văn Sỹ, Phường 1", không ghi quận; chuẩn là chỉ hỏi quận/huyện cũ.
    Lượt 1 (`run-3`) hỏi tỉnh/thành và phường/xã; lượt 2 (`run-5`) đã hỏi quận/huyện cũ nhưng hỏi thêm tỉnh nên vẫn trượt `hoi_mot_lan_du_y` (`eval/report.md`). Cả hai lượt không tạo đơn sai.
-   Bài học: không tạo đơn sai chưa đủ, còn phải hỏi khách đúng ý đang thiếu. Vì vậy cần đo riêng chất lượng câu hỏi lại, và giữ nguyên `expected` thay vì nới ra cho câu này qua.
+   Qua câu này mình nhận ra an toàn (không tạo đơn sai) mới chỉ là một nửa; hỏi thừa hay hỏi lan man vẫn dễ làm khách khó chịu và bỏ ngang. Nên dù chỉ vướng ở một câu hỏi lại, mình thấy vẫn phải đo kỹ cách AI hỏi khách và giữ nguyên `expected` làm chuẩn, chứ không nới tiêu chí để kéo điểm lên.
