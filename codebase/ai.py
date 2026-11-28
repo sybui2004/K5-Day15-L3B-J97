@@ -21,9 +21,10 @@ import json
 import os
 import sys
 import urllib.error
+import time
 import urllib.request
 
-from tracing import model_call
+from tracing import model_call, note
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -85,11 +86,20 @@ def _call_claude(system: str, user: str) -> dict:
 
 
 def _doc_phan_hoi_deepseek(d: dict) -> dict:
-    """Phản hồi chat/completions (chuẩn OpenAI) → hợp đồng call_model. completion_tokens đã gồm token suy luận."""
-    u = d.get("usage") or {}
+    """Phản hồi chat/completions (chuẩn OpenAI) → hợp đồng call_model. completion_tokens đã gồm token suy luận.
+    Token phải lấy từ usage của API: thiếu usage hoặc thiếu / sai kiểu một trường thì báo lỗi, không ghi 0.
+    API thật sự trả 0 thì nhận."""
+    u = d.get("usage")
+    so = {}
+    for k in ("prompt_tokens", "completion_tokens"):
+        v = u.get(k) if isinstance(u, dict) else None
+        if not (isinstance(v, int) and not isinstance(v, bool) and v >= 0):
+            raise ValueError("DeepSeek trả phản hồi thiếu số liệu token (usage.%s = %r), không ghi được token thật"
+                             % (k, v))
+        so[k] = v
     return {"text": ((d.get("choices") or [{}])[0].get("message") or {}).get("content") or "",
-            "model": d.get("model") or FALLBACK_MODEL, "tokens_in": int(u.get("prompt_tokens") or 0),
-            "tokens_out": int(u.get("completion_tokens") or 0)}
+            "model": d.get("model") or FALLBACK_MODEL, "tokens_in": so["prompt_tokens"],
+            "tokens_out": so["completion_tokens"]}
 
 
 def _call_deepseek(system: str, user: str) -> dict:
@@ -124,30 +134,66 @@ def _co_du_phong():
     return FALLBACK_PROVIDER == "deepseek" and bool(API_KEY_DEEPSEEK)
 
 
+class _ChuyenDuPhong(Exception):
+    """Lần thử Claude lỗi ở loại lỗi cho phép chuyển sang dự phòng (xem _loai_loi_claude)."""
+    def __init__(self, loi, loai, giay):
+        super().__init__(str(loi))
+        self.loi, self.loai, self.giay = loi, loai, giay
+
+
 @model_call
+def goi_model_gia(system: str, user: str) -> dict:
+    last = (user.strip().splitlines() or [""])[-1]
+    return {"text": "[câu trả lời giả — chưa nối model] " + last[:60], "model": "fake", "tokens_in": 0, "tokens_out": 0}
+
+
+@model_call
+def goi_claude(system: str, user: str) -> dict:
+    """Một lần thử Claude = một sự kiện model trong trace. Có dự phòng và lỗi thuộc loại được chuyển thì KHÔNG
+    ném lỗi ra trace (lượt vẫn thành công nếu dự phòng chạy được): trả 0 token — đúng thực tế, yêu cầu lỗi không
+    tính token — kèm khoá _chuyen; call_model ghi lý do bằng note rồi gọi dự phòng. Lỗi khác vẫn ném như cũ."""
+    t0 = time.perf_counter()
+    try:
+        return _call_claude(system, user)
+    except Exception as e:  # noqa: BLE001
+        loai = _loai_loi_claude(e)
+        if loai is None or not _co_du_phong():
+            raise
+        return {"text": "", "model": MODEL_NAME or "claude-sonnet-5-5", "tokens_in": 0, "tokens_out": 0,
+                "_chuyen": _ChuyenDuPhong(e, loai, time.perf_counter() - t0)}
+
+
+@model_call
+def goi_deepseek(system: str, user: str) -> dict:
+    return _call_deepseek(system, user)
+
+
 def call_model(system: str, user: str) -> dict:
+    """Điều phối: mỗi lần thử nhà cung cấp là một sự kiện model riêng trong trace (thời gian riêng, token riêng)."""
     if MODEL_PROVIDER == "fake":
-        last = (user.strip().splitlines() or [""])[-1]
-        return {"text": "[câu trả lời giả — chưa nối model] " + last[:60], "model": "fake", "tokens_in": 0, "tokens_out": 0}
+        return goi_model_gia(system, user)
 
     if MODEL_PROVIDER == "deepseek":
-        return _call_deepseek(system, user)
+        return goi_deepseek(system, user)
 
     if MODEL_PROVIDER == "anthropic":
         global _da_chuyen_du_phong
         if _da_chuyen_du_phong and _co_du_phong():
-            return _call_deepseek(system, user)
-        try:
-            return _call_claude(system, user)
-        except Exception as e:  # noqa: BLE001 — chỉ chuyển với lỗi _loai_loi_claude nhận ra
-            loai = _loai_loi_claude(e)
-            if loai is None or not _co_du_phong():
-                raise
-            if loai == "han":
-                _da_chuyen_du_phong = "%s: %s" % (type(e).__name__, e)
-            print("   [dự phòng] Claude lỗi (%s: %s) → gọi %s%s" % (type(e).__name__, str(e)[:120], FALLBACK_MODEL,
-                  " cho các lần sau" if loai == "han" else ""), file=sys.stderr)
-            return _call_deepseek(system, user)
+            note("dự phòng: dùng %s vì Claude đã lỗi trong phiên này (%s)" % (FALLBACK_MODEL, _da_chuyen_du_phong[:150]))
+            return goi_deepseek(system, user)
+        res = goi_claude(system, user)
+        c = res.get("_chuyen")
+        if c is None:
+            return res
+        ma = getattr(c.loi, "status_code", None)
+        ten = "%s%s: %s" % (type(c.loi).__name__, " HTTP %s" % ma if ma else "", str(c.loi)[:150])
+        if c.loai == "han":
+            _da_chuyen_du_phong = ten
+        note("dự phòng: Claude lỗi sau %.1f s (%s) → gọi %s%s" % (c.giay, ten, FALLBACK_MODEL,
+             " cho các lần sau" if c.loai == "han" else ""))
+        print("   [dự phòng] Claude lỗi (%s) → gọi %s%s" % (ten[:140], FALLBACK_MODEL,
+              " cho các lần sau" if c.loai == "han" else ""), file=sys.stderr)
+        return goi_deepseek(system, user)
     raise NotImplementedError(
         "chưa viết phần gọi model thật cho MODEL_PROVIDER=%s trong codebase/ai.py — xem docs/connect-model.md"
         % MODEL_PROVIDER)

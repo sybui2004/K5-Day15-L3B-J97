@@ -190,12 +190,17 @@ function veBuoc(t, p) {
   const ds = el("ol", {class: "buoc-ds"});
   let i = 0;
   for (const b of t.buoc) {
-    if (b.loai === "note") continue;  // ghi chú nội bộ của trace: xem ở nhật ký
+    const duPhong = b.loai === "note" && (b.text || "").startsWith("dự phòng");
+    if (b.loai === "note" && !duPhong) continue;  // ghi chú nội bộ của trace: xem ở nhật ký
     i++;
     let ten, trangThai, ket, chiTiet = [];
-    if (b.loai === "model") {
-      ten = "Model đọc hội thoại"; trangThai = b.error ? "sai" : "model";
-      ket = b.error ? "Lỗi: " + b.error : "Trích người nhận, SĐT, địa chỉ, sản phẩm thành JSON";
+    const thuLoi = b.loai === "model" && b.ten === "goi_claude" && !b.error && !b.output && !b.tokens_in && !b.tokens_out;
+    if (duPhong) {
+      ten = "Chuyển sang model dự phòng"; trangThai = "sai"; ket = b.text.replace(/^dự phòng:\s*/, "");
+    } else if (b.loai === "model") {
+      ten = thuLoi ? "Thử Claude: lỗi, không tính token" : (b.model || "").startsWith("deepseek") ? "Model dự phòng " + b.model : "Model đọc hội thoại";
+      trangThai = b.error || thuLoi ? "sai" : "model";
+      ket = b.error ? "Lỗi: " + b.error : thuLoi ? "Claude không trả lời được, xem bước kế tiếp" : "Trích người nhận, SĐT, địa chỉ, sản phẩm thành JSON";
       if (b.output) chiTiet.push(["Model trả về", b.output]);
     } else {
       ten = CONG_CU[b.ten] || b.ten; [trangThai, ket] = tomTatBuoc(b);

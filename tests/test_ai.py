@@ -8,6 +8,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "codebase"))
 
 import ai  # noqa: E402
+import tracing  # noqa: E402
 
 
 class LoiGia(Exception):
@@ -82,6 +83,40 @@ class TestDuPhong(unittest.TestCase):
         ai._call_claude = lambda s, u: {"text": "{}", "model": "claude-sonnet-5-5", "tokens_in": 1, "tokens_out": 1}
         self.assertEqual(ai.call_model("s", "u")["model"], "claude-sonnet-5-5")
         self.assertEqual(self.goi_ds, 0)
+
+    def test_trace_ghi_rieng_lan_thu_claude_va_deepseek(self):
+        # review PR #60: Claude 529 rồi DeepSeek thành công → hai sự kiện model, lượt vẫn thành công
+        self._claude_loi(LoiGia(529, "Overloaded"))
+        tracing.begin("thu")
+        ai.call_model("s", "u")
+        tom_tat, su_kien = tracing.end()
+        self.assertEqual(tom_tat["model_calls"], 2)
+        self.assertEqual(tom_tat["errors"], [])
+        model = [e for e in su_kien if e["kind"] == "model"]
+        self.assertEqual([e["name"] for e in model], ["goi_claude", "goi_deepseek"])
+        self.assertEqual((model[0]["tokens_in"], model[0]["tokens_out"]), (0, 0))
+        self.assertEqual(model[1]["model"], "deepseek-flash")
+        ghi_chu = [e["text"] for e in su_kien if e["kind"] == "note"]
+        self.assertTrue(any("529" in t and "deepseek-flash" in t for t in ghi_chu), ghi_chu)
+
+    def test_loi_khong_chuyen_van_ghi_loi_vao_trace(self):
+        self._claude_loi(LoiGia(400, "messages: field required"))
+        tracing.begin("thu")
+        with self.assertRaises(LoiGia):
+            ai.call_model("s", "u")
+        tom_tat, _ = tracing.end()
+        self.assertEqual(len(tom_tat["errors"]), 1)
+
+    def test_thieu_usage_thi_bao_loi_du_lieu_do(self):
+        for usage in (None, {}, {"prompt_tokens": 12}, {"completion_tokens": 5}, {"prompt_tokens": "12", "completion_tokens": 5}):
+            d = {"model": "deepseek-flash", "choices": [{"message": {"content": "x"}}]}
+            if usage is not None:
+                d["usage"] = usage
+            with self.assertRaises(ValueError, msg=usage):
+                ai._doc_phan_hoi_deepseek(d)
+        r = ai._doc_phan_hoi_deepseek({"model": "deepseek-flash", "choices": [{"message": {"content": ""}}],
+                                       "usage": {"prompt_tokens": 0, "completion_tokens": 0}})
+        self.assertEqual((r["tokens_in"], r["tokens_out"]), (0, 0))  # API thật sự trả 0 thì nhận
 
     def test_doc_phan_hoi_deepseek(self):
         r = ai._doc_phan_hoi_deepseek({"model": "deepseek-flash", "choices": [{"message": {"content": "xin chào"}}],
