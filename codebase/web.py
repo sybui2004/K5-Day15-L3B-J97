@@ -377,15 +377,30 @@ class ManHinh:
             self._phien = {ma: p, **self._phien}
             return copy.deepcopy(p)
 
+    def _tong_khi_giu_khoa(self):
+        t = dict(self._tong)
+        t["dang_xu_ly"] = sum(p["trang_thai"] == "dang_xu_ly" for p in self._phien.values())
+        return t
+
     def tong(self):
         """Tổng phiên demo (từ lúc mở màn hình): số lần chạy, token, chi phí USD (+ VND nếu có tỉ giá)."""
         with self._khoa:
-            t = dict(self._tong)
-            t["dang_xu_ly"] = sum(p["trang_thai"] == "dang_xu_ly" for p in self._phien.values())
+            t = self._tong_khi_giu_khoa()
+        return self._them_tong(t)
+
+    def _them_tong(self, t):
         t["nap_nen"] = self.cho_nap_nen
         t["chi_phi_vnd"] = round(t["chi_phi_usd"] * self.ty_gia) if self.ty_gia else None
         t["kho"] = self.kho.ten
         return t
+
+    def anh_chup(self):
+        """(danh sách, tổng) đọc trong CÙNG một lần giữ khoá, để số "đang xử lý" khớp với danh sách
+        (đọc hai lần riêng thì luồng nền có thể xong một hội thoại ở giữa, trang dừng tự làm mới quá sớm)."""
+        with self._khoa:
+            ds = copy.deepcopy(list(self._phien.values()))
+            t = self._tong_khi_giu_khoa()
+        return ds, self._them_tong(t)
 
     def nhat_ky(self, gioi_han=100):
         try:
@@ -548,8 +563,8 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         if not host_hop_le(self.headers.get("Host")):
             return self._gui(403, {"loi": "Host không hợp lệ"})
         if self.path == "/api/hop-thu":
-            return self._gui(200, {"phien": self.man_hinh.danh_sach(), "phuong_moi": _phuong_moi(),
-                                   "tong": self.man_hinh.tong()})
+            ds, t = self.man_hinh.anh_chup()
+            return self._gui(200, {"phien": ds, "phuong_moi": _phuong_moi(), "tong": t})
         if self.path == "/api/nhat-ky":
             try:
                 return self._gui(200, self.man_hinh.nhat_ky())

@@ -309,6 +309,25 @@ class TestNapNen(unittest.TestCase):
         t = self.mh.tong()
         self.assertEqual((t["dang_xu_ly"], t["lan_chay"]), (0, 2))
 
+    def test_anh_chup_danh_sach_va_tong_khop_nhau(self):
+        # review PR #59: worker xong hội thoại cuối giữa lúc đọc danh sách và lúc đọc tổng → trang kẹt "đang xử lý"
+        cho = threading.Event()
+        model = agent.call_model
+        agent.call_model = lambda s, u: (cho.wait(5), model(s, u))[1]
+        luong = self.mh.nap_nen(self.lo[:1])
+        goc = self.mh._tong_khi_giu_khoa
+
+        def xong_giua_chung(*a):  # chạy trong khi anh_chup đang giữ khoá: worker chưa thể ghi
+            cho.set()
+            return goc(*a)
+        self.mh._tong_khi_giu_khoa = xong_giua_chung
+        ds, t = self.mh.anh_chup()
+        self.assertEqual(t["dang_xu_ly"], sum(p["trang_thai"] == "dang_xu_ly" for p in ds))
+        self.assertEqual(t["dang_xu_ly"], 1)
+        luong.join(10)
+        ds, t = self.mh.anh_chup()
+        self.assertEqual((t["dang_xu_ly"], ds[0]["trang_thai"]), (0, "cho_duyet"))
+
     def test_lo_moi_len_dau_va_ma_trung_duoc_cap_rieng(self):
         self.mh.nap_nen(self.lo).join(10)
         self.mh.nap_nen(self.lo[:1]).join(10)
