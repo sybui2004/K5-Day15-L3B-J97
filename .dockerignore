@@ -10,6 +10,11 @@ docs/khao_sat/
 evidence/**/raw-*
 data/nhat-ky-duyet.jsonl
 data/lan-chay-web.jsonl
+# Bản sao lưu Postgres (có dữ liệu khách): không vào image
+**/*.sql
+**/*.sql.gz
+**/*.dump
+**/backups/
 # Không cần khi chạy
 .git/
 .venv/

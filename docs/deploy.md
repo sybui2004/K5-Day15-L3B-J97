@@ -10,8 +10,8 @@ Khách ─HTTPS─▶ Cloudflare (sunstack.org) ─tunnel─▶ cloudflared ─�
 | Service | Image | Việc |
 |---|---|---|
 | `postgres` | `postgres:16-alpine` | Nhật ký duyệt + lần chạy AI (bảng `nhat_ky_duyet`, `lan_chay`, `kho.py` tự tạo). Volume `j97_pgdata`. Mạng `backend` là internal, không ra Internet |
-| `be` | `local/j97-be` (build từ `Dockerfile`) | `codebase/web.py`: agent, guard, API `/api/*`. Không mở cổng ra máy |
-| `fe` | `nginx:1.28.3-alpine` | Phục vụ `codebase/static/`, chuyển `/api/` sang `be`, giới hạn `/api/moi` 6 lần/phút/IP. Mở `127.0.0.1:8080` để kiểm tra trên máy |
+| `be` | `local/j97-be` (build từ `Dockerfile`) | `codebase/web.py`: agent, guard, API `/api/*`. Không mở cổng ra máy. `DATABASE_REQUIRED=1`: không vào được Postgres thì dừng, không ghi nhật ký ra file tạm trong container |
+| `fe` | `nginx:1.28.3-alpine` | Phục vụ `codebase/static/`, chuyển `/api/` sang `be`, giới hạn `/api/moi` + `/api/tra-loi` (gọi model) chung 6 lần/phút/IP. Mở `127.0.0.1:8080` để kiểm tra trên máy |
 | `cloudflared` | `cloudflare/cloudflared:2026.11.2` | Kết nối ra Cloudflare bằng token, chỉ chạy khi `.env` có `COMPOSE_PROFILES=tunnel` |
 
 ## 1. Chuẩn bị `.env`
@@ -57,10 +57,16 @@ Tài khoản sunstack.org có app Access **sunstack-internal** phủ `*.sunstack
 
 **Access → Applications → Add an application → Self-hosted**, domain `j97.sunstack.org`, rồi chọn một policy:
 
-- **Công khai (đang dùng):** Action **Bypass**, Include **Everyone**. Action **Allow** + Everyone vẫn bắt đăng nhập (302 sang trang login).
-- **Chỉ người được mời:** Action **Allow**, Include **Emails** (email nhóm, giám khảo), bật Login method **One-time PIN**.
+- **Chỉ người được mời (khuyên dùng):** Action **Allow**, Include **Emails** (email nhóm, giám khảo), bật Login method **One-time PIN**.
+- **Công khai:** Action **Bypass**, Include **Everyone**. Action **Allow** + Everyone vẫn bắt đăng nhập (302 sang trang login).
 
-Khi công khai: màn hình duyệt không có đăng nhập, ai có link cũng duyệt / huỷ đơn được và gọi model bằng key của nhóm qua **Hội thoại mới**. nginx chỉ giới hạn `/api/moi` 6 lần/phút mỗi IP.
+Màn hình duyệt là màn hình vận hành, không có đăng nhập riêng. Khi để **Bypass**, mọi người vào đều:
+
+- **đọc được dữ liệu người khác đã nhập**: tab Hộp thư hiện mọi hội thoại (cả hội thoại gõ ở **Hội thoại mới**), tab Nhật ký đọc từ Postgres các lần chạy AI kèm trace: output model, dữ liệu công cụ, có thể chứa tên, SĐT, địa chỉ. Volume `j97_pgdata` giữ các bản ghi này qua mỗi lần khởi động lại;
+- duyệt / huỷ đơn được;
+- gọi model bằng key của nhóm qua **Hội thoại mới** và **Khách trả lời**. nginx giới hạn chung hai thao tác này 6 lần/phút mỗi IP, không chặn được người dùng nhiều IP.
+
+Chỉ để công khai khi demo với dữ liệu dựng: nhắc người xem không nhập dữ liệu thật, và sau demo xoá lịch sử (`docker compose down -v` xoá cả DB, hoặc `truncate nhat_ky_duyet, lan_chay`).
 
 ## Lỗi hay gặp
 
@@ -70,6 +76,7 @@ Khi công khai: màn hình duyệt không có đăng nhập, ai có link cũng d
 | 302 sang `…cloudflareaccess.com/…/login` | App riêng có policy Allow, chưa phải Bypass |
 | 530, `error code: 1033` | DNS `j97` không trỏ vào tunnel đang chạy: tunnel chưa có route `j97.sunstack.org` |
 | 502 | Service URL sai (`https://`, `localhost`) hoặc `fe` chưa chạy |
+| `be` khởi động lại liên tục, log `DATABASE_REQUIRED=1 → dừng` | Không vào được Postgres, thường do đổi `POSTGRES_PASSWORD` trong `.env` khi volume cũ còn mật khẩu cũ. Đặt lại mật khẩu cũ, hoặc `docker compose exec postgres psql -U j97 -d j97 -c "alter role j97 password '…'"` |
 | 403 `{"loi": "Host không hợp lệ"}` | `PUBLIC_HOST` trong `.env` khác tên miền đang dùng |
 
 ## Vận hành
@@ -81,7 +88,7 @@ Khi công khai: màn hình duyệt không có đăng nhập, ai có link cũng d
 | Cập nhật code | `git pull && docker compose up -d --build` (sửa riêng `codebase/static/` thì chỉ cần tải lại trang) |
 | Dừng / chạy lại | `docker compose stop` · `docker compose up -d` |
 | Xem nhật ký trong DB | `docker compose exec postgres psql -U j97 -d j97 -c 'select * from nhat_ky_duyet order by id desc limit 10'` |
-| Sao lưu DB | `docker compose exec -T postgres pg_dump -U j97 j97 > j97-$(date +%F).sql` |
+| Sao lưu DB (ngoài thư mục repo: file có dữ liệu khách, không để lọt vào image hay git) | `mkdir -p ~/j97-backups && docker compose exec -T postgres pg_dump -U j97 j97 > ~/j97-backups/j97-$(date +%F).sql` |
 | Xoá sạch kể cả dữ liệu | `docker compose down -v` |
 
 Xoay token tunnel: dashboard → tunnel → **Refresh token**, dán token mới vào `.env`, `docker compose up -d cloudflared`.

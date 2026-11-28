@@ -39,6 +39,7 @@ services:
       MODEL_EFFORT: ${MODEL_EFFORT:-}
       GUARD: ${GUARD:-nemo}
       DATABASE_URL: postgresql://j97:${POSTGRES_PASSWORD}@postgres:5432/j97
+      DATABASE_REQUIRED: "1"   # Postgres lỗi thì be dừng (không ghi file tạm trong container rồi mất khi recreate)
       WEB_HOST: 0.0.0.0
       WEB_PORT: "8000"
       WEB_ALLOWED_HOSTS: ${PUBLIC_HOST:-j97.sunstack.org},127.0.0.1:${FE_PORT:-8080},localhost:${FE_PORT:-8080}

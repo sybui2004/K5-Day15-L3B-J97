@@ -539,10 +539,13 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
 
 
 def _mo_kho():
-    """Có DATABASE_URL mà Postgres lỗi thì báo rõ rồi ghi file, để demo vẫn chạy."""
+    """Có DATABASE_URL mà Postgres lỗi thì báo rõ rồi ghi file, để demo vẫn chạy.
+    DATABASE_REQUIRED=1 (compose.yaml) thì dừng hẳn: file ghi trong container sẽ mất khi container bị tạo lại."""
     try:
         return mo_kho(NHAT_KY)
     except LoiKho as e:
+        if (os.environ.get("DATABASE_REQUIRED") or "").strip() == "1":
+            raise SystemExit("Không mở được Postgres (%s), DATABASE_REQUIRED=1 → dừng, không ghi file" % e)
         print("Không mở được Postgres (%s) → ghi nhật ký vào data/*.jsonl" % e)
         return KhoFile(NHAT_KY)
 
