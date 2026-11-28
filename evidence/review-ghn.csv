@@ -27,7 +27,7 @@ stt,so_sao,nhan,cau_dau
 26,1,khac,"bưu cục ở tân nhựt 2, hcm làm việc nghiệp dư, nhân viên trực thì ngồi chơi bật nhạc ầm ĩ, không hỗ trợ khách."
 27,1,khac,vô phước đặt hàng mới bị ghép trúng bên đây giao
 28,4,khac,tốt mà bị trừ phí ko thích
-29,1,sai_thieu_thong_tin_nhan_hang,toàn hoàn hàng mà không gọi dịch vụ kém vô cùng
+29,1,khac,toàn hoàn hàng mà không gọi dịch vụ kém vô cùng
 30,1,khac,giao hàng nhanh mà đơn hàng ở kho địa phương tận 4 ngày
 31,1,khac,chả biết nói gì ngoài tệ làm ăn cập nhập kiểu cho có
 32,1,khac,đơn vị giao hàng tệ nhất mà tui biết.
@@ -37,7 +37,7 @@ stt,so_sao,nhan,cau_dau
 36,1,khac,quá tệ.
 37,1,khac,"đăng nhập ko được, ko gửi mã otp qua đt sao đăng nhập??"
 38,1,khac,"""Nuốt"" hàng của khách , chưa ship mà đã đánh dấu giao hàng thành công 🤬🤬"
-39,1,sai_thieu_thong_tin_nhan_hang,"Cảm thấy ko làm được thì nghỉ,giải thể đi."
+39,1,khac,"Cảm thấy ko làm được thì nghỉ,giải thể đi."
 40,1,khac,đơn hàng để ngày 6 giao mà k thấy đơn trong khi shop ở HCM mình ở cách shop 20p mà 3 ngày rồi chưa giao làm ăn
 41,1,khac,dở tệ
 42,1,khac,Giao hàng nhanh chưa thấy nhanh đơn về để đó rồi không thèm giao.
@@ -46,7 +46,7 @@ stt,so_sao,nhan,cau_dau
 45,3,khac,Phiên bản mới như *** ấy trả lại phiên bản cũ đi
 46,1,khac,Lỡ tải app tạo tk để đó cái ngay giờ nghỉ trưa 11h55p nhân viên gọi liên tục hỏi tạo tk để làm gì?
 47,1,sai_thieu_thong_tin_nhan_hang,Khiếu nại đơn hàng [mã đơn] dán mvd của tôi vào 1 đơn hàng của người khác .
-48,1,sai_thieu_thong_tin_nhan_hang,"Rất có vấn đề, shipper không điện cho khách mà tự ý hoàn hàng."
+48,1,khac,"Rất có vấn đề, shipper không điện cho khách mà tự ý hoàn hàng."
 49,1,khac,đơn hàng tạo mấy ngày shipper k tới lấy cũng không có cuộc gọi nào mà báo lấy hàng không thành công.
 50,1,khac,làm ăn thì bố láo hàng của khách có hay ko cx ko rõ cứ cập nhật thông tin lên hệ thống vớ vẩn làm ăn đúng kiểu
 51,2,khac,tuyệt vời đơn hàng gửi trước cả đơn J&T mà quay vòng vòng ở trung tâm khai thác còn đơn J&T đã chuẩn bị giao
@@ -56,18 +56,18 @@ stt,so_sao,nhan,cau_dau
 55,1,khac,"quản lý toàn ôm đơn hàng giá trị cao rồi mượn tiền hàng, bó tay, không cho mượn thì ôm đơn 7 ngày chưa giao"
 56,1,khac,"Tao bán shope, cứ đơn nào vào GHN là tao nói khách cancel order để vào thằng vchuyen khác, hoặc cho trôi đơn, "
 57,4,khac,đang dùng máy khác
-58,1,sai_thieu_thong_tin_nhan_hang,"Tuần trước đặt 3 đơn hàng, đợi mãi không thấy shipper gọi điện cũng chẳng thấy giao, đơn hàng bị treo mấy ngày"
+58,1,khac,"Tuần trước đặt 3 đơn hàng, đợi mãi không thấy shipper gọi điện cũng chẳng thấy giao, đơn hàng bị treo mấy ngày"
 59,1,khac,Tốt rồi GHN ngâm hàng ở kho không giao làm tôi mất khách đá mất chén cơm qua ngày của tôi rồi bây giờ tôi rất 
 60,1,khac,giao hàng quá chậm trễ
 61,1,khac,giao hàng từ HCM về bình thuân mất 5 ngày nhanh vl ha
-62,1,sai_thieu_thong_tin_nhan_hang,Đánh giá mà có 0 sao là cho 0.
+62,1,khac,Đánh giá mà có 0 sao là cho 0.
 63,1,sai_thieu_thong_tin_nhan_hang,hủy đơn báo ng gọi k nghe?
 64,5,khac,Uy tín
 65,1,khac,"đơn hàng 1 tuần chưa lấy, shipper thì báo là nhận hàng không thành công, trong khi không có cuộc gọi nào."
 66,1,khac,"bán hàng shopee phát sinh trả hàng hoàn tiền, shopee tạo mã đơn bên GHN để lấy hàng trả lại cho người mua tron"
 67,1,khac,cạn lời
 68,1,khac,không đến lấy được hàng thì đừng có bảo đến lấy.
-69,1,sai_thieu_thong_tin_nhan_hang,đơn hàng của tôi đang ở đâu.
+69,1,khac,đơn hàng của tôi đang ở đâu.
 70,1,khac,"Giao hàng lâu, trễ cả mấy ngày, dịch vụ kém"
 71,3,khac,"Cũng bình thường,thỉnh thoảng sửa lỗi nhưng lỗi càng nhiều"
 72,1,khac,GHN làm mất của tôi mấy đơn hàng rồi im re luôn.
@@ -87,7 +87,7 @@ stt,so_sao,nhan,cau_dau
 86,1,khac,4 ngày chưa thấy shipper tới lấy hàng.
 87,1,khac,trải nghiệm tệ
 88,1,khac,"thật sự là đợi đơn rất lâu, đơn cứ hoàn về kho mà trả biết lí do."
-89,1,sai_thieu_thong_tin_nhan_hang,"tự ghi thông tin đơn sai, không giao hàng cho khách mà lại báo giao hàng thành công, tự chuyển thành đơn khiếu"
+89,1,khac,"tự ghi thông tin đơn sai, không giao hàng cho khách mà lại báo giao hàng thành công, tự chuyển thành đơn khiếu"
 90,1,khac,ship ko lấy hàng xong tự hủy đơn .
 91,1,khac,đơn vị vẫn chuyển này nên chuyển sang đơn vị vẫn chuyển như rùa bò đi đừng ghi là ghn bọn này không biết mắc c
 92,3,sai_thieu_thong_tin_nhan_hang,"đơn hàng tôi đặt bên shoppe, đơn vị vận chuyển bên GHN, giao 16/10/2026, đến nay 19/10/2026 chưa thấy giao, lấ"
