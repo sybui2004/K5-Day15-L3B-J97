@@ -38,6 +38,7 @@ from kho import KhoFile, LoiKho, mo_kho  # noqa: E402
 from tools import validate_phone, lookup_address, create_draft_order, _bang, HCM  # noqa: E402
 
 GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HOP_THU_THEM = os.path.join(GOC, "data", "hop-thu-them.jsonl")  # lô "Nhận tin mới" của chế độ NAP_NEN=1
 NHAT_KY = os.path.join(GOC, "data", "nhat-ky-duyet.jsonl")
 TINH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")  # giao diện: index.html, app.css, app.js, fonts/
 LOAI_TEP = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -242,13 +243,18 @@ class ManHinh:
         self.kho = kho or KhoFile(nhat_ky)
         self._phien = {}
         self._khoa = threading.Lock()
+        # tracing dùng biến toàn cục cho lần chạy hiện tại: mọi lần chạy AI (kể cả luồng nền) đi qua khoá này,
+        # lần lượt từng lần. Thứ tự khoá: _khoa rồi mới _khoa_ai; luồng nền không giữ _khoa khi chờ _khoa_ai.
+        self._khoa_ai = threading.Lock()
+        self.cho_nap_nen = False  # NAP_NEN=1: bật nút "Nhận tin mới" và /api/nhan-them
         self._so_moi = 0
         self._bang_gia, self.ty_gia = _bang_gia()
         self._tong = {"lan_chay": 0, "model_calls": 0, "tokens_in": 0, "tokens_out": 0, "chi_phi_usd": 0.0,
                       "lan_chua_co_gia": 0, "loi_kho": None}
 
     def _chay(self, ma, nguon, ham, *args):
-        return _co_trace("web:" + str(ma), ham, *args, nguon=nguon, bang_gia=self._bang_gia)
+        with self._khoa_ai:
+            return _co_trace("web:" + str(ma), ham, *args, nguon=nguon, bang_gia=self._bang_gia)
 
     def _luu_lan_chay(self, ma, quyet_dinh, trace):
         """Cộng tổng phiên demo và ghi kho ngay khi một lần chạy AI kết thúc (cả lần lỗi: quyet_dinh None).
@@ -284,6 +290,53 @@ class ManHinh:
                 "loi_doc": h.get("loi_doc"), "kq": kq, "trang_thai": TRANG_THAI.get(kq["quyet_dinh"], "cho_khach"),
                 "so_luot_hoi_lai": 0, "ma_don": kq.get("ma_don"), "ma_van_don": kq.get("ma_van_don"),
                 "nguon": nguon, "trace": None, "phien_ban": 1}
+
+    @staticmethod
+    def _phien_cho(ma, h, nguon):
+        """Hội thoại vừa đến, AI chưa xử lý xong (chế độ nạp nền)."""
+        kq = {"quyet_dinh": None, "truong": {}, "loi": [], "goi_y_phuong": [], "tin_gui_khach": "", "cho_chu_shop": "",
+              "ma_don": None, "ma_van_don": None}
+        return {"ma_hoi_thoai": ma, "ma_khach": h.get("ma_khach"), "text": h.get("text", ""), "loi_doc": h.get("loi_doc"),
+                "kq": kq, "trang_thai": "dang_xu_ly", "so_luot_hoi_lai": 0, "ma_don": None, "ma_van_don": None,
+                "nguon": nguon, "trace": None, "phien_ban": 0}
+
+    def nap_nen(self, hoi_thoai: list, nguon="hop_thu"):
+        """Chế độ tin đến hàng loạt: đưa cả lô lên đầu hộp thư ngay (trạng thái dang_xu_ly), rồi AI xử lý từng
+        hội thoại ở luồng nền theo thứ tự đến. Mã trùng (với hộp thư hoặc trong lô) được cấp mã riêng (HT-1*).
+        Trả về luồng nền (test dùng join)."""
+        with self._khoa:
+            lo = []
+            for h in hoi_thoai:
+                ma = str(h.get("ma_hoi_thoai"))
+                while ma in self._phien or any(ma == m for m, _ in lo):
+                    ma += "*"
+                lo.append((ma, dict(h, ma_hoi_thoai=ma)))
+            self._phien = {**{ma: self._phien_cho(ma, h, nguon) for ma, h in lo}, **self._phien}
+        luong = threading.Thread(target=self._xu_ly_nen, args=(lo, nguon), daemon=True, name="nap-nen")
+        luong.start()
+        return luong
+
+    def _xu_ly_nen(self, lo, nguon):
+        for ma, h in lo:
+            try:
+                [kq], trace = self._chay(ma, nguon, xu_ly_hop_thu, [h])  # giữ _khoa_ai, không giữ _khoa
+                loi = None
+            except LoiChayAI as e:
+                kq, trace, loi = None, e.trace, e
+            except Exception as e:  # noqa: BLE001 — luồng nền không được chết giữa lô
+                kq, trace, loi = None, None, e
+            with self._khoa:
+                if trace is not None:
+                    self._luu_lan_chay(ma, kq["quyet_dinh"] if kq else None, trace)
+                if kq is not None:
+                    p = dict(self._phien_moi(ma, h, kq, nguon), trace=trace)
+                else:
+                    p = self._phien_cho(ma, h, nguon)
+                    p["kq"].update(quyet_dinh="HOI_LAI", loi=[{"truong": "tat_ca", "ly_do": "AI chưa xử lý được (%s), "
+                                   "shop xử lý tay hoặc dán câu khách để chạy lại" % loi}],
+                                   cho_chu_shop="Cho chủ shop: AI chưa xử lý được hội thoại này · chưa tạo đơn nháp")
+                    p.update(trang_thai="cho_khach", trace=trace, phien_ban=1)
+                self._phien[ma] = p
 
     def tai(self, hoi_thoai: list):
         """Chạy AI cho cả hộp thư. Nhật ký ghi theo đúng thứ tự chạy; chỉ danh sách hiển thị được sắp lại.
@@ -324,13 +377,30 @@ class ManHinh:
             self._phien = {ma: p, **self._phien}
             return copy.deepcopy(p)
 
+    def _tong_khi_giu_khoa(self):
+        t = dict(self._tong)
+        t["dang_xu_ly"] = sum(p["trang_thai"] == "dang_xu_ly" for p in self._phien.values())
+        return t
+
     def tong(self):
         """Tổng phiên demo (từ lúc mở màn hình): số lần chạy, token, chi phí USD (+ VND nếu có tỉ giá)."""
         with self._khoa:
-            t = dict(self._tong)
+            t = self._tong_khi_giu_khoa()
+        return self._them_tong(t)
+
+    def _them_tong(self, t):
+        t["nap_nen"] = self.cho_nap_nen
         t["chi_phi_vnd"] = round(t["chi_phi_usd"] * self.ty_gia) if self.ty_gia else None
         t["kho"] = self.kho.ten
         return t
+
+    def anh_chup(self):
+        """(danh sách, tổng) đọc trong CÙNG một lần giữ khoá, để số "đang xử lý" khớp với danh sách
+        (đọc hai lần riêng thì luồng nền có thể xong một hội thoại ở giữa, trang dừng tự làm mới quá sớm)."""
+        with self._khoa:
+            ds = copy.deepcopy(list(self._phien.values()))
+            t = self._tong_khi_giu_khoa()
+        return ds, self._them_tong(t)
 
     def nhat_ky(self, gioi_han=100):
         try:
@@ -350,6 +420,11 @@ class ManHinh:
         if ma not in self._phien:
             raise LoiThaoTac("không có hội thoại %s" % ma)
         return self._phien[ma]
+
+    @staticmethod
+    def _chua_xu_ly_xong(p):
+        if p["trang_thai"] == "dang_xu_ly":
+            raise LoiThaoTac("hội thoại %s đang được AI xử lý, chờ vài giây" % p["ma_hoi_thoai"])
 
     @staticmethod
     def _dung_phien_ban(p, phien_ban):
@@ -385,6 +460,7 @@ class ManHinh:
     def huy(self, ma):
         with self._khoa:
             p = self._lay(ma)
+            self._chua_xu_ly_xong(p)
             if p["trang_thai"] in DA_XONG:
                 raise LoiThaoTac("hội thoại %s đã %s" % (ma, "duyệt" if p["trang_thai"] == "da_duyet" else "huỷ"))
             self._ghi(p, "da_huy", [])  # ghi nhật ký được rồi mới chốt trạng thái
@@ -398,6 +474,7 @@ class ManHinh:
         - Đang có đơn nháp chờ duyệt: tin xác nhận chưa gửi khách, nên chỉ nối câu khách nhắn thêm, không tính."""
         with self._khoa:
             p = self._lay(ma)
+            self._chua_xu_ly_xong(p)
             if p["trang_thai"] in DA_XONG:
                 raise LoiThaoTac("hội thoại %s đã xong, không thêm trả lời được" % ma)
             if p["loi_doc"] or not p["text"]:
@@ -486,8 +563,8 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         if not host_hop_le(self.headers.get("Host")):
             return self._gui(403, {"loi": "Host không hợp lệ"})
         if self.path == "/api/hop-thu":
-            return self._gui(200, {"phien": self.man_hinh.danh_sach(), "phuong_moi": _phuong_moi(),
-                                   "tong": self.man_hinh.tong()})
+            ds, t = self.man_hinh.anh_chup()
+            return self._gui(200, {"phien": ds, "phuong_moi": _phuong_moi(), "tong": t})
         if self.path == "/api/nhat-ky":
             try:
                 return self._gui(200, self.man_hinh.nhat_ky())
@@ -526,6 +603,12 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
                 return self._gui(200, mh.huy(ma))
             if self.path == "/api/tra-loi":
                 return self._gui(200, mh.them_tra_loi(ma, str(body.get("tra_loi") or "")))
+            if self.path == "/api/nhan-them":
+                if not mh.cho_nap_nen:
+                    return self._gui(404, {"loi": "chỉ có khi chạy với NAP_NEN=1"})
+                lo = doc_hop_thu(HOP_THU_THEM)
+                mh.nap_nen(lo)
+                return self._gui(200, {"so": len(lo)})
             if self.path == "/api/moi":
                 ma_khach = body.get("ma_khach")
                 return self._gui(200, mh.tao_moi(body.get("luot"), ma_khach if isinstance(ma_khach, str) else None))
@@ -555,13 +638,20 @@ def main() -> int:
     except OSError as e:
         print("Không mở được %s:%d (%s). Cổng đang bận? Tắt chương trình đang dùng cổng rồi chạy lại." % (HOST, PORT, e))
         return 1
+    nap_nen = os.environ.get("NAP_NEN", "").strip() == "1"
     try:
         hop_thu = doc_hop_thu()
-        print("Màn hình duyệt — đang xử lý %d hội thoại trong hộp thư mẫu..." % len(hop_thu))
         mh = ManHinh(kho=_mo_kho())
         print("Nhật ký duyệt và lần chạy AI lưu ở: %s" % mh.kho.ten)
-        mh.tai(hop_thu)
-        XuLyYeuCau.man_hinh = mh
+        if nap_nen:  # tin đến hàng loạt: mở trang ngay, AI xử lý hộp thư ở luồng nền
+            mh.cho_nap_nen = True
+            XuLyYeuCau.man_hinh = mh
+            print("Chế độ tin đến hàng loạt (NAP_NEN=1): AI xử lý %d hội thoại ở nền, trang tự cập nhật" % len(hop_thu))
+            mh.nap_nen(hop_thu)
+        else:
+            print("Màn hình duyệt — đang xử lý %d hội thoại trong hộp thư mẫu..." % len(hop_thu))
+            mh.tai(hop_thu)
+            XuLyYeuCau.man_hinh = mh
     except BaseException:
         server.server_close()
         raise

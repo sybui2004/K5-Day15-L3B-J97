@@ -39,6 +39,16 @@ python run.py
 - Đầu trang cộng số lần chạy, token và chi phí của cả phiên demo. Thoát bằng Ctrl+C.
 - **Mở sẵn trước khi lên** để khỏi chờ 1–2 phút trước giám khảo.
 
+### Chế độ tin đến hàng loạt (nên dùng khi demo)
+
+Thêm `NAP_NEN=1` vào `.env` rồi chạy `python run.py`:
+
+- Trang mở **ngay**, không phải chờ. Hộp thư hiện 10 hội thoại mẫu, các hội thoại chưa xong mang nhãn **AI đang xử lý**; đầu trang đếm số đang xử lý. AI làm lần lượt từng hội thoại (mỗi cái 3–5 giây), trang tự cập nhật.
+- Bấm **Nhận tin mới (5)** (cạnh nút Hội thoại mới): 5 khách nhắn chốt đơn cùng lúc (`data/hop-thu-them.jsonl`). Kết quả đúng: HT-T01 đơn nháp (phường Nhiêu Lộc) · HT-T02 đơn nháp (Bến Nghé → phường Sài Gòn) · HT-T03 chờ khách (Phường 4, Quận 3 bị tách) · HT-T04 chờ khách (thiếu sđt) · HT-T05 từ chối (đòi bỏ qua kiểm tra). Bấm lại lần nữa thì mã có thêm dấu `*` (HT-T01*), vẫn chạy được.
+- Hội thoại đang xử lý chưa duyệt, huỷ hay thêm trả lời được: chờ vài giây cho AI xong.
+- Có trục trặc thì xoá dòng `NAP_NEN=1`, chạy lại: về cách cũ (xử lý xong hộp thư rồi mới mở trang).
+- Lời nói gợi ý: "Đây là lúc đông khách: nhiều khách nhắn chốt đơn cùng lúc. AI tự đọc từng hội thoại, cái nào đủ và chắc thì lên đơn nháp, cái nào thiếu thì soạn sẵn tin hỏi lại, cái nào lừa thì từ chối. Chủ shop chỉ việc duyệt."
+
 ## 3. Kịch bản demo (slide trang 4, khoảng 2 phút)
 
 Bấm **Hội thoại mới** (góc phải trên), điền mã khách, dán đoạn chat (mỗi dòng một tin; dòng bắt đầu `Shop:` là tin của shop), bấm **Chạy AI**. Mỗi ca mất khoảng 5–10 giây.
@@ -81,6 +91,7 @@ Nói trong lúc chạy:
 
 | Sự cố | Làm gì |
 |---|---|
+| Anthropic hết credit / sai key / quá tải | Có `API_KEY_DEEPSEEK` trong `.env` thì tự chuyển sang DeepSeek V4.1 Flash (`deepseek-flash`); terminal in `[dự phòng] Claude lỗi … → gọi deepseek-flash`, khung "AI đã làm gì" ghi model `deepseek-flash`. Nói rõ với giám khảo đây là model dự phòng, eval chạy trên Claude. Chi phí đầu trang ghi "thiếu giá" cho các lần này. |
 | Mất mạng / API lỗi | Chiếu **video dự phòng** (link trong README, mục 7). Hội thoại lỗi giữ nguyên, bấm chạy lại khi có mạng. |
 | Chờ quá lâu lúc mở màn hình | Kiểm terminal có dòng lỗi model không. Đổi mạng rồi chạy lại `python run.py`. |
 | Lớp chặn NeMo lỗi hoặc chưa cài `nemoguardrails` | Luồng chính vẫn chạy, lỗi ghi trong "AI đã làm gì". Muốn tắt hẳn: `GUARD=tat` trong `.env`, chạy lại. |
