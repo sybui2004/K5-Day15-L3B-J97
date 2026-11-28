@@ -19,5 +19,6 @@ README của nhóm có mục "Dùng AI vào việc gì" (2–3 dòng, bắt bu�
 | Công cụ và màn hình duyệt (`codebase/tools.py`, `codebase/web.py`, phần Hưng làm; khai bổ sung tối 28/11) | Claude Code | Hỗ trợ viết code | Hưng đọc lại code. Có commit sửa theo review PR #16, #26, #45 | Hưng |
 | Demo giao diện tĩnh (`docs/ui-demo/`, sau CP4) | Claude Code (`claude-opus-5-5`, theo log phiên trên máy Hưng) | Viết bản HTML tĩnh kiểu Seller Centre mô phỏng luồng E, dữ liệu mẫu và AI giả lập trong trình duyệt | Hưng mở thử bằng trình duyệt | Hưng |
 | Reflection của Hưng và phần khai AI (tối 28/11) | Claude Code (`claude-sonnet-5-5` soạn, `claude-opus-5-5` rà lại và mở PR) | Soạn nháp `reflection/doan-sy-hung.md` từ lịch sử git, `eval/report.md` và câu trả lời của Hưng; sửa các dòng khai AI của Hưng ở file này, README, `spec.md` | Hưng trả lời về việc dùng AI, cách kiểm, lý do làm demo, chọn câu B12 và tự viết lại phần bài học của câu 3 | Hưng |
+| Reflection của Sỹ (tối 28/11) | Claude Code (`claude-sonnet-5-5`) | Soạn nháp cả 3 câu của `reflection/bui-thai-sy.md` từ lịch sử git, `docs/ai-usage.md`, `evidence/data-mining.md` và `eval/report.md`, gồm cả phần bài học ở câu 3 | Sỹ duyệt ở PR trước khi merge | Sỹ |
 
 **Không dùng AI để:** tạo người được phỏng vấn, trích dẫn, câu trả lời khảo sát; sửa kết quả các lượt đã chạy (`eval/run-*.csv`, `cost/simulate-*.csv`, `traces/`).
