@@ -13,7 +13,7 @@
 
 ## 2. Số chính
 
-- Đào data: **7/100 (7%)** review GHN mới nhất (16/10–26/11/2026) kể chuyện sai hoặc thiếu thông tin nhận hàng: 2 nhầm mã vận đơn, 5 nêu lý do giao thất bại là "không liên lạc được người nhận". **0/100** nhắc địa chỉ sau sáp nhập. Người thứ hai gắn nhãn 20 review đầu: chưa làm.
+- Đào data: **7/100 (7%)** review GHN mới nhất (16/10–26/11/2026) kể chuyện sai hoặc thiếu thông tin nhận hàng: 2 nhầm mã vận đơn, 5 nêu lý do giao thất bại là "không liên lạc được người nhận". **0/100** nhắc địa chỉ sau sáp nhập. Đối chiếu nhãn 20 review đầu: lệch 3/20, dưới ngưỡng 4/20; Sỹ duyệt toàn bộ nhãn.
 - Phỏng vấn (n = 4, không ghi %):
   - **H2 (chép sai, thiếu thông tin nhận hàng): 4/4 người gặp trong 1 tháng qua.** Số lần / tháng: P1 3, P2 4, P3 2, P4 1. Mỗi vụ mất 38.000–60.000đ phí ship, 3/4 vụ gần nhất khách huỷ hoặc mua chỗ khác.
   - **H1 (trả lời chậm khi đông khách → khách bỏ): 1/4 kể rõ** (P4: 2 lần / tháng khách bỏ vì trả lời chậm 15–20 phút). 3/4 còn lại kể **một phần**: lúc đông khách thì lên đơn vội gây sai, và khách bỏ khi bị hỏi lại nhiều lần (P2: khoảng 30% khách không trả lời sau lần hỏi lại thứ hai).
