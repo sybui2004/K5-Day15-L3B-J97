@@ -23,7 +23,7 @@
 ## Chạy bản chạy thử của nhóm J97
 
 ```bash
-python -m pip install -r requirements.txt   # SDK anthropic, chỉ cần khi gọi model thật
+python -m pip install -r requirements.txt   # SDK anthropic + nemoguardrails, chỉ cần khi gọi model thật
 cp .env.example .env                        # Windows: copy .env.example .env
 #   điền API_KEY; nhóm chạy với MODEL_PROVIDER=anthropic, MODEL_NAME=claude-sonnet-5-5, MODEL_EFFORT=low
 python run.py                               # mở màn hình duyệt ở http://127.0.0.1:8000
@@ -31,6 +31,7 @@ python run.py                               # mở màn hình duyệt ở http:/
 
 - **Màn hình duyệt** (`codebase/web.py`): hộp thư 10 hội thoại mẫu (`data/hop-thu-mau.jsonl`). Bấm từng hội thoại để xem đơn nháp, sửa trường, Duyệt hoặc Huỷ; hội thoại đang chờ khách thì dán câu trả lời của khách để chạy lại (luồng B). Chỉ mở trên máy này (`127.0.0.1`).
 - **Lần đầu mở web phải chờ khoảng 1 phút:** trước khi mở cổng, bản chạy thử gọi model cho cả 10 hội thoại (khoảng 6 giây / hội thoại với model thật). Terminal in `Màn hình duyệt — đang xử lý 10 hội thoại…` rồi `Mở trình duyệt: http://127.0.0.1:8000`; thoát bằng Ctrl+C.
+- **Lớp chặn đầu vào (`GUARD=nemo`, mặc định):** mỗi hội thoại gọi model thêm 1 lần (NeMo Guardrails kiểm lời khách trước), nên lần đầu mở web gọi model 20 lần thay vì 10 và chờ lâu hơn. Chưa cài `nemoguardrails` thì lớp chặn tự bỏ qua và ghi vào trace; muốn tắt hẳn thì đặt `GUARD=tat` trong `.env`. Lớp chặn không tải gì từ mạng ngoài lần gọi model.
 - **Bản dòng lệnh dự phòng:** `python codebase/app.py`, gõ một hội thoại, nhận QUYẾT ĐỊNH (TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI).
 - **Chưa có `.env`:** chạy chế độ giả (model giả, không cần `pip install`). Luồng vẫn đi hết, nhưng model giả không trả JSON nên mọi hội thoại ra HỎI LẠI.
 - Chạy bộ câu thử, chấm, mô phỏng chi phí: xem mục "Lệnh" bên dưới.

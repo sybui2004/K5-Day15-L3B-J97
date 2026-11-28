@@ -125,7 +125,9 @@ Số trong bảng lấy từ phỏng vấn P1–P4 (n = 4, `evidence/interviews/
 ```mermaid
 flowchart LR
     IN["A · Hộp thư<br/>nhiều hội thoại"] --> A[Một hội thoại]
-    A --> B["Bước 1 · AI đọc hội thoại<br/>tách thông tin, giải nghĩa địa chỉ cũ,<br/>(1 lần gọi model, trả JSON)"]
+    A --> G{"Lớp chặn đầu vào · NeMo Guardrails<br/>self check input, chỉ đọc lời khách<br/>(1 lần gọi model · GUARD=tat thì bỏ qua)"}
+    G -- "bị chặn" --> R
+    G -- "cho qua / NeMo lỗi" --> B["Bước 1 · AI đọc hội thoại<br/>tách thông tin, giải nghĩa địa chỉ cũ,<br/>(1 lần gọi model, trả JSON)"]
     B --> C{"Bước 2 · Code kiểm<br/>get_customer_history (C)<br/>đủ trường? validate_phone<br/>convert_old_address · lookup_address"}
     C -- "yêu cầu ngoài phạm vi" --> R[TỪ CHỐI + nói shop làm được gì]
     C -- "thiếu / sai / không chắc" --> H[HỎI LẠI một lần, gom đủ các trường]
@@ -137,7 +139,7 @@ flowchart LR
     K -- "đúng" --> OK[Đơn đã duyệt · chờ bàn giao thủ công]
 ```
 
-- **Hình dạng:** [x] workflow cố định · [ ] một agent · [ ] nhiều agent. Lát cắt luôn đi đúng một chuỗi bước: AI đọc → code kiểm → quyết định. Mỗi câu chỉ gọi model 1 lần nên rẻ và dễ đo. **Không chọn agent** vì không bước nào cần AI tự chọn đường đi; để AI tự gọi công cụ thì khó chặn chuyện AI bỏ qua bước kiểm và tạo đơn khi chưa đủ thông tin.
+- **Hình dạng:** [x] workflow cố định · [ ] một agent · [ ] nhiều agent. Lát cắt luôn đi đúng một chuỗi bước: lớp chặn đầu vào → AI đọc → code kiểm → quyết định. Mỗi câu gọi model **2 lần** (1 lần lớp chặn NeMo + 1 lần đọc hội thoại); câu bị lớp chặn từ chối chỉ gọi 1 lần. `GUARD=tat` trong `.env` thì về 1 lần như lượt 1, lượt 2. **Không chọn agent** vì không bước nào cần AI tự chọn đường đi; để AI tự gọi công cụ thì khó chặn chuyện AI bỏ qua bước kiểm và tạo đơn khi chưa đủ thông tin.
 - **AI quyết định gì:** đọc hội thoại lộn xộn (nhiều lượt, viết tắt, sửa đi sửa lại) để xác định người nhận, số điện thoại và địa chỉ cuối cùng; giải nghĩa địa chỉ kiểu cũ (phường, quận/huyện, tỉnh cũ) để code tra bảng chuyển đổi. **AI không tự chọn phường mới**: phường cũ bị tách thì code hỏi lại khách.
 - Nguồn sự thật cho địa giới: **Nghị quyết 1685/NQ-UBTVQH15** (Ủy ban Thường vụ Quốc hội thông qua 16/6/2025, hiệu lực từ ngày thông qua, phường/xã mới hoạt động từ 01/7/2025), toàn văn trên Cổng TTĐT Chính phủ: https://xaydungchinhsach.chinhphu.vn/toan-van-nghi-quyet-so-1685-nq-ubtvqh15-sap-xep-cac-dvhc-cap-xa-cua-thanh-pho-ho-chi-minh-nam-2025-119250616211341304.htm. Văn bản phủ toàn TP Hồ Chí Minh sau sắp xếp, kể cả địa bàn Bình Dương và Bà Rịa - Vũng Tàu cũ, và **không nói đường nào thuộc phần nào** của một phường cũ bị tách. Thứ tự kiểm trong code: `docs/cp2-ke-hoach.md` mục 1.3 (d).
 - **AI dựa vào đâu** — mỗi công cụ (sẽ có trong `codebase/tools.py`):
@@ -149,6 +151,7 @@ flowchart LR
   | `lookup_address` | tỉnh, phường/xã mới | `{ok, khop, goi_y, ly_do}` | không |
   | `create_draft_order` | thông tin đã kiểm (dict, kèm mã hội thoại) | `{ma_don, ma_van_don, trang_thai: "cho_duyet"}` | không: chỉ bản nháp, không gọi GHN |
   | `get_customer_history` *(CP3)* | mã tài khoản chat (str) | `{co: bool, dia_chi_lan_truoc: dict, ngay: str}` | không: chỉ đọc |
+  | `kiem_dau_vao` *(CP4, `codebase/guard.py`, không phải `@tool`)* | hội thoại (str); chỉ gửi các lượt `Khách:` cho model | `{chan: bool, ly_do, loi}`; NeMo Guardrails 0.25, rail `self check input`, model qua `call_model`; lỗi thì cho qua (`loi` vào trace) | không |
 
 - **Mức tự động:** [ ] AI gợi ý, người quyết · [x] AI tự làm khi chắc, chuyển người khi không · [ ] AI tự làm. Tin hỏi lại được soạn sẵn, chủ shop bấm gửi; **tạo đơn chỉ tạo bản nháp**, chủ shop duyệt rồi mới bàn giao, vì sai địa chỉ thì chủ shop mất hàng và phí ship, còn sửa một đơn nháp thì rẻ.
 - **Chỗ chặn rủi ro:** rủi ro lớn nhất là **phường cũ bị tách, chọn sai phường mới → giao nhầm**. Nghị quyết 1685/NQ-UBTVQH15 không nói đường nào thuộc phần nào của phường bị tách, nên Bước 2 **luôn hỏi lại khách** kèm đủ danh sách phường mới, và chỉ nhận phường khách chọn có trong danh sách. Mọi phường mới đều lấy từ bảng dựng từ Nghị quyết 1685/NQ-UBTVQH15. Trường nào không qua kiểm thì không có đơn nháp, dù khách nói gì. Code còn chặn model đoán: sđt phải có trong hội thoại. Khách cũ (C): chỉ đọc lịch sử theo **mã tài khoản chat** đang nhắn, không theo số điện thoại khách đưa, để người lạ không lấy được địa chỉ của người khác. Mã này do **code** đọc ở đầu hội thoại hoặc từ dữ liệu hộp thư, không bao giờ lấy từ lời khách hay output của model, nên khách gõ "mã của chị là KH-005" cũng không lấy được địa chỉ của KH-005.
@@ -252,6 +255,7 @@ flowchart LR
 | 28/11 | README: tên nhóm và lát cắt, xoá mục 0 của khung, thêm cách chạy bản của nhóm (cài `requirements.txt`, `.env`, màn hình duyệt), bảng "Phần nào thật, phần nào giả" đủ 7 dòng | README còn `____` và hướng dẫn của khung ("không cần pip install") không còn đúng sau khi nối Claude và thêm màn hình duyệt; rubric R3 chấm "người ngoài chạy được, phần còn giả ghi rõ" |
 | 28/11 | `codebase/agent.py`: prompt và bước kiểm ngoài phạm vi (khiếu nại, xin số shipper/nhân viên, khách giả lời shop), phường đánh số không có quận là kiểu cũ, hỏi quận và tỉnh cùng một tin, không tự điền tỉnh | Lỗi lượt 1: B16, B18, B19 (bộ 19 câu), B30, B12 (bộ 30 câu) — `eval/report.md` mục 2–3. Review PR #46: bỏ đoán tỉnh và so khớp cụm từ câu thử. Không đổi câu thử, §7 chuẩn "đạt", metric |
 | 28/11 | §7 kết quả: lượt 1 = run-3, lượt 2 = run-5 (cùng bộ 30 câu); run-1, run-2 (bộ 19 câu) và run-4 giữ file, không tính | Guide 3.4: lượt 1 trên bộ 20–30 câu; lượt 1 và lượt 2 cùng bộ câu thử. Không sửa kết quả lượt nào |
+| 28/11 | Lớp chặn đầu vào NeMo Guardrails trước Bước 1 (`codebase/guard.py`, `codebase/guard_config/`): rail `self check input`, prompt tiếng Việt viết theo loại tấn công, chỉ đọc lời khách; bị chặn thì TỪ CHỐI, không gọi model chính; NeMo lỗi thì đi tiếp luồng cũ và ghi trace; công tắc `GUARD=nemo\|tat`. Bước 2 và `_gia_mao_shop` giữ làm lớp thứ hai. §4 sơ đồ, hình dạng, bảng công cụ. `requirements.txt` thêm `nemoguardrails==0.25.0` | Bước 2 và `_gia_mao_shop` dựa vào chính model đọc hội thoại và nhãn "[Tin của Shop]" (B30 qua ở lượt 2 nhờ đúng nhãn này, `eval/report.md` §4). Thiết kế: `docs/superpowers/specs/2026-11-28-nemo-guardrails-design.md` (PR #42). Thử tay với `claude-sonnet-5-5` (chưa phải lượt eval): guard tự chặn 8/8 câu `tu_choi`, không chặn nhầm B01–B03, B10, B23–B25, HT-06. Không đổi câu thử, §7, metric; run-3, run-5 giữ nguyên |
 | 28/11 | README: điền link video demo 34 giây (màn hình duyệt, `claude-sonnet-5-5`, log token ở đầu video) | Guide 3.4: video 30 giây, thao tác thật, AI trả kết quả thật |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)

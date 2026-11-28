@@ -26,6 +26,7 @@ Khung chỉ dùng thư viện chuẩn của Python. Thêm thư viện thì ghi v
 |---|---|---|
 | `codebase/agent.py` | nhóm | `answer(text) -> {"output": str}` — luồng chính, đúng hình dạng ở `spec.md` §4 |
 | `codebase/ai.py` | nhóm | `call_model(system, user) -> {"text", "model", "tokens_in", "tokens_out"}`, giữ `@model_call`. Token lấy từ `usage` của API, không ước lượng |
+| `codebase/guard.py` | nhóm | lớp chặn đầu vào: `kiem_dau_vao(text) -> {"chan", "ly_do", "loi"}`, NeMo Guardrails `self check input` (cấu hình `codebase/guard_config/`), chỉ đọc lượt `Khách:`, model qua `call_model`, lỗi thì cho qua. `GUARD=tat` trong `.env` thì `agent.py` không gọi |
 | `codebase/tools.py` | nhóm | mỗi công cụ một hàm có `@tool`, docstring: tên · input · output · có tác động ra ngoài không |
 | `codebase/inbox.py` | nhóm | luồng A: `xu_ly_hop_thu(hoi_thoai) -> [{"ma_hoi_thoai", **xu_ly(...)}]`, đọc `data/hop-thu-mau.jsonl` |
 | `codebase/web.py` | nhóm | luồng D + B: màn hình duyệt ở `http://127.0.0.1:8000` (chỉ thư viện chuẩn, chỉ bind 127.0.0.1). Duyệt chỉ đổi trạng thái, không gọi GHN, không gửi tin. Nhật ký `data/nhat-ky-duyet.jsonl` không commit |
