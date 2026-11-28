@@ -74,6 +74,13 @@ p { margin: 0; }
 .cho_khach, .HOI_LAI { background: var(--wait-bg); color: var(--wait); }
 .tu_choi, .da_huy, .TU_CHOI { background: var(--bad-bg); color: var(--bad); }
 .da_duyet { background: var(--done-bg); color: #fff; }
+.dang_xu_ly { background: var(--p-surface); color: var(--p-muted); }
+.chip.dang_xu_ly::before { animation: nhay 1s ease-in-out infinite; }
+@keyframes nhay { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .chip.dang_xu_ly::before { animation: none; } }
+.nut-tren { display: flex; gap: var(--s-2); align-items: center; }
+#nhan-them[hidden] { display: none; }
+.so-lieu.dang-chay-ai b { color: var(--wait); }
 
 /* ---------- thanh trên ---------- */
 .thanh-tren {
