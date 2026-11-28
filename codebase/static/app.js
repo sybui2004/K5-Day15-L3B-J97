@@ -56,8 +56,9 @@ function bao(text, sai, ma) {
 
 /* ---------- tải và cập nhật ---------- */
 async function tai(giu) {
-  const cu = chon ? phien.find(p => p.ma_hoi_thoai === chon) : null;
   const d = await goi("/api/hop-thu");
+  // lấy bản cũ của hội thoại đang chọn SAU await: trong lúc chờ, người dùng có thể đã chọn hội thoại khác
+  const cu = chon ? phien.find(p => p.ma_hoi_thoai === chon) : null;
   phien = d.phien; tong = d.tong;
   $("ds-phuong").replaceChildren(...d.phuong_moi.map(p => el("option", {value: p})));
   veTong(); veHopThu();
@@ -71,7 +72,8 @@ async function tai(giu) {
 // Chế độ tin đến hàng loạt: còn hội thoại AI đang xử lý thì 1,5 giây tải lại hộp thư một lần.
 function henTuLamMoi() {
   clearTimeout(henNap);
-  if (tong && tong.dang_xu_ly > 0) henNap = setTimeout(() => tai("nen").catch(() => henTuLamMoi()), 1500);
+  // tính cả từ danh sách: còn dòng "đang xử lý" thì vẫn tự làm mới
+  if (tong && (tong.dang_xu_ly > 0 || phien.some(p => p.trang_thai === "dang_xu_ly"))) henNap = setTimeout(() => tai("nen").catch(() => henTuLamMoi()), 1500);
 }
 async function nhanThem() {
   const b = $("nhan-them"); b.disabled = true;
