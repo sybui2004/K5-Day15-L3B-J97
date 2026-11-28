@@ -4,6 +4,7 @@ Chỉ model được thay bằng hàm giả. Bốn công cụ là công cụ th�
 (data/chuyen-doi-dia-gioi.csv, Nghị quyết 1685/NQ-UBTVQH15).
 Chạy: python3 -m unittest discover -s tests -v
 """
+import importlib.util
 import json
 import os
 import sys
@@ -11,8 +12,12 @@ import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "codebase"))
+# Test luồng cũ không gọi lớp chặn NeMo (máy có .env thật sẽ gọi API). Guard có test riêng: tests/test_guard.py,
+# TestGuardTrongAgent.
+os.environ["GUARD"] = "tat"
 
 import agent  # noqa: E402
+import tracing  # noqa: E402
 
 HOI_THOAI = ("Mã khách: KH-012 | Khách: chị lấy 2 áo size M nhé | Shop: dạ chị cho em xin tên, sđt, địa chỉ ạ"
              " | Khách: Mai 0912 345 678, <số nhà, đường>, P.4 Q.3, HCM")
@@ -337,6 +342,67 @@ class TestAgent(unittest.TestCase):
                                     sdt="0912345678", dia_chi_chi_tiet="20 Nguyễn Đình Chiểu"), hoi)
         self.assertHoiLai(kq, out)
         self.assertIn("tỉnh/thành phố", kq["tin_gui_khach"])
+
+
+class TestGuardTrongAgent(unittest.TestCase):
+    """Lớp chặn NeMo trước Bước 1 (docs/superpowers/plans/2026-11-28-nemo-guardrails.md, Task 4)."""
+
+    def setUp(self):
+        import guard
+        self.guard = guard
+        self._goc = (agent.call_model, agent.kiem_dau_vao, guard.call_model, guard._RAILS)
+        self._env = mock.patch.dict(os.environ, {"GUARD": "nemo"})
+        self._env.start()
+
+    def tearDown(self):
+        self._env.stop()
+        agent.call_model, agent.kiem_dau_vao, self.guard.call_model, self.guard._RAILS = self._goc
+
+    def model_chinh_du(self):
+        agent.call_model = lambda system, user: {"text": json.dumps(du_truong()), "model": "test",
+                                                 "tokens_in": 0, "tokens_out": 0}
+
+    def test_guard_chan_thi_tu_choi_khong_goi_model_chinh(self):
+        agent.kiem_dau_vao = lambda t: {"chan": True, "ly_do": "self check input", "loi": None}
+
+        def cam(system, user):
+            raise AssertionError("model chính không được gọi")
+        agent.call_model = cam
+        kq = agent.xu_ly(HOI_THOAI)
+        self.assertEqual(kq["quyet_dinh"], "TU_CHOI")
+        self.assertIn("lớp chặn đầu vào (NeMo)", kq["cho_chu_shop"])
+        self.assertIsNone(kq["ma_don"])
+        self.assertEqual(kq["tin_gui_khach"], agent.TIN_TU_CHOI)
+
+    def test_guard_loi_van_chay_luong_cu(self):
+        agent.kiem_dau_vao = lambda t: {"chan": False, "ly_do": "", "loi": "RuntimeError: x"}
+        self.model_chinh_du()
+        tracing.begin("t")
+        kq = agent.xu_ly(HOI_THOAI)
+        _, events = tracing.end()
+        self.assertEqual(kq["quyet_dinh"], "TAO_DON_NHAP")
+        self.assertTrue(any("lớp chặn NeMo lỗi, đi tiếp" in e.get("text", "") for e in events))
+
+    def test_guard_tat_khong_goi_guard(self):
+        def cam(t):
+            raise AssertionError("guard không được gọi")
+        agent.kiem_dau_vao = cam
+        self.model_chinh_du()
+        with mock.patch.dict(os.environ, {"GUARD": "tat"}):
+            self.assertEqual(agent.xu_ly(HOI_THOAI)["quyet_dinh"], "TAO_DON_NHAP")
+
+    @unittest.skipUnless(importlib.util.find_spec("nemoguardrails"), "chưa cài nemoguardrails")
+    def test_trace_dem_hai_lan_goi_model(self):
+        self.guard._RAILS = None
+        self.guard.call_model = tracing.model_call(
+            lambda system, user: {"text": "No", "model": "gia", "tokens_in": 5, "tokens_out": 1})
+        agent.call_model = tracing.model_call(
+            lambda system, user: {"text": json.dumps(du_truong()), "model": "gia", "tokens_in": 7, "tokens_out": 2})
+        tracing.begin("t")
+        agent.answer(HOI_THOAI)
+        summary, _ = tracing.end()
+        self.assertEqual(summary["model_calls"], 2)
+        self.assertEqual(summary["tokens_in"], 12)
 
 
 if __name__ == "__main__":

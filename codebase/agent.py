@@ -14,9 +14,11 @@ Luồng C (giao chỗ cũ, P3): bước 3 trong _kiem lấy địa chỉ lần t
 đọc ở đầu hội thoại (doc_ma_khach), không theo mã khách gõ trong lượt chat.
 """
 import json
+import os
 import re
 
 from ai import call_model
+from guard import kiem_dau_vao
 from tracing import note
 
 from tools import validate_phone, convert_old_address, lookup_address, create_draft_order, chuan_hoa_tinh, chuan_hoa_ten
@@ -319,12 +321,15 @@ def _dong_phuong(truong, quy_doi):
 
 # ---------- luồng chính ----------
 
+TIN_TU_CHOI = ("Dạ shop chỉ lên đơn khi đủ thông tin nhận hàng của chính đơn này, và không chia sẻ "
+               "thông tin của khách khác ạ. Anh/chị gửi giúp em tên, số điện thoại, địa chỉ người "
+               "nhận là shop lên đơn ngay ạ.")
+
+
 def _tu_choi(kq, ly_do):
     note("từ chối: yêu cầu ngoài phạm vi")
     kq["quyet_dinh"] = "TU_CHOI"
-    kq["tin_gui_khach"] = ("Dạ shop chỉ lên đơn khi đủ thông tin nhận hàng của chính đơn này, và không chia sẻ "
-                           "thông tin của khách khác ạ. Anh/chị gửi giúp em tên, số điện thoại, địa chỉ người "
-                           "nhận là shop lên đơn ngay ạ.")
+    kq["tin_gui_khach"] = TIN_TU_CHOI
     kq["cho_chu_shop"] = "Cho chủ shop: khách yêu cầu ngoài phạm vi (%s) · chưa tạo đơn nháp" % \
         lam_sach_luot(ly_do)[:120]
     return kq
@@ -333,6 +338,18 @@ def _tu_choi(kq, ly_do):
 def xu_ly(text: str, ma_hoi_thoai=None) -> dict:
     kq = {"quyet_dinh": "HOI_LAI", "truong": {}, "loi": [], "goi_y_phuong": [], "tin_gui_khach": "",
           "cho_chu_shop": "", "ma_don": None, "ma_van_don": None}
+
+    # Lớp chặn đầu vào (NeMo Guardrails, self check input). GUARD=tat thì bỏ qua, chạy như lượt 2.
+    # Lỗi thì đi tiếp luồng cũ: bước 2 và các bước kiểm của code vẫn chặn phía sau.
+    if os.environ.get("GUARD", "nemo").strip().lower() != "tat":
+        chan = kiem_dau_vao(text)
+        if chan["loi"]:
+            note("lớp chặn NeMo lỗi, đi tiếp: " + chan["loi"])
+        if chan["chan"]:
+            note("từ chối: lớp chặn đầu vào (NeMo)")
+            kq.update(quyet_dinh="TU_CHOI", tin_gui_khach=TIN_TU_CHOI,
+                      cho_chu_shop="Cho chủ shop: lớp chặn đầu vào (NeMo): %s · chưa tạo đơn nháp" % chan["ly_do"])
+            return kq
 
     # Bước 1 · model đọc hội thoại
     reply = call_model(SYSTEM, text)
