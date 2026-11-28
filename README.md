@@ -121,10 +121,10 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 - **Claude Code** (Sỹ, Việt Anh): viết code luồng chính, hộp thư, luồng khách cũ; soạn data tự dựng (`hop-thu-mau.jsonl`, `lich-su-khach.csv`); viết các mục spec và README. Mọi PR có người cặp kia duyệt, bộ test (`python -m unittest discover -s tests`, hiện 245 test, 6 test bỏ qua khi không có Postgres) chạy trước khi merge.
 - **Claude Code** (Sỹ, CP4): soạn `cost/personas.yaml`, chạy mô phỏng `simulate-1`, viết `cost/cost-estimate.md`, `spec.md` §8 và slide 8 trang. Sỹ đối chiếu số với `simulate-1-summary.md`, xem từng trang PDF.
-- **Hưng, sau CP4:** dùng AI làm demo giao diện `docs/ui-demo` *(công cụ và phần kiểm lại chờ Hưng xác nhận)*.
+- **Claude Code** (Hưng): hỗ trợ code `tools.py` và màn hình duyệt `web.py` (Hưng đọc lại code); sau CP4 dựng demo giao diện `docs/ui-demo` (`claude-opus-5-5`, Hưng mở thử bằng trình duyệt); soạn nháp reflection của Hưng và sửa phần khai AI.
 - **Codex**: rà văn phong câu hỏi phỏng vấn (Sỹ); trả lời đoạn 11 của Y1, ghi riêng, không chấm (Việt Anh); sửa kế hoạch CP4 và bảng người nói (Sỹ).
 - **ChatGPT** (Việt Anh, task Y1): chạy tay đoạn chat chốt đơn để tìm lỗi trước khi viết tiêu chí chấm. Chấm `pass` bằng code (`eval/grade.py`), không dùng LLM.
-- Số liệu, trích dẫn phỏng vấn không do AI tạo. Ngoài các việc đã ghi trong [docs/ai-usage.md](docs/ai-usage.md), Hưng, An không dùng AI (An xác nhận 28/11; Hưng cần xác nhận lại sau khi bổ sung demo UI).
+- Số liệu, trích dẫn phỏng vấn không do AI tạo. Ngoài các việc đã ghi trong [docs/ai-usage.md](docs/ai-usage.md), Hưng, An không dùng AI (An xác nhận 28/11; Hưng xác nhận lại tối 28/11).
 
 ## File mẫu — điền ở bước nào
 
