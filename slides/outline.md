@@ -20,4 +20,7 @@ Ai nói trang nào (mỗi người ≥1 phần):
 
 | Trang | Người nói |
 |---|---|
-| | |
+| 1–2 | Sỹ |
+| 3–4 | Hưng |
+| 5–6 | Việt Anh |
+| 7–8 | An |

@@ -28,7 +28,6 @@ CP4 đòi "chi phí / task thành công ở kịch bản cơ sở, kèm tên mod
 ## Ràng buộc
 
 - `cost/simulate.py`, `run.py` là khung, không sửa.
-- §8 là phần của Hưng (kế hoạch CP3): PR cần Hưng duyệt.
 - Lượt mô phỏng gọi model thật (Sonnet 5.5, ≈ 113 lần gọi, ≈ $0.5), không commit `.env`. `codebase/ai.py` đọc `.env` ở gốc **bản checkout đang chạy** (worktree này, không phải repo chính) và thiếu cấu hình thì lặng lẽ chạy `fake`. Vì vậy trước lượt nộp phải xác nhận lượt thử ghi model `claude-sonnet-5-5` và token > 0 (xem kế hoạch Task 1).
 - Commit / PR không có dòng ghi công AI (`AGENTS.md`).
 
@@ -60,7 +59,7 @@ CP4 đòi "chi phí / task thành công ở kịch bản cơ sở, kèm tên mod
 | **Chọn — deck HTML trong repo** `slides/demo-slides.html`, xuất `demo-slides.pdf` bằng headless Chromium (`npx playwright`, tải ≈150MB trên máy này, không thêm vào repo) | Đổi số → sửa và xuất lại một lệnh; cả nhóm sửa qua PR | Trông giản dị hơn; người không quen HTML khó sửa |
 | Deck trên claude.ai (loại Slides) | Đẹp, tải PDF / PPTX | Mỗi lần đổi số phải tải tay rồi commit; chỉ người có link sửa |
 
-Một file HTML tự chứa (không CDN), mỗi trang một `<section>` khổ 16:9, in ra PDF mỗi `<section>` một trang. Trang 4 (demo) ghi 1 câu thường + 1 câu khó lấy từ `eval/benchmark.csv` kèm output thật trong `eval/run-5.csv`. Bảng "Ai nói trang nào" trong `outline.md` để trống cho nhóm.
+Một file HTML tự chứa (không CDN), mỗi trang một `<section>` khổ 16:9, in ra PDF mỗi `<section>` một trang. Trang 4 (demo) ghi 1 câu thường + 1 câu khó lấy từ `eval/benchmark.csv` kèm output thật trong `eval/run-5.csv`. Phân công người nói theo bảng trong `slides/outline.md`.
 
 ## Cách kết luận: so chi phí với ngưỡng hoà vốn (số thật lấy từ lượt nộp)
 
