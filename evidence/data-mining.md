@@ -41,12 +41,14 @@ Dữ liệu từng review: `evidence/review-ghn.csv` (cột `stt, so_sao, nhan, 
 
 ## 4. ≥5 ví dụ cụ thể (mã dòng / mã đã ẩn danh, không đoán ai là ai)
 
-1. stt 47 (1 sao): "Khiếu nại đơn hàng [mã đơn] dán mvd của tôi vào 1 đơn hàng của người khác . tôi nhận sai hàng" — nhầm người nhận.
-2. stt 89 (1 sao): "tự ghi thông tin đơn sai, không giao hàng cho khách mà lại báo giao hàng thành công" — chuyển sang `khac` vì chưa rõ trường sai.
-3. stt 7 (2 sao): "đến đơn thứ 2 t gửi cho bạn t, thì bên GHN dán lộn mã đơn của t" — nhầm đơn.
-4. stt 69 (1 sao): "tại sao địa chỉ rõ ràng mà shiper lại không tìm thấy nhà." — chuyển sang `khac` vì người viết nói địa chỉ rõ.
-5. stt 100 (1 sao): "không nhận được một cuộc gọi mà để cập nhật là không liên lạc được người nhận" — hoàn / không giao vì "không liên lạc được".
-6. stt 92 (3 sao): "lấy lý do, không gọi được cho người nhận hàng, mà trong khi đó số điện thoại đang sử dụng bình thường" — như trên.
+1. stt 47 (1 sao): "Khiếu nại đơn hàng [mã đơn] dán mvd của tôi vào 1 đơn hàng của người khác . tôi nhận sai hàng" — nhầm mã vận đơn, nhận sai hàng.
+2. stt 7 (2 sao): "đến đơn thứ 2 t gửi cho bạn t, thì bên GHN dán lộn mã đơn của t" — nhầm mã vận đơn.
+3. stt 100 (1 sao): "không nhận được một cuộc gọi mà để cập nhật là không liên lạc được người nhận" — lý do giao thất bại: không liên lạc được.
+4. stt 92 (3 sao): "lấy lý do, không gọi được cho người nhận hàng, mà trong khi đó số điện thoại đang sử dụng bình thường" — như trên.
+5. stt 43 (1 sao): "Báo không liên hệ được nhưng chẳng có cuộc gọi nào từ shiper rồi tự hoàn hàng người ta về shop" — như trên.
+6. stt 63 (1 sao): "hủy đơn báo ng gọi k nghe?" — lý do huỷ: khách không nghe máy.
+
+Hai ví dụ ban đầu đã chuyển sang `khac` khi rà lại: stt 89 ("tự ghi thông tin đơn sai…", chưa rõ trường sai) và stt 69 ("địa chỉ rõ ràng mà shiper lại không tìm thấy nhà", người viết nói địa chỉ rõ).
 
 ## 5. Giới hạn của data
 
