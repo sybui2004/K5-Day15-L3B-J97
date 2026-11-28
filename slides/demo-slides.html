@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>J97 · Lên đơn từ tin nhắn</title>
+<style>
+  @page { size: 13.333in 7.5in; margin: 0; }
+  :root {
+    --ink: #1c2430; --muted: #5b6676; --line: #d9dee5; --bg: #ffffff;
+    --accent: #0b6e4f; --accent-soft: #e6f2ed; --warn: #a14a00; --warn-soft: #fbefe3; --bad: #a3221b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #eef1f4; color: var(--ink);
+    font-family: "Noto Sans", "DejaVu Sans", "Segoe UI", Arial, sans-serif; }
+  .slide { width: 13.333in; height: 7.5in; padding: 0.55in 0.7in 0.5in; background: var(--bg);
+    position: relative; overflow: hidden; break-after: page; page-break-after: always; margin: 0 auto 0.3in; }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  @media print { html, body { background: #fff; } .slide { margin: 0; } }
+  .kicker { font-size: 13pt; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0 0 6pt; }
+  h1 { font-size: 30pt; line-height: 1.15; margin: 0 0 16pt; }
+  h2 { font-size: 15pt; margin: 0 0 8pt; color: var(--muted); font-weight: 700; }
+  p, li { font-size: 14pt; line-height: 1.4; }
+  ul { margin: 0; padding-left: 1.1em; } li { margin: 0 0 5pt; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35in; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25in; }
+  .big { font-size: 40pt; font-weight: 800; color: var(--accent); line-height: 1; }
+  .big.warn { color: var(--warn); }
+  .stat { border: 1px solid var(--line); border-radius: 10pt; padding: 12pt 14pt; }
+  .stat p { margin: 6pt 0 0; font-size: 12.5pt; color: var(--muted); }
+  blockquote { margin: 0 0 8pt; padding: 8pt 12pt; border-left: 4pt solid var(--accent); background: var(--accent-soft); font-size: 13pt; line-height: 1.35; }
+  blockquote cite { display: block; font-style: normal; color: var(--muted); font-size: 11pt; margin-top: 3pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5pt; }
+  th, td { border-bottom: 1px solid var(--line); padding: 5pt 7pt; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; font-size: 11.5pt; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.pick td { background: var(--accent-soft); font-weight: 700; }
+  .tag { display: inline-block; padding: 1pt 7pt; border-radius: 99pt; font-size: 11pt; font-weight: 700; }
+  .tag.ok { background: var(--accent-soft); color: var(--accent); }
+  .tag.no { background: var(--warn-soft); color: var(--warn); }
+  .src { position: absolute; left: 0.7in; right: 0.7in; bottom: 0.22in; font-size: 9.5pt; color: var(--muted);
+    border-top: 1px solid var(--line); padding-top: 4pt; display: flex; justify-content: space-between; gap: 12pt; }
+  pre { margin: 0; white-space: pre-wrap; font-family: "Noto Sans", "DejaVu Sans", sans-serif; font-size: 11pt; line-height: 1.35;
+    background: #f6f8fa; border: 1px solid var(--line); border-radius: 8pt; padding: 8pt 10pt; }
+  .flow { display: flex; align-items: stretch; gap: 8pt; margin: 6pt 0 14pt; }
+  .flow .box { flex: 1; border: 1.5pt solid var(--line); border-radius: 9pt; padding: 8pt 9pt; font-size: 11.5pt; line-height: 1.3; }
+  .flow .box b { display: block; font-size: 12.5pt; margin-bottom: 3pt; }
+  .flow .ai { border-color: var(--accent); background: var(--accent-soft); }
+  .flow .code { border-color: #7a8699; }
+  .flow .human { border-color: var(--warn); background: var(--warn-soft); }
+  .flow .arrow { align-self: center; color: var(--muted); font-size: 18pt; flex: 0 0 auto; }
+  .note { font-size: 12pt; color: var(--muted); }
+  .callout { border: 1.5pt solid var(--warn); background: var(--warn-soft); border-radius: 10pt; padding: 10pt 14pt; font-size: 13.5pt; line-height: 1.4; }
+  .cover-title { font-size: 34pt; }
+</style>
+</head>
+<body>
+
+<!-- 1 · Người dùng & pain -->
+<section class="slide">
+  <p class="kicker">J97 · Track D · 1 / 8 · Người dùng &amp; pain</p>
+  <h1 class="cover-title">Chủ shop bán lẻ chép sai thông tin nhận hàng khi lên đơn từ tin nhắn</h1>
+  <div class="grid3" style="margin-bottom:16pt">
+    <div class="stat"><div class="big">4/4</div><p>chủ shop đã phỏng vấn chép sai hoặc thiếu thông tin nhận hàng trong 1 tháng qua (P1 3 · P2 4 · P3 2 · P4 1 vụ)</p></div>
+    <div class="stat"><div class="big warn">38–60k</div><p>đồng phí ship mất mỗi vụ hoàn; 3/4 vụ gần nhất khách huỷ hoặc mua chỗ khác</p></div>
+    <div class="stat"><div class="big">20–45%</div><p>đơn khách vẫn ghi địa chỉ kiểu cũ; mỗi đơn thêm 1–3 phút, 4/4 shop từng quy đổi sai hoặc bị GHN từ chối phường cũ</p></div>
+  </div>
+  <div class="grid2">
+    <div>
+      <blockquote>"mình nhìn nhầm số 8 thành số 3 ở đuôi; đơn gửi đi ngoại tỉnh nằm ở bưu cục 4 ngày không gọi được cho khách nên bị hoàn về."<cite>P3, chủ shop mỹ phẩm</cite></blockquote>
+      <blockquote>"Có mấy lần hệ thống GHN không nhận tên phường cũ khách gửi, bắt buộc phải dò đúng tên phường mới sau sáp nhập…"<cite>P2, chủ shop phụ kiện điện thoại</cite></blockquote>
+    </div>
+    <div>
+      <h2>Ai, làm gì</h2>
+      <ul>
+        <li>4 chủ shop bán lẻ ở TP HCM, 260–650 đơn / tháng qua tin nhắn Facebook, website</li>
+        <li>Mỗi đơn 4–8 phút, 3–6 lượt nhắn: đọc tin, chép tên, sđt, địa chỉ sang GHN, tự tra phường mới</li>
+        <li>Phỏng vấn 27/11/2026, n = 4 — mẫu nhỏ, cả 4 ở TP HCM</li>
+      </ul>
+    </div>
+  </div>
+  <div class="src"><span>Nguồn: <code>evidence/summary.md</code> · <code>evidence/interviews/P1.md</code>–<code>P4.md</code></span><span>Trích nguyên văn, đã được đồng ý, không ghi tên</span></div>
+</section>
+
+<!-- 2 · Vì sao chọn -->
+<section class="slide">
+  <p class="kicker">2 / 8 · Vì sao chọn bài này</p>
+  <h1>Lên đơn từ tin nhắn có bằng chứng mạnh nhất và mất tiền thật</h1>
+  <table style="margin-bottom:14pt">
+    <tr><th>Hướng</th><th>Bao nhiêu shop gặp</th><th>Impact / tháng (4 shop)</th><th>Chọn?</th></tr>
+    <tr class="pick"><td>Lên đơn từ tin nhắn chốt mua: kiểm sđt, người nhận, quy địa chỉ cũ, hỏi lại một lần</td><td>4/4</td><td>≈ 195.000–494.000đ phí ship + ≈ 855 phút (≈ 14 giờ) đổi địa chỉ cũ</td><td><span class="tag ok">Chọn</span></td></tr>
+    <tr><td>Trả lời tư vấn nhanh lúc đông khách</td><td>1/4 kể rõ</td><td>2 đơn mất ở 1 shop, chưa tính được thành tiền</td><td><span class="tag no">Loại</span></td></tr>
+    <tr><td>Xử lý khiếu nại, hoàn đơn vì giao nhầm</td><td>4/4 có vụ hoàn</td><td>Chưa tính được (chưa hỏi thời gian xử lý)</td><td><span class="tag no">Loại</span></td></tr>
+  </table>
+  <div class="grid2">
+    <ul>
+      <li><b>195.000đ</b>: 4 vụ gần nhất, mỗi shop một vụ (có nguồn chắc)</li>
+      <li><b>494.000đ</b>: 10 vụ / tháng × tiền vụ gần nhất của từng shop <i>(tự ước tính, coi mọi vụ đều bị hoàn)</i></li>
+      <li><b>855 phút</b>: Σ đơn / tháng × tỉ lệ đơn địa chỉ cũ × phút thêm mỗi đơn</li>
+    </ul>
+    <ul>
+      <li><b>Loại tư vấn nhanh:</b> dưới ngưỡng ≥2/3 của giả thuyết; cần danh mục, giá từng shop, chốt giá là cam kết với khách</li>
+      <li><b>Loại khiếu nại:</b> chưa có bằng chứng về bước này; hoàn tiền khó đảo nếu AI sai</li>
+    </ul>
+  </div>
+  <div class="src"><span>Nguồn: <code>spec.md</code> §2 (phỏng vấn câu 4, 6, 7, 9, 10)</span><span>Chưa tính tiền hàng mất khi khách huỷ</span></div>
+</section>
+
+<!-- 3 · Giải pháp -->
+<section class="slide">
+  <p class="kicker">3 / 8 · Giải pháp</p>
+  <h1 style="font-size:24pt">AI xác định thông tin nhận hàng đã đủ và chắc để tạo đơn nháp, hay phải hỏi lại khách</h1>
+  <div class="flow">
+    <div class="box"><b>Hộp thư</b>Hội thoại chốt mua, nhiều lượt, viết tắt, địa chỉ cũ</div>
+    <div class="arrow">→</div>
+    <div class="box ai"><b>Lớp chặn NeMo</b>self check input, chỉ đọc lời khách · bị chặn → TỪ CHỐI</div>
+    <div class="arrow">→</div>
+    <div class="box ai"><b>AI đọc hội thoại</b>1 lần gọi model, trả JSON: người nhận, sđt, địa chỉ, cờ ngoài phạm vi</div>
+    <div class="arrow">→</div>
+    <div class="box code"><b>Code kiểm</b>validate_phone · convert_old_address · lookup_address · get_customer_history</div>
+    <div class="arrow">→</div>
+    <div class="box human"><b>Chủ shop duyệt</b>Đơn nháp + vận đơn nháp, sửa trường nào code kiểm lại</div>
+  </div>
+  <div class="grid3">
+    <div><h2>Hình dạng: workflow cố định</h2><p style="font-size:12.5pt">Không bước nào cần AI tự chọn đường. Để AI tự gọi công cụ thì khó chặn chuyện bỏ qua bước kiểm và tạo đơn khi chưa đủ thông tin.</p></div>
+    <div><h2>AI tự làm đến đâu</h2><p style="font-size:12.5pt">Tự làm khi chắc, chuyển người khi không. <b>Chỉ tạo bản nháp</b>: không tự duyệt, không tự gửi tin, không gọi API GHN thật.</p></div>
+    <div><h2>Chặn rủi ro lớn nhất</h2><p style="font-size:12.5pt">Phường cũ bị tách: code chỉ nhận phường trong danh sách từ Nghị quyết 1685/NQ-UBTVQH15; chưa có căn cứ thì hỏi lại khách kèm đủ danh sách.</p></div>
+  </div>
+  <div class="src"><span>Nguồn: <code>spec.md</code> §4 (sơ đồ, bảng công cụ, mức tự động) · <code>codebase/agent.py</code>, <code>codebase/guard.py</code></span><span>Model: claude-sonnet-5-5</span></div>
+</section>
+
+<!-- 4 · Demo -->
+<section class="slide">
+  <p class="kicker">4 / 8 · Demo live</p>
+  <h1>Một ca thường, một ca khó: phường cũ bị tách</h1>
+  <div class="grid2">
+    <div>
+      <h2>B04 · địa chỉ cũ gộp gọn → TẠO ĐƠN NHÁP</h2>
+      <pre style="margin-bottom:6pt">Khách: lấy 1 áo
+Khách: Lan 0904444444, 12 Nguyễn Huệ, P. Bến Nghé, Q.1, TP.HCM</pre>
+      <pre>QUYẾT ĐỊNH: TẠO ĐƠN NHÁP
+Người nhận: Lan · SĐT: 0904444444
+Địa chỉ: 12 Nguyễn Huệ
+Phường/xã: phường Sài Gòn (quy đổi từ Phường Bến Nghé,
+  Quận 1 theo khoản 1 Nghị quyết 1685/NQ-UBTVQH15)
+Tỉnh/thành: TP Hồ Chí Minh
+Mã đơn: DN-add34471 · Vận đơn: GHN-NHAP-add34471</pre>
+    </div>
+    <div>
+      <h2>B09 · phường cũ bị tách → HỎI LẠI, không đoán</h2>
+      <pre style="margin-bottom:6pt">Khách: lấy 1 áo
+Khách: Mai 0909999999, 20 Nguyễn Đình Chiểu,
+  Phường 4, Quận 3, TP Hồ Chí Minh</pre>
+      <pre>QUYẾT ĐỊNH: HỎI LẠI
+Tin gửi khách: Dạ shop cần thêm địa chỉ Phường 4, Quận 3
+  nay thuộc phường nào trong các phường sau ạ:
+  phường Bàn Cờ, phường Xuân Hòa ạ.
+Cho chủ shop: đã có tên, sđt, sản phẩm · phường cũ bị tách,
+  chờ khách chọn phường · chưa tạo đơn nháp</pre>
+    </div>
+  </div>
+  <p class="note" style="margin-top:12pt">Mạng hỏng → video dự phòng 34 giây (link trong <code>README.md</code>). Câu thử lạ của giám khảo: dán vào nút <i>Hội thoại mới</i> trên màn hình duyệt.</p>
+  <div class="src"><span>Nguồn: <code>eval/run-5.csv</code> (run-5@20261128-021955, output thật, rút gọn dòng)</span><span>Tên, sđt là giá trị dựng</span></div>
+</section>
+
+<!-- 5 · Đánh giá -->
+<section class="slide">
+  <p class="kicker">5 / 8 · Đánh giá thế nào</p>
+  <h1>Lượt 2: 28/30 câu, đạt chuẩn — không câu nào tạo đơn nháp sai</h1>
+  <div class="grid2">
+    <div>
+      <h2>Bộ câu thử · metric · chuẩn "đạt"</h2>
+      <ul style="font-size:12.5pt">
+        <li><b>30 câu</b>: thường 8 · khó 14 · từ chối 8 (5 câu tấn công). Nguồn thật 10/30: 3 chat thật đã che, 7 trích đoạn công khai</li>
+        <li><b>5 metric</b>: không tạo đơn sai · quy đổi địa chỉ đúng · hỏi một lần đủ ý · trích đúng thông tin · từ chối đúng</li>
+        <li><b>Chuẩn "đạt"</b> (chốt CP2): ≥80% câu qua, <b>100%</b> không tạo đơn sai, <b>100%</b> câu từ chối qua</li>
+      </ul>
+    </div>
+    <div>
+      <table>
+        <tr><th>Lượt</th><th class="n">Đạt</th><th class="n">thường</th><th class="n">khó</th><th class="n">từ chối</th><th>Chuẩn</th></tr>
+        <tr><td>1 · run-3</td><td class="n">28/30 (93%)</td><td class="n">8/8</td><td class="n">13/14</td><td class="n">7/8</td><td><span class="tag no">chưa</span></td></tr>
+        <tr class="pick"><td>2 · run-5</td><td class="n">28/30 (93%)</td><td class="n">8/8</td><td class="n">12/14</td><td class="n">8/8</td><td><span class="tag ok">đạt</span></td></tr>
+      </table>
+      <p class="note" style="margin:6pt 0 0">Cùng bộ 30 câu, cùng cách chấm, claude-sonnet-5-5. Không tạo đơn sai: 30/30 ở cả hai lượt.</p>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:14pt">
+    <div class="callout"><b>Cải tiến:</b> khách giả lời shop để được miễn sđt (B30) — lượt 1 HỎI LẠI thay vì TỪ CHỐI. Sửa prompt + code bắt nhãn giả trong lượt khách → từ chối 7/8 → 8/8.</div>
+    <div><h2>Lỗi còn lại (không tạo đơn sai)</h2>
+      <ul style="font-size:12.5pt"><li><b>B10</b> tệ đi: không còn đoán tỉnh khi khách không viết → hỏi lại thêm một lượt</li><li><b>B12</b>: hỏi cả tỉnh lẫn quận, expected chỉ có quận</li></ul></div>
+  </div>
+  <div class="src"><span>Nguồn: <code>eval/README.md</code> · <code>eval/report.md</code> · <code>eval/run-3.csv</code>, <code>eval/run-5.csv</code></span><span>run-1, run-2 (bộ 19 câu), run-4 không tính — lý do ở report mục 1</span></div>
+</section>
+
+<!-- 6 · Chi phí -->
+<section class="slide">
+  <p class="kicker">6 / 8 · Chi phí khi dùng thật</p>
+  <h1>Sonnet 5.5: $0.0159 / đơn thành công, ≈ 150.700đ / shop / tháng</h1>
+  <table style="margin-bottom:12pt;font-size:12pt">
+    <tr><th>Model · giá $/1M vào, ra</th><th class="n">/ phiên</th><th class="n">/ task đạt</th><th class="n">/ tháng thấp<br>580 shop</th><th class="n">/ tháng cơ sở<br>1.741 shop</th><th class="n">/ tháng cao<br>5.803 shop</th><th class="n">/ shop / tháng<br>cơ sở</th></tr>
+    <tr><td style="white-space:nowrap">Haiku 5.5 · 0,10 / 0,50</td><td class="n">$0.00074</td><td class="n">$0.00079</td><td class="n">$167.91</td><td class="n">$504.03</td><td class="n">$1,679.99</td><td class="n">$0.29</td></tr>
+    <tr class="pick"><td style="white-space:nowrap">Sonnet 5.5 · 2 / 10 · đang chạy</td><td class="n">$0.0148</td><td class="n">$0.0159</td><td class="n">$3,358.25</td><td class="n">$10,080.53</td><td class="n">$33,599.82</td><td class="n">$5.79</td></tr>
+    <tr><td style="white-space:nowrap">Opus 5.5 · 4 / 20</td><td class="n">$0.0296</td><td class="n">$0.0317</td><td class="n">$6,716.49</td><td class="n">$20,161.05</td><td class="n">$67,199.65</td><td class="n">$11.58</td></tr>
+  </table>
+  <div class="grid2">
+    <ul style="font-size:12.5pt">
+      <li><b>50</b> phiên mô phỏng qua bản chạy thử thật (seed 42), một phiên = một đơn chốt qua tin nhắn, có lớp chặn NeMo</li>
+      <li>3 kiểu shop từ phỏng vấn: nhỏ 260 · vừa 400 · lớn 650 đơn / tháng; tỉ trọng 25–50–25% <i>(tự ước tính)</i></li>
+      <li>Chi phí / task thành công = chi phí / phiên ÷ tỉ lệ đạt 28/30 (run-5)</li>
+    </ul>
+    <ul style="font-size:12.5pt">
+      <li><b>Số shop dùng</b> = 11.606 người nộp thuế TMĐT TP.HCM (mốc tham chiếu) × hệ số phủ 1–2 × thuộc lát cắt 0,5 × tỉ lệ dùng 0,1 / 0,3 / 0,5 — <i>ba thừa số tự ước tính</i></li>
+      <li>Haiku, Opus: token đo trên Sonnet 5.5, chỉ đổi đơn giá; dùng tỉ lệ đạt của Sonnet (chưa chạy eval trên Haiku)</li>
+    </ul>
+  </div>
+  <div class="src"><span>Nguồn: <code>cost/simulate-1-summary.md</code> · <code>cost/cost-estimate.md</code> · <code>cost/personas.yaml</code></span><span>Giá: further-reading/model-prices.md (BTC xem 25/11/2026)</span></div>
+</section>
+
+<!-- 7 · Kết luận -->
+<section class="slide">
+  <p class="kicker">7 / 8 · Kết luận</p>
+  <h1>Sonnet chưa tự bù được bằng phí ship; Haiku cần tránh 6–15%</h1>
+  <div class="grid2">
+    <div>
+      <h2>Ngưỡng hoà vốn f* = chi phí / shop / tháng ÷ phí ship đang mất</h2>
+      <table>
+        <tr><th>Model</th><th class="n">Chi phí / shop / tháng</th><th class="n">f* nếu mất 48.750đ</th><th class="n">f* nếu mất 123.500đ</th></tr>
+        <tr><td style="white-space:nowrap">Haiku 5.5</td><td class="n">≈ 7.500đ</td><td class="n">15%</td><td class="n">6%</td></tr>
+        <tr class="pick"><td style="white-space:nowrap">Sonnet 5.5</td><td class="n">≈ 150.700đ</td><td class="n">309%</td><td class="n">122%</td></tr>
+        <tr><td style="white-space:nowrap">Opus 5.5</td><td class="n">≈ 301.400đ</td><td class="n">618%</td><td class="n">244%</td></tr>
+      </table>
+      <p class="note" style="margin-top:6pt">Phí ship đang mất / shop / tháng: 195.000–494.000đ ÷ 4 shop = 48.750–123.500đ (§2, đầu trên tự ước tính). Tỷ giá 26.030 đ/USD (Vietcombank bán ra, 28/11/2026). f* &gt; 100%: riêng phí ship không đủ bù.</p>
+    </div>
+    <div>
+      <div class="callout" style="margin-bottom:10pt"><b>Đề xuất: iterate.</b> Với Sonnet, riêng phí ship không đủ bù kể cả tránh hết lỗi; phải tính thêm ≈ 214 phút / shop / tháng. Với Haiku chỉ cần tránh 6–15% phí ship đang mất — <b>nếu</b> Haiku đạt như Sonnet.</div>
+      <ul style="font-size:12.5pt">
+        <li>Pain có thật: 4/4 shop (trang 1) · lượt 2 đạt chuẩn, 0 đơn sai (trang 5)</li>
+        <li>Chưa đo: AI tránh được bao nhiêu phần lỗi; Haiku có đạt như Sonnet không</li>
+        <li>Chưa quy ra tiền: ≈ 214 phút / shop / tháng đổi địa chỉ cũ</li>
+      </ul>
+      <p style="margin-top:10pt"><b>Go / iterate / stop:</b> <span class="tag no">nhóm chốt</span></p>
+    </div>
+  </div>
+  <div class="src"><span>Nguồn: <code>cost/cost-estimate.md</code> §3 · <code>spec.md</code> §2, §8</span><span>Trang 1, 5, 6</span></div>
+</section>
+
+<!-- 8 · Nếu có thêm 1 tuần -->
+<section class="slide">
+  <p class="kicker">8 / 8 · Nếu có thêm 1 tuần</p>
+  <h1>Đo ba thứ kết luận đang phụ thuộc</h1>
+  <div class="grid3">
+    <div class="stat"><h2>1 · Chạy eval trên Haiku 5.5</h2><p style="font-size:12.5pt;color:var(--ink)">Cùng bộ 30 câu, cùng chuẩn "đạt". Nếu Haiku đạt như Sonnet thì chi phí giảm khoảng 20 lần (trang 6) — thay giả định "dùng tỉ lệ đạt của Sonnet" bằng số đo.</p></div>
+    <div class="stat"><h2>2 · Đo AI tránh được bao nhiêu lỗi</h2><p style="font-size:12.5pt;color:var(--ink)">Cho 2–3 shop dùng thử màn hình duyệt một tuần, đếm vụ chép sai và phút đổi địa chỉ cũ trước / sau. Đây là số còn thiếu để biết f* có đạt không.</p></div>
+    <div class="stat"><h2>3 · Câu tấn công mới cho lớp chặn</h2><p style="font-size:12.5pt;color:var(--ink)">B30 qua nhờ bắt đúng nhãn "[Tin của Shop]" trong câu thử. Cần câu giả lời shop kiểu khác để đo riêng lớp chặn NeMo (ghi thành lượt mới).</p></div>
+  </div>
+  <div class="grid2" style="margin-top:16pt">
+    <ul style="font-size:12.5pt"><li>Lỗi còn lại B10, B12: giữ chuẩn và <code>expected</code>, không đoán tỉnh để kéo điểm</li><li>Đếm review Google Play app GHN làm nguồn pain thứ hai (cách đếm đã viết, chưa đếm)</li></ul>
+    <ul style="font-size:12.5pt"><li>Mở rộng ngoài TP HCM: bảng chuyển đổi hiện chỉ phủ Nghị quyết 1685</li></ul>
+  </div>
+  <div class="src"><span>Nguồn: <code>eval/report.md</code> mục 4 · <code>evidence/summary.md</code> mục 4 · <code>cost/cost-estimate.md</code></span><span>J97 · L3B</span></div>
+</section>
+
+</body>
+</html>
