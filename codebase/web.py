@@ -152,6 +152,22 @@ def chi_phi(model: str, tokens_in: int, tokens_out: int, bang_gia: list):
     return None
 
 
+def chi_phi_su_kien(su_kien, bang_gia: list):
+    """USD cho một lần chạy, tính trên từng lần gọi model (kind == "model") theo đúng model của lần đó rồi cộng.
+    Một lần chạy có thể có hai model (lớp chặn NeMo và bước đọc đơn, hoặc API chuyển sang model dự phòng).
+    Có lần gọi nào chưa định giá được, hoặc không có lần gọi model nào, thì trả None (chưa đủ giá)."""
+    goi = [e for e in su_kien if e.get("kind") == "model"]
+    if not goi:
+        return None
+    tong = 0.0
+    for e in goi:
+        c = chi_phi(e.get("model") or "", e.get("tokens_in") or 0, e.get("tokens_out") or 0, bang_gia)
+        if c is None:
+            return None
+        tong += c
+    return tong
+
+
 def _buoc(e):
     """Một sự kiện trace → một bước cho màn hình. Bỏ input của model (system prompt dài, không giúp người xem)."""
     b = {"loai": e.get("kind"), "ten": e.get("name") or "", "t": e.get("t")}
@@ -186,7 +202,7 @@ def _co_trace(nhan, ham, *args, nguon="hop_thu", bang_gia=()):
     trace = {"nguon": nguon, "buoc": [_buoc(e) for e in su_kien], "model_calls": s["model_calls"],
              "tool_calls": s["tool_calls"], "tokens_in": s["tokens_in"], "tokens_out": s["tokens_out"],
              "model": model, "thoi_gian_s": round(time.perf_counter() - t0, 3),
-             "chi_phi_usd": chi_phi(model, s["tokens_in"], s["tokens_out"], list(bang_gia)), "loi": loi}
+             "chi_phi_usd": chi_phi_su_kien(su_kien, list(bang_gia)), "loi": loi}
     if loi_ham is not None:
         raise LoiChayAI(loi_ham, trace) from loi_ham
     return kq, trace
@@ -267,7 +283,7 @@ class ManHinh:
         return {"ma_hoi_thoai": ma, "ma_khach": h.get("ma_khach"), "text": h.get("text", ""),
                 "loi_doc": h.get("loi_doc"), "kq": kq, "trang_thai": TRANG_THAI.get(kq["quyet_dinh"], "cho_khach"),
                 "so_luot_hoi_lai": 0, "ma_don": kq.get("ma_don"), "ma_van_don": kq.get("ma_van_don"),
-                "nguon": nguon, "trace": None}
+                "nguon": nguon, "trace": None, "phien_ban": 1}
 
     def tai(self, hoi_thoai: list):
         """Chạy AI cho cả hộp thư. Nhật ký ghi theo đúng thứ tự chạy; chỉ danh sách hiển thị được sắp lại.
@@ -335,18 +351,28 @@ class ManHinh:
             raise LoiThaoTac("không có hội thoại %s" % ma)
         return self._phien[ma]
 
-    def kiem(self, ma, sua):
+    @staticmethod
+    def _dung_phien_ban(p, phien_ban):
+        """Phiếu gửi kèm phiên bản cũ (AI vừa đọc lại hội thoại sau khi phiếu được mở) thì từ chối,
+        để không áp trường của phiếu cũ lên đơn nháp mới. Không gửi phiên bản thì bỏ qua (gọi từ code)."""
+        if phien_ban is not None and phien_ban != p["phien_ban"]:
+            raise LoiThaoTac("hội thoại %s vừa được AI đọc lại, phiếu đang mở đã cũ — xem lại phiếu mới rồi duyệt"
+                             % p["ma_hoi_thoai"])
+
+    def kiem(self, ma, sua, phien_ban=None):
         with self._khoa:
             p = self._lay(ma)
             if p["trang_thai"] != "cho_duyet":
                 raise LoiThaoTac("hội thoại %s không có đơn nháp chờ duyệt" % ma)
+            self._dung_phien_ban(p, phien_ban)
             return kiem_khi_sua(p["kq"]["truong"], sua)
 
-    def duyet(self, ma, sua):
+    def duyet(self, ma, sua, phien_ban=None):
         with self._khoa:
             p = self._lay(ma)
             if p["trang_thai"] != "cho_duyet":
                 raise LoiThaoTac("hội thoại %s không có đơn nháp chờ duyệt" % ma)
+            self._dung_phien_ban(p, phien_ban)
             k = kiem_khi_sua(p["kq"]["truong"], sua)
             if not k["duoc_duyet"]:
                 raise LoiThaoTac("còn trường chưa qua kiểm, chưa duyệt được", k)
@@ -389,7 +415,7 @@ class ManHinh:
             self._luu_lan_chay(ma, kq["quyet_dinh"], trace)
             p.update(text=text, kq=kq, trang_thai=TRANG_THAI.get(kq["quyet_dinh"], "cho_khach"),
                      so_luot_hoi_lai=p["so_luot_hoi_lai"] + (1 if hoi_lai else 0), ma_don=kq.get("ma_don"),
-                     ma_van_don=kq.get("ma_van_don"), trace=trace)
+                     ma_van_don=kq.get("ma_van_don"), trace=trace, phien_ban=p["phien_ban"] + 1)
             return copy.deepcopy(p)
 
     def _ghi(self, p, ket_qua, da_sua):
@@ -487,12 +513,15 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         ma, sua = str(body.get("ma") or ""), body.get("sua") or {}
         if not isinstance(sua, dict):
             return self._gui(400, {"loi": "sua phải là object"})
+        pb = body.get("phien_ban")
+        if pb is not None and (not isinstance(pb, int) or isinstance(pb, bool)):
+            return self._gui(400, {"loi": "phien_ban phải là số nguyên"})
         mh = self.man_hinh
         try:
             if self.path == "/api/kiem":
-                return self._gui(200, mh.kiem(ma, sua))
+                return self._gui(200, mh.kiem(ma, sua, pb))
             if self.path == "/api/duyet":
-                return self._gui(200, mh.duyet(ma, sua))
+                return self._gui(200, mh.duyet(ma, sua, pb))
             if self.path == "/api/huy":
                 return self._gui(200, mh.huy(ma))
             if self.path == "/api/tra-loi":
