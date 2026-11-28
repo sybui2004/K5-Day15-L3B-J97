@@ -575,7 +575,162 @@ class TestKiemYeuCau(unittest.TestCase):
         self.assertFalse(web.post_hop_le({"X-Man-Hinh-Duyet": "1", "Content-Type": "text/plain"}))
 
 
-class TestGioiHanPost(unittest.TestCase):
+class _MayChuThu:
+    """Dựng máy chủ thật trên cổng tạm, có QuanLyTaiKhoan trên kho file tạm. Lớp con gán self.man_hinh_gia."""
+
+    def dung_may_chu(self, man_hinh):
+        import tai_khoan
+        self._tmp_tk = tempfile.TemporaryDirectory()
+        self.cong_goc = web.PORT
+        self.server = web.MayChu(("127.0.0.1", 0), web.XuLyYeuCau)
+        web.PORT = self.server.server_address[1]
+        web.XuLyYeuCau.man_hinh = man_hinh
+        web.XuLyYeuCau.tai_khoan = tai_khoan.QuanLyTaiKhoan(
+            __import__("kho").KhoFile(os.path.join(self._tmp_tk.name, "nk.jsonl")), mat_khau_admin="admin")
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def dung_lai(self):
+        self.server.shutdown()
+        self.server.server_close()
+        web.PORT, web.XuLyYeuCau.man_hinh, web.XuLyYeuCau.tai_khoan = self.cong_goc, None, None
+        self._tmp_tk.cleanup()
+
+    def goi(self, phuong_thuc, duong, body=None, cookie=None, them=None):
+        """Trả (status, headers dict chữ thường, json hoặc None)."""
+        import http.client
+        c = http.client.HTTPConnection("127.0.0.1", web.PORT, timeout=10)
+        h = {"Host": "127.0.0.1:%d" % web.PORT}
+        if phuong_thuc == "POST":
+            h.update({"X-Man-Hinh-Duyet": "1", "Content-Type": "application/json"})
+        if cookie:
+            h["Cookie"] = "j97_phien=" + cookie
+        h.update(them or {})
+        data = body if isinstance(body, bytes) else (json.dumps(body or {}).encode() if phuong_thuc == "POST" else None)
+        c.request(phuong_thuc, duong, body=data, headers=h)
+        r = c.getresponse()
+        raw = r.read()
+        hd = {k.lower(): v for k, v in r.getheaders()}
+        c.close()
+        try:
+            return r.status, hd, json.loads(raw or b"null")
+        except ValueError:
+            return r.status, hd, None
+
+    @staticmethod
+    def cookie_tu(hd):
+        import re
+        m = re.search(r"j97_phien=([^;]*)", hd.get("set-cookie", ""))
+        return m.group(1) if m else None
+
+    def dang_nhap_admin(self):
+        st, hd, _ = self.goi("POST", "/api/dang-nhap", {"username": "admin", "mat_khau": "admin"})
+        assert st == 200, st
+        return self.cookie_tu(hd)
+
+
+class TestDangNhapHttp(_MayChuThu, unittest.TestCase):
+    def setUp(self):
+        class ManHinhGia:
+            def anh_chup(self):
+                return [], {"dang_xu_ly": 0}
+
+            def duyet(self, ma, sua, pb=None):
+                return {"ma_hoi_thoai": ma}
+
+        self._trusted_goc = web.TRUSTED_PROXY
+        self.dung_may_chu(ManHinhGia())
+
+    def tearDown(self):
+        web.TRUSTED_PROXY = self._trusted_goc
+        self.dung_lai()
+
+    def dang_ky(self, u, ip_header=None):
+        return self.goi("POST", "/api/dang-ky", {"username": u, "mat_khau": "matkhau1", "nhap_lai": "matkhau1"},
+                        them={"X-Real-IP": ip_header} if ip_header else None)
+
+    def test_chua_dang_nhap_api_shop_401(self):
+        self.assertEqual(self.goi("GET", "/api/hop-thu")[0], 401)
+        self.assertEqual(self.goi("POST", "/api/duyet", {"ma": "HT-1"})[0], 401)
+        self.assertEqual(self.goi("GET", "/api/toi")[0], 401)
+
+    def test_bi_chan_thi_khong_chay_tiep_vao_api_shop(self):
+        goi = []
+        self.server.RequestHandlerClass.man_hinh = type("Ghi", (), {
+            "anh_chup": lambda s_: goi.append("hop-thu") or ([], {}),
+            "nhat_ky": lambda s_: goi.append("nhat-ky") or {},
+            "duyet": lambda s_, *a: goi.append("duyet") or {}})()
+        ck = self.cookie_tu(self.dang_ky("khach9")[1])
+        self.goi("GET", "/api/hop-thu")
+        self.goi("GET", "/api/nhat-ky", cookie=ck)
+        self.goi("POST", "/api/duyet", {"ma": "HT-1"}, cookie=ck)
+        self.goi("POST", "/api/duyet", {"ma": "HT-1"})
+        self.assertEqual(goi, [])
+
+    def test_khach_goi_api_shop_403(self):
+        st, hd, d = self.dang_ky("khach1")
+        self.assertEqual((st, d["vai"]), (200, "khach"))
+        ck = self.cookie_tu(hd)
+        self.assertEqual(self.goi("GET", "/api/hop-thu", cookie=ck)[0], 403)
+        self.assertEqual(self.goi("POST", "/api/duyet", {"ma": "HT-1"}, cookie=ck)[0], 403)
+        self.assertEqual(self.goi("GET", "/api/nhat-ky", cookie=ck)[0], 403)
+
+    def test_dang_ky_dat_cookie(self):
+        st, hd, _ = self.dang_ky("khach2")
+        sc = hd.get("set-cookie", "")
+        self.assertEqual(st, 200)
+        for phan in ("j97_phien=", "HttpOnly", "SameSite=Strict", "Path=/", "Max-Age=43200"):
+            self.assertIn(phan, sc)
+        self.assertNotIn("Secure", sc)
+        st, _, d = self.goi("GET", "/api/toi", cookie=self.cookie_tu(hd))
+        self.assertEqual((st, d), (200, {"vai": "khach", "username": "khach2"}))
+
+    def test_cookie_secure_qua_proxy_tin_cay(self):
+        web.TRUSTED_PROXY = web.doc_trusted_proxy("127.0.0.0/8")
+        st, hd, _ = self.goi("POST", "/api/dang-nhap", {"username": "admin", "mat_khau": "admin"},
+                             them={"X-Forwarded-Proto": "https"})
+        self.assertEqual(st, 200)
+        self.assertIn("Secure", hd.get("set-cookie", ""))
+
+    def test_khong_tin_header_tu_ngoai(self):
+        web.TRUSTED_PROXY = web.doc_trusted_proxy("")
+        for i in range(5):
+            self.assertEqual(self.dang_ky("ngoai%d" % i, ip_header="10.0.0.%d" % i)[0], 200)
+        st, _, d = self.dang_ky("ngoai5", ip_header="10.0.0.99")
+        self.assertEqual(st, 429)
+        self.assertGreater(d["cho_giay"], 0)
+        st, hd, _ = self.goi("POST", "/api/dang-nhap", {"username": "admin", "mat_khau": "admin"},
+                             them={"X-Forwarded-Proto": "https"})
+        self.assertNotIn("Secure", hd.get("set-cookie", ""))
+
+    def test_tin_header_tu_proxy_tin_cay(self):
+        web.TRUSTED_PROXY = web.doc_trusted_proxy("127.0.0.0/8")
+        for i in range(6):
+            self.assertEqual(self.dang_ky("qua%d" % i, ip_header="10.0.1.%d" % i)[0], 200)
+
+    def test_admin_dang_nhap_vao_hop_thu(self):
+        ck = self.dang_nhap_admin()
+        self.assertEqual(self.goi("GET", "/api/hop-thu", cookie=ck)[0], 200)
+        self.assertEqual(self.goi("GET", "/api/toi", cookie=ck)[2], {"vai": "shop", "username": "admin"})
+
+    def test_dang_nhap_sai_401(self):
+        st, _, d = self.goi("POST", "/api/dang-nhap", {"username": "admin", "mat_khau": "sai"})
+        self.assertEqual(st, 401)
+        self.assertIn("loi", d)
+
+    def test_dang_ky_sai_400(self):
+        st, _, d = self.goi("POST", "/api/dang-ky", {"username": "lan", "mat_khau": "matkhau1", "nhap_lai": "khac"})
+        self.assertEqual(st, 400)
+        self.assertIn("nhập lại", d["loi"])
+
+    def test_dang_xuat(self):
+        ck = self.dang_nhap_admin()
+        st, hd, _ = self.goi("POST", "/api/dang-xuat", cookie=ck)
+        self.assertEqual(st, 200)
+        self.assertIn("Max-Age=0", hd.get("set-cookie", ""))
+        self.assertEqual(self.goi("GET", "/api/toi", cookie=ck)[0], 401)
+
+
+class TestGioiHanPost(_MayChuThu, unittest.TestCase):
     """/api/moi phải nhận được hội thoại hợp lệ lớn nhất (30 lượt × 2.000 ký tự tiếng Việt / emoji)."""
 
     def setUp(self):
@@ -588,22 +743,18 @@ class TestGioiHanPost(unittest.TestCase):
             def huy(self, ma):
                 return {"ma_hoi_thoai": ma}
 
-        self.cong_goc = web.PORT
-        self.server = web.MayChu(("127.0.0.1", 0), web.XuLyYeuCau)
-        web.PORT = self.server.server_address[1]
-        web.XuLyYeuCau.man_hinh = ManHinhGia()
-        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.dung_may_chu(ManHinhGia())
+        self.ck = self.dang_nhap_admin()
 
     def tearDown(self):
-        self.server.shutdown()
-        self.server.server_close()
-        web.PORT, web.XuLyYeuCau.man_hinh = self.cong_goc, None
+        self.dung_lai()
 
     def gui(self, duong, body):
         import http.client
         c = http.client.HTTPConnection("127.0.0.1", web.PORT, timeout=10)
         c.request("POST", duong, body=body, headers={"Host": "127.0.0.1:%d" % web.PORT, "X-Man-Hinh-Duyet": "1",
-                                                     "Content-Type": "application/json"})
+                                                     "Content-Type": "application/json",
+                                                     "Cookie": "j97_phien=" + self.ck})
         r = c.getresponse()
         r.read()
         c.close()

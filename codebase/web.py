@@ -15,13 +15,16 @@ Giao diện: codebase/static/ (index.html, app.css, app.js, fonts/), dữ liệu
 Chỉ thư viện chuẩn (Postgres là tuỳ chọn, cần psycopg). Một luồng xử lý (tracing dùng biến toàn cục).
 """
 import copy
+import ipaddress
 import json
 import os
 import re
 import sys
 import threading
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.cookies import SimpleCookie
+from urllib.parse import parse_qs, urlsplit
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -36,6 +39,7 @@ from agent import lam_sach_luot, xu_ly, _so_luong  # noqa: E402
 from inbox import doc_hop_thu, xu_ly_hop_thu, THU_TU, _dung_text  # noqa: E402
 from kho import KhoFile, LoiKho, mo_kho  # noqa: E402
 from tools import validate_phone, lookup_address, create_draft_order, _bang, HCM  # noqa: E402
+from tai_khoan import HET_HAN_PHIEN, LoiDangNhap, QuaGioiHan, QuanLyTaiKhoan  # noqa: E402
 
 GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOP_THU_THEM = os.path.join(GOC, "data", "hop-thu-them.jsonl")  # lô "Nhận tin mới" của chế độ NAP_NEN=1
@@ -54,6 +58,22 @@ GIOI_HAN_POST_MOI = MOI_TOI_DA_LUOT * (MOI_TOI_DA_KY_TU * 12 + 256) + 4096
 HOST = (os.environ.get("WEB_HOST") or "127.0.0.1").strip()
 PORT = int(os.environ.get("WEB_PORT") or 8000)
 HOST_THEM = {h.strip().lower() for h in (os.environ.get("WEB_ALLOWED_HOSTS") or "").split(",") if h.strip()}
+
+
+def doc_trusted_proxy(gia_tri):
+    """TRUSTED_PROXY: các mạng (CIDR, cách nhau dấu phẩy) của proxy tin cậy (nginx trong compose).
+    Chỉ yêu cầu đến từ các mạng này mới được tin header X-Real-IP / X-Forwarded-Proto. Rỗng = không tin ai."""
+    return [ipaddress.ip_network(x.strip(), strict=False) for x in (gia_tri or "").split(",") if x.strip()]
+
+
+TRUSTED_PROXY = doc_trusted_proxy(os.environ.get("TRUSTED_PROXY"))
+COOKIE = "j97_phien"
+# Đường dẫn theo vai (spec chat khách §5.5). Không nằm trong ba nhóm này thì là trang tĩnh / không có.
+API_SHOP_GET = {"/api/hop-thu", "/api/nhat-ky"}
+API_SHOP_POST = {"/api/kiem", "/api/duyet", "/api/huy", "/api/tra-loi", "/api/nhan-them", "/api/moi",
+                 "/api/shop/nhan", "/api/shop/tra-bot", "/api/shop/doc-lai"}
+API_KHACH_GET = {"/api/chat"}
+API_KHACH_POST = {"/api/chat/gui"}
 SUA_DUOC = ["ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "phuong_xa", "san_pham", "so_luong"]
 BAT_BUOC_CHU = ["ten_nguoi_nhan", "dia_chi_chi_tiet", "san_pham"]
 TRANG_THAI = {"TAO_DON_NHAP": "cho_duyet", "HOI_LAI": "cho_khach", "TU_CHOI": "tu_choi"}
@@ -516,6 +536,27 @@ def host_hop_le(host) -> bool:
     return host in ("%s:%d" % (HOST, PORT), "localhost:%d" % PORT) or (host or "").lower() in HOST_THEM
 
 
+def _tu_proxy_tin_cay(handler) -> bool:
+    try:
+        ip = ipaddress.ip_address(handler.client_address[0])
+    except (ValueError, IndexError, TypeError):
+        return False
+    return any(ip in mang for mang in TRUSTED_PROXY)
+
+
+def ip_khach(handler) -> str:
+    """IP thật của người gọi: X-Real-IP (nginx ghi đè bằng CF-Connecting-IP) chỉ khi đến từ proxy tin cậy."""
+    if _tu_proxy_tin_cay(handler):
+        thuc = (handler.headers.get("X-Real-IP") or "").strip()
+        if thuc:
+            return thuc
+    return str(handler.client_address[0])
+
+
+def la_https(handler) -> bool:
+    return _tu_proxy_tin_cay(handler) and (handler.headers.get("X-Forwarded-Proto") or "").strip().lower() == "https"
+
+
 def post_hop_le(headers) -> bool:
     """POST phải có header riêng + JSON: trang web lạ không gửi được khi không qua preflight CORS (chặn CSRF)."""
     return headers.get("X-Man-Hinh-Duyet") == "1" and \
@@ -544,13 +585,16 @@ def _phuong_moi():
 
 class XuLyYeuCau(BaseHTTPRequestHandler):
     man_hinh = None  # gán trước khi chạy server
+    tai_khoan = None  # QuanLyTaiKhoan, gán trước khi chạy server (None = không ai đăng nhập được)
 
     def log_message(self, fmt, *args):  # gọn màn hình console
         pass
 
-    def _gui(self, code, body, kieu="application/json; charset=utf-8"):
+    def _gui(self, code, body, kieu="application/json; charset=utf-8", cookie=None):
         data = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode("utf-8")
         self.send_response(code)
+        if cookie is not None:
+            self.send_header("Set-Cookie", cookie)
         self.send_header("Content-Type", kieu)
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
@@ -563,9 +607,63 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    # ---- đăng nhập ----
+    def _token(self):
+        try:
+            c = SimpleCookie(self.headers.get("Cookie") or "")
+        except Exception:  # noqa: BLE001 — cookie hỏng coi như chưa đăng nhập
+            return None
+        return c[COOKIE].value if COOKIE in c else None
+
+    def _ai_dang_nhap(self):
+        ql = self.tai_khoan
+        return ql.doc_phien(self._token()) if ql else None
+
+    def _cookie(self, token, max_age=HET_HAN_PHIEN):
+        return "%s=%s; HttpOnly; SameSite=Strict; Path=/; Max-Age=%d%s" % (
+            COOKIE, token, max_age, "; Secure" if la_https(self) else "")
+
+    def _can_vai(self, vai):
+        """Trả tài khoản nếu đúng vai; ngược lại gửi 401 / 403 và trả None — người gọi PHẢI dừng ngay."""
+        tk = self._ai_dang_nhap()
+        if tk is None:
+            self._gui(401, {"loi": "chưa đăng nhập"})
+            return None
+        if tk["vai"] != vai:
+            self._gui(403, {"loi": "không có quyền"})
+            return None
+        return tk
+
+    def _xu_ly_dang_nhap(self, duong, body):
+        ql = self.tai_khoan
+        if ql is None:
+            return self._gui(503, {"loi": "chưa bật đăng nhập"})
+        try:
+            if duong == "/api/dang-ky":
+                tk = ql.dang_ky(body.get("username"), body.get("mat_khau"), body.get("nhap_lai"), ip_khach(self))
+            else:
+                tk = ql.dang_nhap(body.get("username"), body.get("mat_khau"), ip_khach(self))
+        except QuaGioiHan as e:
+            return self._gui(429, {"loi": str(e), "cho_giay": e.cho_giay})
+        except LoiDangNhap as e:
+            return self._gui(400 if duong == "/api/dang-ky" else 401, {"loi": str(e)})
+        except LoiKho as e:
+            return self._gui(503, {"loi": "chưa lưu được (%s), thử lại" % e})
+        return self._gui(200, {"vai": tk["vai"], "username": tk["username"]}, cookie=self._cookie(ql.tao_phien(tk)))
+
     def do_GET(self):
         if not host_hop_le(self.headers.get("Host")):
             return self._gui(403, {"loi": "Host không hợp lệ"})
+        duong = urlsplit(self.path).path
+        if duong == "/api/toi":
+            tk = self._ai_dang_nhap()
+            return self._gui(200, {"vai": tk["vai"], "username": tk["username"]}) if tk else \
+                self._gui(401, {"loi": "chưa đăng nhập"})
+        if duong in API_SHOP_GET and self._can_vai("shop") is None:
+            return None
+        if duong in API_KHACH_GET:
+            tk = self._can_vai("khach")
+            return None if tk is None else self._get_khach(duong, tk)
         if self.path == "/api/hop-thu":
             ds, t = self.man_hinh.anh_chup()
             return self._gui(200, {"phien": ds, "phuong_moi": _phuong_moi(), "tong": t})
@@ -591,6 +689,20 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
                 raise ValueError("cần object JSON")
         except ValueError as e:
             return self._gui(400, {"loi": "JSON hỏng: %s" % e})
+        duong = urlsplit(self.path).path
+        if duong in ("/api/dang-ky", "/api/dang-nhap"):
+            return self._xu_ly_dang_nhap(duong, body)
+        if duong == "/api/dang-xuat":
+            if self.tai_khoan:
+                self.tai_khoan.xoa_phien(self._token())
+            return self._gui(200, {"ok": True}, cookie=self._cookie("", max_age=0))
+        if duong in API_KHACH_POST:
+            tk = self._can_vai("khach")
+            return None if tk is None else self._post_khach(duong, tk, body)
+        if duong not in API_SHOP_POST:
+            return self._gui(404, {"loi": "không có"})
+        if self._can_vai("shop") is None:
+            return None
         ma, sua = str(body.get("ma") or ""), body.get("sua") or {}
         if not isinstance(sua, dict):
             return self._gui(400, {"loi": "sua phải là object"})
@@ -621,6 +733,10 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         return self._gui(404, {"loi": "không có"})
 
 
+XuLyYeuCau._get_khach = lambda self, duong, tk: self._gui(404, {"loi": "không có"})
+XuLyYeuCau._post_khach = lambda self, duong, tk, body: self._gui(404, {"loi": "không có"})
+
+
 def _mo_kho():
     """Có DATABASE_URL mà Postgres lỗi thì báo rõ rồi ghi file, để demo vẫn chạy.
     DATABASE_REQUIRED=1 (compose.yaml) thì dừng hẳn: file ghi trong container sẽ mất khi container bị tạo lại."""
@@ -633,7 +749,8 @@ def _mo_kho():
         return KhoFile(NHAT_KY)
 
 
-class MayChu(HTTPServer):
+class MayChu(ThreadingHTTPServer):
+    daemon_threads = True  # nhiều khách hỏi tin cùng lúc không phải chờ một lần gọi AI
     # Windows: SO_REUSEADDR cho tiến trình khác mở chung cổng đang dùng → tắt; nơi khác giữ mặc định
     allow_reuse_address = os.name != "nt"
 
@@ -649,6 +766,11 @@ def main() -> int:
     try:
         hop_thu = doc_hop_thu()
         mh = ManHinh(kho=_mo_kho())
+        mat_khau_admin = (os.environ.get("ADMIN_PASSWORD") or "").strip() or "admin"
+        XuLyYeuCau.tai_khoan = QuanLyTaiKhoan(mh.kho, mat_khau_admin)
+        if mat_khau_admin == "admin" and HOST != "127.0.0.1":
+            print("CẢNH BÁO: tài khoản shop đang dùng mật khẩu mặc định admin/admin trên Host công khai "
+                  "— đặt ADMIN_PASSWORD trong .env", flush=True)
         print("Nhật ký duyệt và lần chạy AI lưu ở: %s" % mh.kho.ten)
         if nap_nen:  # tin đến hàng loạt: mở trang ngay, AI xử lý hộp thư ở luồng nền
             mh.cho_nap_nen = True
