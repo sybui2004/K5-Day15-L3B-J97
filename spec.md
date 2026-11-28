@@ -47,7 +47,7 @@ Data BTC cấp đã dùng (nếu có — không commit nguyên file): không dù
   - **H2 đúng:** 4/4 shop chép sai hoặc thiếu thông tin nhận hàng trong 1 tháng qua, mỗi shop 1–4 lần.
   - **Địa chỉ kiểu cũ:** 4/4 shop nói khách vẫn ghi, khoảng 20–45% số đơn, mỗi đơn mất thêm 1–3 phút. 4/4 shop từng quy đổi sai hoặc bị GHN từ chối phường cũ.
   - **H1 phải đổi:** chỉ 1/4 shop kể rõ khách bỏ vì shop trả lời chậm. 3/4 kể khách bỏ khi bị hỏi lại nhiều lần.
-  - **Chưa có** nguồn kiểm chéo: đếm review Google Play của app GHN mới viết cách đếm, chưa đếm.
+  - **Nguồn kiểm chéo** (đào data, 28/11): 14/100 review mới nhất của app GHN trên Google Play kể sai hoặc thiếu thông tin nhận hàng (4 nhầm thông tin / đơn / người, 10 hoàn vì "không liên lạc được người nhận"), khớp với H2; 0/100 nhắc địa chỉ sau sáp nhập, nên tỉ lệ đơn địa chỉ cũ chỉ có nguồn phỏng vấn (`evidence/data-mining.md`).
 
 ## §2. Impact & quyết định chọn *(guide 1.3)*
 
@@ -283,6 +283,7 @@ flowchart LR
 | 28/11 | §9 dòng "Đưa vào model": thay "chờ Việt Anh xác nhận" bằng xác nhận Y1: soạn 11 đoạn tự viết, dán đoạn 1–10 vào ChatGPT (27/11), đoạn 11 hỏi Codex (28/11), không có thông tin khách thật · thêm `eval/chay-tay-y1.md` (trước chỉ nằm trên nhánh Y1, chưa merge) · `eval/README.md`: Việt Anh kiểm lại điểm chấm tay run-5 | Việt Anh xác nhận nội dung đã dán khi chạy tay Y1 (review PR #51 để chờ). Không đổi số bằng chứng, câu thử, §7, metric, code |
 | 28/11 | §8, `cost/`: `personas.yaml` 3 kiểu shop từ phỏng vấn P1–P4, số shop = 11.606 (mốc tham chiếu) × hệ số phủ × tỉ lệ thuộc lát cắt × tỉ lệ sử dụng (580 / 1.741 / 5.803, ba tỉ lệ *(tự ước tính)*), giá 3 model; `simulate-1` 50 phiên, tỉ lệ đạt từ `run-5`; `cost-estimate.md` §1–§4 với ngưỡng hoà vốn theo phí ship · `eval/README.md` mục 1–2 · `slides/demo-slides.html` + `demo-slides.pdf` | Guide 4.2, 5.1. 11.606 là số người nộp thuế TMĐT, không phải số shop dùng sản phẩm, nên tách thành thừa số. Không đổi câu thử, §7, metric, kết quả các lượt đã chạy |
 | 28/11 | Chốt kết luận: **iterate**; giữ ba tỉ lệ tự ước tính của số shop (580 / 1.741 / 5.803), không chạy lại mô phỏng. §8, `cost/cost-estimate.md` §3, slide trang 7 đổi "đề xuất" thành quyết định | Sonnet ≈ 150.700đ / shop / tháng, cao hơn đầu trên phí ship đang mất (123.500đ); Haiku rẻ hơn nhưng chưa có eval trên bộ 30 câu; chưa đo tỉ lệ lỗi AI tránh được. Không đổi số mô phỏng, câu thử, §7, metric |
+| 28/11 | Đào data (nguồn kiểm chéo R1): 100 review mới nhất app GHN trên Google Play, gắn nhãn theo cách đếm viết 27/11 → 14/100 `sai_thieu_thong_tin_nhan_hang`, 0/100 nhắc địa chỉ sau sáp nhập. Thêm `evidence/review-ghn.csv`, `evidence/count_review.py`; điền `evidence/data-mining.md` mục 2–5, `evidence/summary.md`, §1; slide trang 1, 8 | Guide 1.2, rubric R1 (nguồn thứ hai). Cách đếm và nhãn giữ nguyên như viết trước khi đọc review; người thứ hai gắn nhãn 20 review đầu chưa làm. Không đổi số phỏng vấn, câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 

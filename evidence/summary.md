@@ -7,13 +7,13 @@
 
 | Nguồn | Đạt ngưỡng? | File |
 |---|---|---|
-| Đào data (x/N, %, cách đếm chạy lại được, ≥5 ví dụ) | ☐ nguồn kiểm chéo: review Google Play app GHN · **đã viết cách đếm, chưa đếm** | `evidence/data-mining.md` |
+| Đào data (x/N, %, cách đếm chạy lại được, ≥5 ví dụ) | ☑ nguồn kiểm chéo: 100 review mới nhất app GHN trên Google Play, đếm 28/11 · **14/100 (14%)** kể sai / thiếu thông tin nhận hàng | `evidence/data-mining.md` · `evidence/review-ghn.csv` · `evidence/count_review.py` |
 | Phỏng vấn (≥3 người ngoài nhóm, đúng người dùng) | ☑ nguồn chính · **4 chủ shop bán lẻ ở TP HCM, phỏng vấn 27/11** | `evidence/interviews/P1.md`–`P4.md` · câu hỏi: `docs/question.md` |
 | Khảo sát (≥20 người ngoài nhóm, đúng người dùng) | — không làm | — |
 
 ## 2. Số chính
 
-- Đào data: **chưa đếm** (cách đếm review Google Play app GHN đã viết ở `evidence/data-mining.md`; không dùng làm nguồn đạt ngưỡng).
+- Đào data: **14/100 (14%)** review GHN mới nhất (16/10–26/11/2026) kể chuyện sai hoặc thiếu thông tin nhận hàng: 4 sai thông tin / nhầm đơn / nhầm người, 10 hoàn hoặc không giao vì "không liên lạc được người nhận". **0/100** nhắc địa chỉ sau sáp nhập. Người thứ hai gắn nhãn 20 review đầu: chưa làm.
 - Phỏng vấn (n = 4, không ghi %):
   - **H2 (chép sai, thiếu thông tin nhận hàng): 4/4 người gặp trong 1 tháng qua.** Số lần / tháng: P1 3, P2 4, P3 2, P4 1. Mỗi vụ mất 38.000–60.000đ phí ship, 3/4 vụ gần nhất khách huỷ hoặc mua chỗ khác.
   - **H1 (trả lời chậm khi đông khách → khách bỏ): 1/4 kể rõ** (P4: 2 lần / tháng khách bỏ vì trả lời chậm 15–20 phút). 3/4 còn lại kể **một phần**: lúc đông khách thì lên đơn vội gây sai, và khách bỏ khi bị hỏi lại nhiều lần (P2: khoảng 30% khách không trả lời sau lần hỏi lại thứ hai).
@@ -45,7 +45,7 @@ Cả 4 người đồng ý cho trích nguyên văn, không ghi tên người và
 
 ## 4. Các nguồn có khớp nhau không
 
-Chưa có nguồn thứ hai: chưa đếm review Google Play (cách đếm đã viết ở `evidence/data-mining.md`). Trong 4 buổi phỏng vấn, các con số tự khớp nhau ở H2 (4/4) và ở địa chỉ kiểu cũ (4/4); lệch ở H1 (chỉ P4 kể rõ khách bỏ vì trả lời chậm).
+**Khớp một phần.** Review GHN (14/100) cho thấy thông tin nhận hàng sai hoặc không liên lạc được người nhận làm đơn bị hoàn, khớp với phỏng vấn: 4/4 shop có vụ chép sai, P3 có đơn hoàn vì "không gọi được cho khách". **Lệch:** review do người nhận / người gửi lẻ viết, phàn nàn về khâu giao của GHN, nên không tách được phần do shop chép sai; nhóm "không liên lạc được" có thể do shipper không gọi. Địa chỉ kiểu cũ: phỏng vấn 4/4, review 0/100, vì người viết review không kể khâu shop nhập địa chỉ, nên con số 20–45% chỉ có nguồn phỏng vấn. Trong 4 buổi phỏng vấn, các con số tự khớp nhau ở H2 (4/4) và ở địa chỉ kiểu cũ (4/4); lệch ở H1 (chỉ P4 kể rõ khách bỏ vì trả lời chậm).
 
 ## 5. Kết luận
 
@@ -54,7 +54,7 @@ Giả thuyết ở `evidence/hypothesis.md`:
 - **H1 phải đổi** — chỉ 1/4 kể rõ khách bỏ vì trả lời chậm (dưới ngưỡng ≥2/3). Cái 3/4 kể là **khách bỏ khi bị hỏi lại nhiều lần**. Vì vậy tin hỏi lại phải gom đủ trường trong **một** tin (metric `hoi_mot_lan_du_y`).
 - **Thêm điều chưa có trong giả thuyết:** địa chỉ kiểu cũ (20–45% đơn) làm mỗi đơn chậm thêm 1–3 phút và gây quy đổi sai — đúng chỗ khó lát cắt chọn.
 
-Điều vẫn chưa biết: số đếm từ nguồn thứ hai (review GHN); n = 4 là nhỏ và cả 4 đều ở TP HCM.
+Điều vẫn chưa biết: phần lỗi do shop chép sai trong các vụ hoàn (review không tách được); tỉ lệ đơn địa chỉ cũ ngoài 4 shop; n = 4 là nhỏ và cả 4 đều ở TP HCM.
 
 ## Lịch hẹn (dùng cho CP2 — chỉ ghi vai và giờ, không tên)
 
