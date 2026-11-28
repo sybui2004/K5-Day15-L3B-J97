@@ -11,7 +11,7 @@ Khách ─HTTPS─▶ Cloudflare (sunstack.org) ─tunnel─▶ cloudflared ─�
 |---|---|---|
 | `postgres` | `postgres:16-alpine` | Nhật ký duyệt + lần chạy AI (bảng `nhat_ky_duyet`, `lan_chay`, `kho.py` tự tạo). Volume `j97_pgdata`. Mạng `backend` là internal, không ra Internet |
 | `be` | `local/j97-be` (build từ `Dockerfile`) | `codebase/web.py`: agent, guard, API `/api/*`. Không mở cổng ra máy. `DATABASE_REQUIRED=1`: không vào được Postgres thì dừng, không ghi nhật ký ra file tạm trong container |
-| `fe` | `nginx:1.28.3-alpine` | Phục vụ `codebase/static/`, chuyển `/api/` sang `be`, giới hạn `/api/moi` + `/api/tra-loi` (gọi model) chung 6 lần/phút/IP. Mở `127.0.0.1:8080` để kiểm tra trên máy |
+| `fe` | `nginx:1.28.3-alpine` | Phục vụ `codebase/static/`, chuyển `/api/` sang `be`, giới hạn `/api/moi`, `/api/tra-loi`, `/api/nhan-them` (gọi model) chung 6 lần/phút/IP. Mở `127.0.0.1:8080` để kiểm tra trên máy |
 | `cloudflared` | `cloudflare/cloudflared:2026.11.2` | Kết nối ra Cloudflare bằng token, chỉ chạy khi `.env` có `COMPOSE_PROFILES=tunnel` |
 
 ## 1. Chuẩn bị `.env`
@@ -21,7 +21,7 @@ cp .env.example .env        # nếu chưa có
 openssl rand -hex 24        # dán vào POSTGRES_PASSWORD
 ```
 
-Điền `MODEL_PROVIDER`, `MODEL_NAME`, `API_KEY` như khi chạy `python run.py`. `PUBLIC_HOST` là tên miền công khai (mặc định `j97.sunstack.org`). Lúc khởi động `be` chạy AI cho cả hộp thư mẫu, nên mỗi lần khởi động lại sẽ tốn một lượt gọi model.
+Điền `MODEL_PROVIDER`, `MODEL_NAME`, `API_KEY` như khi chạy `python run.py`; tuỳ chọn `API_KEY_DEEPSEEK` (dự phòng), `NAP_NEN=1` (mở trang ngay, AI xử lý hộp thư ở nền). `PUBLIC_HOST` là tên miền công khai (mặc định `j97.sunstack.org`). Lúc khởi động `be` chạy AI cho cả hộp thư mẫu, nên mỗi lần khởi động lại sẽ tốn một lượt gọi model.
 
 ## 2. Chạy và kiểm tra trên máy
 
@@ -64,7 +64,7 @@ Màn hình duyệt là màn hình vận hành, không có đăng nhập riêng. 
 
 - **đọc được dữ liệu người khác đã nhập**: tab Hộp thư hiện mọi hội thoại (cả hội thoại gõ ở **Hội thoại mới**), tab Nhật ký đọc từ Postgres các lần chạy AI kèm trace: output model, dữ liệu công cụ, có thể chứa tên, SĐT, địa chỉ. Volume `j97_pgdata` giữ các bản ghi này qua mỗi lần khởi động lại;
 - duyệt / huỷ đơn được;
-- gọi model bằng key của nhóm qua **Hội thoại mới** và **Khách trả lời**. nginx giới hạn chung hai thao tác này 6 lần/phút mỗi IP, không chặn được người dùng nhiều IP.
+- gọi model bằng key của nhóm qua **Hội thoại mới**, **Khách trả lời** và **Nhận tin mới**. nginx giới hạn chung ba thao tác này 6 lần/phút mỗi IP, không chặn được người dùng nhiều IP.
 
 Chỉ để công khai khi demo với dữ liệu dựng: nhắc người xem không nhập dữ liệu thật, và sau demo xoá lịch sử (`docker compose down -v` xoá cả DB, hoặc `truncate nhat_ky_duyet, lan_chay`).
 
