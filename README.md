@@ -29,7 +29,7 @@ cp .env.example .env                        # Windows: copy .env.example .env
 python run.py                               # mở màn hình duyệt ở http://127.0.0.1:8000
 ```
 
-- **Màn hình duyệt** (`codebase/web.py`): hộp thư 10 hội thoại mẫu (`data/hop-thu-mau.jsonl`). Bấm từng hội thoại để xem đơn nháp, sửa trường, Duyệt hoặc Huỷ; hội thoại đang chờ khách thì dán câu trả lời của khách để chạy lại (luồng B). Chỉ mở trên máy này (`127.0.0.1`).
+- **Màn hình duyệt** (`codebase/web.py`): hộp thư 10 hội thoại mẫu (`data/hop-thu-mau.jsonl`). Bấm từng hội thoại để xem đơn nháp, sửa trường, Duyệt hoặc Huỷ; hội thoại đang chờ khách thì dán câu trả lời của khách để chạy lại (luồng B). Phải đăng nhập shop: tài khoản `admin`, mật khẩu `ADMIN_PASSWORD` (không đặt thì là `admin`). Chạy bằng `python run.py` thì mặc định chỉ mở trên máy này (`127.0.0.1`); đưa lên mạng xem [docs/deploy.md](docs/deploy.md).
 - **Lần đầu mở web phải chờ khoảng 1 phút:** trước khi mở cổng, bản chạy thử gọi model cho cả 10 hội thoại (khoảng 6 giây / hội thoại với model thật). Terminal in `Màn hình duyệt — đang xử lý 10 hội thoại…` rồi `Mở trình duyệt: http://127.0.0.1:8000`; thoát bằng Ctrl+C.
 - **Tin đến hàng loạt** (tuỳ chọn, `NAP_NEN=1` trong `.env`): trang mở ngay, hộp thư hiện các hội thoại ở trạng thái *AI đang xử lý* rồi tự chuyển sang Đơn nháp / Chờ khách / Từ chối khi AI xử lý xong từng cái (trang tự cập nhật 1,5 giây một lần). Nút **Nhận tin mới (5)** nạp 5 hội thoại dựng trong `data/hop-thu-them.jsonl` lên đầu hộp thư, như 5 khách nhắn chốt đơn cùng lúc. Không đặt biến này thì chạy như cũ.
 - **Hội thoại mới khi demo** (nút *Hội thoại mới* góc phải trên, `POST /api/moi`): gõ hoặc dán đoạn chat, mỗi dòng một tin, dòng bắt đầu `Shop:` là tin của shop; có 5 nút điền nhanh (đủ thông tin, phường cũ bị tách, SĐT thiếu số, đổi người nhận, câu lừa AI). AI chạy ngay, hội thoại lên đầu hộp thư với mã `HT-M01`, `HT-M02`… Mỗi lần chạy AI giữ trace: các bước model / công cụ, token, thời gian, chi phí theo giá trong `cost/personas.yaml` (model chưa có giá thì chỉ hiện token). Khung **AI đã làm gì** ở giữa màn hình hiện từng bước đó; khung bên phải liệt kê **vì sao AI chưa lên đơn**; đầu trang cộng token và chi phí của cả phiên demo; tab **Nhật ký** đọc lại nhật ký duyệt và các lần chạy.
@@ -97,7 +97,7 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 | `codebase/inbox.py` | *(J97)* luồng A: chạy cả hộp thư, xếp TẠO ĐƠN NHÁP → HỎI LẠI → TỪ CHỐI | 3.2 |
 | `codebase/web.py` | *(J97)* luồng D + B: màn hình duyệt, sửa trường thì code kiểm lại, hỏi lại nhiều lượt | 3.2 |
 
-- **Hiện tại (CP3):** đã nối Claude (`claude-sonnet-5-5`); `.env` trống thì vẫn chạy chế độ giả để thử luồng.
+- **Hiện tại:** đã nối Claude (`claude-sonnet-5-5`); `.env` trống thì vẫn chạy chế độ giả để thử luồng.
 - Trước mỗi lượt đánh giá: `python run.py eval --try` thấy token > 0 rồi mới `python run.py eval`.
 - Bộ chạy gửi **nguyên ô `input`** của câu thử vào `answer(text)`. Dữ liệu nền (bài học, thông báo, lịch…) để trong `data/`, đọc qua công cụ.
 
@@ -119,11 +119,12 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 
 2–3 dòng (bắt buộc): nhóm dùng công cụ AI nào để làm gì, người kiểm lại phần nào. Chi tiết: [docs/ai-usage.md](docs/ai-usage.md). Coding agent đọc [AGENTS.md](AGENTS.md).
 
-- **Claude Code** (Sỹ, Việt Anh): viết code luồng chính, hộp thư, luồng khách cũ; soạn data tự dựng (`hop-thu-mau.jsonl`, `lich-su-khach.csv`); viết các mục spec và README. Mọi PR có người cặp kia duyệt, bộ test (`python -m unittest discover -s tests`, 179 test) chạy trước khi merge.
+- **Claude Code** (Sỹ, Việt Anh): viết code luồng chính, hộp thư, luồng khách cũ; soạn data tự dựng (`hop-thu-mau.jsonl`, `lich-su-khach.csv`); viết các mục spec và README. Mọi PR có người cặp kia duyệt, bộ test (`python -m unittest discover -s tests`, hiện 245 test, 6 test bỏ qua khi không có Postgres) chạy trước khi merge.
 - **Claude Code** (Sỹ, CP4): soạn `cost/personas.yaml`, chạy mô phỏng `simulate-1`, viết `cost/cost-estimate.md`, `spec.md` §8 và slide 8 trang. Sỹ đối chiếu số với `simulate-1-summary.md`, xem từng trang PDF.
+- **Hưng, sau CP4:** dùng AI làm demo giao diện `docs/ui-demo` *(công cụ và phần kiểm lại chờ Hưng xác nhận)*.
 - **Codex**: rà văn phong câu hỏi phỏng vấn (Sỹ); trả lời đoạn 11 của Y1, ghi riêng, không chấm (Việt Anh); sửa kế hoạch CP4 và bảng người nói (Sỹ).
 - **ChatGPT** (Việt Anh, task Y1): chạy tay đoạn chat chốt đơn để tìm lỗi trước khi viết tiêu chí chấm. Chấm `pass` bằng code (`eval/grade.py`), không dùng LLM.
-- Số liệu, trích dẫn phỏng vấn không do AI tạo. Hưng, An không dùng AI ngoài các việc đã ghi trong [docs/ai-usage.md](docs/ai-usage.md) (xác nhận 28/11).
+- Số liệu, trích dẫn phỏng vấn không do AI tạo. Ngoài các việc đã ghi trong [docs/ai-usage.md](docs/ai-usage.md), Hưng, An không dùng AI (An xác nhận 28/11; Hưng cần xác nhận lại sau khi bổ sung demo UI).
 
 ## File mẫu — điền ở bước nào
 
