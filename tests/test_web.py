@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 os.environ["GUARD"] = "tat"
 
 import agent  # noqa: E402
+import tracing  # noqa: E402
 import web  # noqa: E402
 
 HCM = "TP Hồ Chí Minh"
@@ -218,11 +219,11 @@ class TestManHinh(unittest.TestCase):
             self.mh.duyet("HT-99", {})
 
     def test_ghi_nhat_ky_loi_thi_khong_chot_va_thu_lai_duoc(self):
-        goc = web.ghi_nhat_ky
+        goc = self.mh.kho.ghi_duyet
 
-        def hong(path, dong):
+        def hong(dong):
             raise OSError("đĩa đầy")
-        web.ghi_nhat_ky = hong
+        self.mh.kho.ghi_duyet = hong
         try:
             for thao_tac, ma in ((lambda: self.mh.duyet("HT-1", {}), "HT-1"), (lambda: self.mh.huy("HT-2"), "HT-2")):
                 truoc = self.mh.lay(ma)
@@ -230,7 +231,7 @@ class TestManHinh(unittest.TestCase):
                     thao_tac()
                 self.assertEqual(self.mh.lay(ma), truoc)
         finally:
-            web.ghi_nhat_ky = goc
+            self.mh.kho.ghi_duyet = goc
         self.assertEqual(self.mh.duyet("HT-1", {})["trang_thai"], "da_duyet")
         self.assertEqual(self.mh.huy("HT-2")["trang_thai"], "da_huy")
         self.assertEqual([d["ket_qua"] for d in self.nhat_ky_doc()], ["da_duyet", "da_huy"])
@@ -255,6 +256,174 @@ class TestManHinh(unittest.TestCase):
         p = self.mh.them_tra_loi("HT-4", "ok gửi bàn cờ")
         self.assertIn("| Shop: " + self.mh.lay("HT-4")["text"].split(" | Shop: ")[1].split(" | ")[0], p["text"])
         self.assertEqual(p["so_luot_hoi_lai"], 0)
+
+
+class TestTaoMoiVaTrace(unittest.TestCase):
+    """Hội thoại tạo trên màn hình (demo câu thử lạ), trace + chi phí từng lần chạy, nhật ký."""
+
+    def setUp(self):
+        self._goc = agent.call_model
+        agent.call_model = tracing.model_call(_model_tra([("bàn cờ", DON), ("Bàn Cờ", DON)]))  # đếm như model thật
+        self.tmp = tempfile.TemporaryDirectory()
+        self.mh = web.ManHinh(nhat_ky=os.path.join(self.tmp.name, "nhat-ky.jsonl"))
+        self.mh.tai([{"ma_hoi_thoai": "HT-1", "ma_khach": "KH-1", "text": "Mã khách: KH-1 | Khách: Mai bàn cờ"}])
+
+    def tearDown(self):
+        agent.call_model = self._goc
+        self.tmp.cleanup()
+
+    LUOT = [{"vai": "khach", "tin": "lấy 1 áo size M"}, {"vai": "shop", "tin": "dạ chị cho em xin địa chỉ"},
+            {"vai": "khach", "tin": "Mai 0900000001, 12 hẻm 5, phường Bàn Cờ, HCM"}]
+
+    def test_tao_moi_chay_ai_va_len_dau_hop_thu(self):
+        p = self.mh.tao_moi(self.LUOT, "KH-9")
+        self.assertEqual(p["ma_hoi_thoai"], "HT-M01")
+        self.assertEqual(p["nguon"], "moi")
+        self.assertEqual(p["trang_thai"], "cho_duyet")
+        self.assertTrue(p["text"].startswith("Mã khách: KH-9 | Khách: lấy 1 áo size M | Shop: "))
+        self.assertEqual(self.mh.danh_sach()[0]["ma_hoi_thoai"], "HT-M01")
+        self.assertEqual(self.mh.tao_moi(self.LUOT)["ma_hoi_thoai"], "HT-M02")
+        self.assertEqual(self.mh.duyet("HT-M01", {})["trang_thai"], "da_duyet")
+
+    def test_tao_moi_sai_dau_vao(self):
+        sai = [([], None), ([{"vai": "shop", "tin": "chào"}], None), ([{"vai": "bot", "tin": "x"}], None),
+               ([{"vai": "khach", "tin": "  "}], None), ([{"vai": "khach", "tin": "x" * 2001}], None),
+               (self.LUOT, "khách 9"), ("không phải danh sách", None), ([{"vai": "khach"}], None),
+               ([{"vai": "khach", "tin": "x"}] * 31, None)]
+        for luot, ma_khach in sai:
+            with self.subTest(luot=str(luot)[:40], ma_khach=ma_khach):
+                with self.assertRaises(web.LoiThaoTac):
+                    self.mh.tao_moi(luot, ma_khach)
+        self.assertEqual(len(self.mh.danh_sach()), 1)
+        self.assertEqual(self.mh.tao_moi(self.LUOT)["ma_hoi_thoai"], "HT-M01")
+
+    def test_model_loi_khi_tao_moi_thi_khong_them(self):
+        def hong(system, user):
+            raise ConnectionError("mất mạng")
+        agent.call_model = hong
+        with self.assertRaisesRegex(web.LoiThaoTac, "mất mạng"):
+            self.mh.tao_moi(self.LUOT)
+        self.assertEqual(len(self.mh.danh_sach()), 1)
+
+    def test_moi_lan_chay_co_trace_va_cong_vao_tong(self):
+        p = self.mh.tao_moi(self.LUOT)
+        t = p["trace"]
+        self.assertEqual(t["nguon"], "moi")
+        self.assertEqual(t["model_calls"], 1)
+        loai = [b["loai"] for b in t["buoc"]]
+        self.assertIn("model", loai)
+        self.assertIn("tool", loai)
+        self.assertIn("validate_phone", [b["ten"] for b in t["buoc"]])
+        for k in ("tokens_in", "tokens_out", "thoi_gian_s", "chi_phi_usd"):
+            self.assertIn(k, t)
+        self.assertIsNone(t["chi_phi_usd"])  # model "test" không có giá
+        self.assertEqual(self.mh.danh_sach()[1]["trace"]["nguon"], "hop_thu")
+        tong = self.mh.tong()
+        self.assertEqual(tong["lan_chay"], 2)
+        self.assertEqual(tong["model_calls"], 2)
+        nk = self.mh.nhat_ky()
+        self.assertEqual([d["ma_hoi_thoai"] for d in nk["lan_chay"]], ["HT-M01", "HT-1"])
+
+    def test_tra_loi_cung_ghi_trace(self):
+        self.mh.tai([{"ma_hoi_thoai": "HT-2", "ma_khach": None, "text": "Khách: Lan 0900000005"}])
+        p = self.mh.them_tra_loi("HT-2", "bàn cờ")
+        self.assertEqual(p["trace"]["nguon"], "tra_loi")
+
+    def test_ghi_lan_chay_loi_khong_chan_demo(self):
+        def hong(dong):
+            raise OSError("Postgres: mất kết nối")
+        self.mh.kho.ghi_lan_chay = hong
+        self.assertEqual(self.mh.tao_moi(self.LUOT)["trang_thai"], "cho_duyet")
+        self.assertEqual(self.mh.tong()["loi_kho"], "Postgres: mất kết nối")
+
+    def test_model_loi_van_ghi_lan_chay_va_cong_tong(self):
+        def hong(system, user):
+            raise ConnectionError("mất mạng")
+        agent.call_model = tracing.model_call(hong)
+        with self.assertRaisesRegex(web.LoiThaoTac, "mất mạng"):
+            self.mh.tao_moi(self.LUOT)
+        tong = self.mh.tong()
+        self.assertEqual(tong["lan_chay"], 2)  # HT-1 lúc tải + lần lỗi
+        self.assertEqual(tong["model_calls"], 2)
+        lan = self.mh.nhat_ky()["lan_chay"][0]
+        self.assertEqual(lan["ma_hoi_thoai"], "HT-M01")
+        self.assertIsNone(lan["quyet_dinh"])
+        self.assertTrue(any("mất mạng" in l for l in lan["trace"]["loi"]))
+        self.assertEqual(len(self.mh.danh_sach()), 1)  # không thêm hội thoại
+        agent.call_model = tracing.model_call(_model_tra([("bàn cờ", DON)]))
+        self.assertEqual(self.mh.tao_moi(self.LUOT)["ma_hoi_thoai"], "HT-M01")  # thử lại được, mã chưa bị chiếm
+
+    def test_model_loi_khi_tra_loi_van_ghi_lan_chay(self):
+        def hong(system, user):
+            raise ConnectionError("mất mạng")
+        truoc = self.mh.lay("HT-1")
+        agent.call_model = tracing.model_call(hong)
+        with self.assertRaises(web.LoiThaoTac):
+            self.mh.them_tra_loi("HT-1", "à lấy 2 cái")
+        lan = self.mh.nhat_ky()["lan_chay"][0]
+        self.assertEqual((lan["ma_hoi_thoai"], lan["nguon"], lan["quyet_dinh"]), ("HT-1", "tra_loi", None))
+        self.assertEqual(self.mh.tong()["lan_chay"], 2)
+        sau = self.mh.lay("HT-1")
+        self.assertEqual((sau["text"], sau["trang_thai"], sau["trace"]), (truoc["text"], truoc["trang_thai"], truoc["trace"]))
+
+    def test_nhat_ky_khoi_dong_theo_thu_tu_chay(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        mh = web.ManHinh(nhat_ky=os.path.join(tmp.name, "nhat-ky.jsonl"))
+        mh.tai([{"ma_hoi_thoai": "HT-A", "ma_khach": None, "text": "Khách: Lan 0900000005"},  # thiếu → HỎI LẠI
+                {"ma_hoi_thoai": "HT-B", "ma_khach": "KH-1", "text": "Khách: Mai 0900000001, 12 hẻm 5, phường Bàn Cờ, HCM, lấy 1 áo size M"}])
+        self.assertEqual([p["ma_hoi_thoai"] for p in mh.danh_sach()], ["HT-B", "HT-A"])  # đơn nháp lên đầu
+        self.assertEqual([d["ma_hoi_thoai"] for d in mh.nhat_ky()["lan_chay"]], ["HT-B", "HT-A"])  # mới nhất trước
+        self.assertEqual([d["quyet_dinh"] for d in mh.nhat_ky()["lan_chay"]], ["TAO_DON_NHAP", "HOI_LAI"])
+
+    def test_ma_trung_dung_cung_ma_o_hop_thu_va_nhat_ky(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        mh = web.ManHinh(nhat_ky=os.path.join(tmp.name, "nhat-ky.jsonl"))
+        mh.tai([{"ma_hoi_thoai": "HT-1", "ma_khach": None, "text": "Khách: Lan 0900000005"},  # HỎI LẠI
+                {"ma_hoi_thoai": "HT-1", "ma_khach": None,
+                 "text": "Khách: Mai 0900000001, 12 hẻm 5, phường Bàn Cờ, HCM, lấy 1 áo size M"}])  # ĐƠN NHÁP
+        hop_thu = {p["ma_hoi_thoai"]: p["kq"]["quyet_dinh"] for p in mh.danh_sach()}
+        self.assertEqual(hop_thu, {"HT-1": "HOI_LAI", "HT-1*": "TAO_DON_NHAP"})
+        nhat_ky = {d["ma_hoi_thoai"]: d["quyet_dinh"] for d in mh.nhat_ky()["lan_chay"]}
+        self.assertEqual(nhat_ky, hop_thu)
+
+
+class TestChiPhi(unittest.TestCase):
+    GIA = [{"model": "claude-sonnet-5-5", "input": 3, "output": 15}, {"model": "x", "input": None, "output": 1}]
+
+    def test_tinh_theo_trieu_token(self):
+        self.assertAlmostEqual(web.chi_phi("claude-sonnet-5-5", 1_000_000, 100_000, self.GIA), 4.5)
+
+    def test_ten_model_co_hau_to_ngay(self):
+        self.assertAlmostEqual(web.chi_phi("claude-sonnet-5-5-20261101", 1000, 0, self.GIA), 0.003)
+
+    def test_khong_co_gia(self):
+        self.assertIsNone(web.chi_phi("test", 10, 10, self.GIA))
+        self.assertIsNone(web.chi_phi("x", 10, 10, self.GIA))
+        self.assertIsNone(web.chi_phi("", 10, 10, self.GIA))
+
+
+class TestTepTinh(unittest.TestCase):
+    """Giao diện ở codebase/static/: chỉ phục vụ file trong thư mục đó, đúng loại nội dung."""
+
+    def test_trang_chinh_va_tai_nguyen(self):
+        for duong, loai in (("/", "text/html"), ("/app.js", "text/javascript"), ("/app.css", "text/css"),
+                            ("/fonts/fonts.css", "text/css"), ("/fonts/manrope-vietnamese.woff2", "font/woff2")):
+            with self.subTest(duong=duong):
+                tep = web.tep_tinh(duong)
+                self.assertIsNotNone(tep)
+                self.assertTrue(tep[1].startswith(loai))
+                self.assertTrue(tep[0])
+
+    def test_khong_ra_ngoai_thu_muc_static(self):
+        for duong in ("/../web.py", "/fonts/../../kho.py", "/%2e%2e/web.py", "/..\\web.py", "/khong-co.js",
+                      "/fonts/", "//etc/passwd", "/.env"):
+            with self.subTest(duong=duong):
+                self.assertIsNone(web.tep_tinh(duong))
+
+    def test_query_string_bi_bo_qua(self):
+        self.assertEqual(web.tep_tinh("/app.js?v=2")[1], web.tep_tinh("/app.js")[1])
 
 
 class TestKhoiChay(unittest.TestCase):
@@ -289,6 +458,52 @@ class TestKiemYeuCau(unittest.TestCase):
         self.assertTrue(web.post_hop_le({"X-Man-Hinh-Duyet": "1", "Content-Type": "application/json"}))
         self.assertFalse(web.post_hop_le({"Content-Type": "application/json"}))
         self.assertFalse(web.post_hop_le({"X-Man-Hinh-Duyet": "1", "Content-Type": "text/plain"}))
+
+
+class TestGioiHanPost(unittest.TestCase):
+    """/api/moi phải nhận được hội thoại hợp lệ lớn nhất (30 lượt × 2.000 ký tự tiếng Việt / emoji)."""
+
+    def setUp(self):
+        import threading
+
+        class ManHinhGia:
+            def tao_moi(self, luot, ma_khach=None):
+                return {"ma_hoi_thoai": "HT-M01", "do_dai": len(web.kiem_hoi_thoai_moi(luot, ma_khach))}
+
+            def huy(self, ma):
+                return {"ma_hoi_thoai": ma}
+
+        self.cong_goc = web.PORT
+        self.server = web.MayChu(("127.0.0.1", 0), web.XuLyYeuCau)
+        web.PORT = self.server.server_address[1]
+        web.XuLyYeuCau.man_hinh = ManHinhGia()
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def tearDown(self):
+        self.server.shutdown()
+        self.server.server_close()
+        web.PORT, web.XuLyYeuCau.man_hinh = self.cong_goc, None
+
+    def gui(self, duong, body):
+        import http.client
+        c = http.client.HTTPConnection("127.0.0.1", web.PORT, timeout=10)
+        c.request("POST", duong, body=body, headers={"Host": "127.0.0.1:%d" % web.PORT, "X-Man-Hinh-Duyet": "1",
+                                                     "Content-Type": "application/json"})
+        r = c.getresponse()
+        r.read()
+        c.close()
+        return r.status
+
+    def test_hoi_thoai_hop_le_lon_nhat_qua_duoc(self):
+        for tin, ascii_ in (("ế" * 2000, False), ("😀" * 2000, True)):
+            body = json.dumps({"luot": [{"vai": "khach", "tin": tin}] * 30}, ensure_ascii=ascii_).encode("utf-8")
+            with self.subTest(byte=len(body)):
+                self.assertGreater(len(body), 65536)
+                self.assertEqual(self.gui("/api/moi", body), 200)
+
+    def test_vuot_gioi_han_thi_413(self):
+        self.assertEqual(self.gui("/api/moi", b" " * (web.GIOI_HAN_POST_MOI + 1)), 413)
+        self.assertEqual(self.gui("/api/huy", b" " * (web.GIOI_HAN_POST + 1)), 413)  # API khác giữ 64 KB
 
 
 if __name__ == "__main__":

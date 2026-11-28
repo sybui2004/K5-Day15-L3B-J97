@@ -4,3 +4,5 @@
 # và ghi lệnh cài vào README: python -m pip install -r requirements.txt
 anthropic>=2.14
 nemoguardrails==0.25.0
+# Tuỳ chọn: chỉ cần khi điền DATABASE_URL (nhật ký màn hình duyệt vào Postgres)
+psycopg[binary]>=3.2
