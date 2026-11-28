@@ -91,6 +91,7 @@ Nói trong lúc chạy:
 
 | Sự cố | Làm gì |
 |---|---|
+| Anthropic hết credit / sai key / quá tải | Có `API_KEY_DEEPSEEK` trong `.env` thì tự chuyển sang DeepSeek V4.1 Flash (`deepseek-flash`); terminal in `[dự phòng] Claude lỗi … → gọi deepseek-flash`, khung "AI đã làm gì" ghi model `deepseek-flash`. Nói rõ với giám khảo đây là model dự phòng, eval chạy trên Claude. Chi phí đầu trang ghi "thiếu giá" cho các lần này. |
 | Mất mạng / API lỗi | Chiếu **video dự phòng** (link trong README, mục 7). Hội thoại lỗi giữ nguyên, bấm chạy lại khi có mạng. |
 | Chờ quá lâu lúc mở màn hình | Kiểm terminal có dòng lỗi model không. Đổi mạng rồi chạy lại `python run.py`. |
 | Lớp chặn NeMo lỗi hoặc chưa cài `nemoguardrails` | Luồng chính vẫn chạy, lỗi ghi trong "AI đã làm gì". Muốn tắt hẳn: `GUARD=tat` trong `.env`, chạy lại. |
