@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi" data-radius="soft">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Màn hình chủ shop duyệt đơn nháp AI lên từ tin nhắn chốt mua, xem AI đã kiểm gì và tốn bao nhiêu.">
+<meta name="theme-color" content="#f8f8f8">
+<title>Duyệt đơn từ tin nhắn</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<a class="skip-link" href="#noi-dung">Bỏ qua đến nội dung</a>
+
+<header class="thanh-tren">
+  <div class="thuong-hieu">
+    <h1>Duyệt đơn từ tin nhắn</h1>
+    <p class="phu">Duyệt chỉ đổi trạng thái đơn nháp. Không gọi GHN, không gửi tin cho khách.</p>
+  </div>
+  <div class="tong" id="tong" aria-live="polite"></div>
+  <nav class="che-do" aria-label="Chế độ xem">
+    <button type="button" class="tab" data-xem="hop-thu" aria-pressed="true">Hộp thư</button>
+    <button type="button" class="tab" data-xem="nhat-ky" aria-pressed="false">Nhật ký</button>
+  </nav>
+  <button type="button" class="btn btn--chinh" id="mo-moi">
+    <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10"/></svg>
+    Hội thoại mới
+  </button>
+</header>
+
+<main id="noi-dung" tabindex="-1">
+  <div class="man" id="man-hop-thu">
+    <nav class="cot cot-hop-thu" aria-label="Hộp thư">
+      <div class="dau-cot">
+        <h2>Hộp thư</h2>
+        <div id="dem" class="dem" aria-live="polite"></div>
+      </div>
+      <div id="loc" class="loc" role="group" aria-label="Lọc hội thoại theo trạng thái"></div>
+      <ul id="hop-thu" class="hop-thu"></ul>
+    </nav>
+    <section class="cot cot-giua" id="cot-giua" aria-live="polite" aria-label="Hội thoại và các bước AI">
+      <p class="trong">Chọn một hội thoại bên trái để xem đoạn chat, các bước AI đã làm và đơn nháp.</p>
+    </section>
+    <aside class="cot cot-phai" id="cot-phai" aria-label="Đơn nháp và thao tác"></aside>
+  </div>
+
+  <div class="man" id="man-nhat-ky" hidden>
+    <section class="khung-nk">
+      <div class="dau-nk">
+        <div>
+          <h2>Nhật ký duyệt và các lần chạy AI</h2>
+          <p class="phu" id="nk-kho"></p>
+        </div>
+        <button type="button" class="btn" id="nk-tai">Tải lại nhật ký</button>
+      </div>
+      <h3>Duyệt và huỷ</h3>
+      <div class="bang-cuon"><table class="bang" id="nk-duyet"></table></div>
+      <h3>Lần chạy AI</h3>
+      <div class="bang-cuon"><table class="bang" id="nk-lan-chay"></table></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="hop-moi" aria-labelledby="moi-tieu-de">
+  <form id="form-moi" class="form-moi" novalidate>
+    <div class="dau-hop">
+      <h2 id="moi-tieu-de">Hội thoại mới</h2>
+      <button type="button" class="btn btn--icon" id="dong-moi" aria-label="Đóng">
+        <svg class="ico" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+    <p class="phu">Gõ hoặc dán đoạn chat, mỗi dòng một tin. Dòng bắt đầu bằng <b>Shop:</b> là tin của shop, các dòng khác là tin của khách. AI đọc cả đoạn rồi quyết định tạo đơn nháp, hỏi lại hay từ chối.</p>
+    <div class="mau" role="group" aria-label="Điền nhanh một trường hợp">
+      <span class="nhan">Điền nhanh</span>
+      <button type="button" class="chip-nut" data-mau="du">Đủ thông tin</button>
+      <button type="button" class="chip-nut" data-mau="tach">Phường cũ bị tách</button>
+      <button type="button" class="chip-nut" data-mau="sdt">SĐT thiếu số</button>
+      <button type="button" class="chip-nut" data-mau="doi">Đổi người nhận</button>
+      <button type="button" class="chip-nut" data-mau="lua">Câu lừa AI</button>
+    </div>
+    <div class="moi-luoi">
+      <div class="moi-nhap">
+        <label for="moi-ma">Mã khách (không bắt buộc)</label>
+        <input id="moi-ma" name="ma_khach" placeholder="KH-201" autocomplete="off" inputmode="text" maxlength="12">
+        <p class="loi" id="loi-ma"></p>
+        <label for="moi-chat">Đoạn chat</label>
+        <textarea id="moi-chat" name="chat" rows="9" placeholder="lấy cho mình 1 áo thun size M&#10;Shop: dạ chị cho em xin tên, sđt, địa chỉ nhận hàng ạ&#10;Mai 0900 000 001, 12 hẻm 5, phường Bàn Cờ, TP HCM"></textarea>
+        <p class="loi" id="loi-chat"></p>
+      </div>
+      <div class="moi-xem" aria-label="Xem trước đoạn chat">
+        <p class="nhan">Xem trước</p>
+        <div id="moi-xem" class="chat chat--nho"></div>
+      </div>
+    </div>
+    <div class="chan-hop">
+      <p class="dang-chay" id="moi-trang-thai" role="status"></p>
+      <button type="button" class="btn" id="huy-moi">Huỷ</button>
+      <button type="submit" class="btn btn--chinh" id="gui-moi">Chạy AI</button>
+    </div>
+  </form>
+</dialog>
+
+<datalist id="ds-phuong"></datalist>
+<script src="/app.js"></script>
+</body>
+</html>

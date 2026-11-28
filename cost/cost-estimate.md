@@ -6,33 +6,87 @@
 
 ## 1. Đầu vào
 
-- **Persona** (`cost/personas.yaml`): ≥3 kiểu — tỉ lệ, số phiên / người / tháng, số lượt hỏi / phiên. Nguồn: __
-- **Số người dùng thật** 3 kịch bản: thấp __ · cơ sở __ · cao __. Nguồn: __
-- **Giá** ≥2 mức model (từ `further-reading/model-prices.md` của repo đề, có link + ngày xem): __ · __
-- **Tỉ lệ đạt** dùng để tính: __/__ (__%) — lượt `run-__` (lượt 2)
-- Đo token trên model __, tính giá model __ và __
+- **Persona** (`cost/personas.yaml`): 3 kiểu shop, lấy từ bảng "Số lần / tháng của từng kiểu người dùng" ở `spec.md` §2 (phỏng vấn P1–P4, n = 4). Khi nhân ra chi phí tháng, mỗi phiên được tính như một đơn chốt qua tin nhắn; nội dung một phiên là 1–3 hội thoại độc lập lấy ngẫu nhiên (xem §2, "Đọc bảng cho đúng").
+
+  | Kiểu | Tỉ trọng | Đơn / shop / tháng | Lượt hỏi / phiên | Nguồn |
+  |---|---:|---:|---:|---|
+  | `shop_nho` | 25% | 260 | 2 | P4 (câu 2, câu 4) |
+  | `shop_vua` | 50% | 400 | 3 | P1 480, P3 320 → trung bình (câu 2, câu 4) |
+  | `shop_lon` | 25% | 650 | 1 | P2 (câu 2, câu 4) |
+
+  Tỉ trọng theo tỉ lệ trong 4 shop đã hỏi *(tự ước tính: chưa có số cả thị trường)*. Lượt hỏi / phiên = 1 + số lần hỏi lại, quy từ số lượt nhắn mỗi đơn (P1 5 · P2 3 · P3 6 · P4 4): đơn trôi chảy 3 lượt, mỗi lần hỏi lại thêm 2 lượt, làm tròn lên *(tự ước tính)*.
+- **Số người dùng thật** (số shop dùng sản phẩm) 3 kịch bản: thấp **580** · cơ sở **1.741** · cao **5.803**. Nguồn: tích của bốn thừa số dưới đây. 11.606 chỉ là mốc tham chiếu, **không** phải số shop dùng sản phẩm.
+
+  | Thừa số | Thấp | Cơ sở | Cao | Nguồn |
+  |---|---:|---:|---:|---|
+  | Quy mô tham chiếu: người nộp thuế kinh doanh TMĐT Cục Thuế TP.HCM đưa vào quản lý, luỹ kế đến hết 10/2024 | 11.606 | 11.606 | 11.606 | [Thanh Niên 04/12/2024](https://thanhnien.vn/doanh-nghiep-ca-nhan-kinh-doanh-thuong-mai-dien-tu-can-luu-y-thue-185241203172338583.htm), xem 27/11/2026 |
+  | Hệ số phủ: thêm người bán chưa đăng ký thuế | 1 | 1 | 2 | *(tự ước tính)* |
+  | Tỉ lệ thuộc lát cắt: tự chốt đơn qua tin nhắn rồi tạo vận đơn (spec §1) | 0,5 | 0,5 | 0,5 | *(tự ước tính)*: bài báo không tách người bán qua mạng xã hội |
+  | Tỉ lệ sử dụng: shop thuộc lát cắt dùng công cụ | 0,1 | 0,3 | 0,5 | *(tự ước tính)* |
+  | **Số shop dùng** (làm tròn) | **580** | **1.741** | **5.803** | tích các dòng trên |
+
+  Cả ba kịch bản, kể cả cơ sở, dựa trên ba tỉ lệ chưa đo.
+- **Giá** 3 mức model, USD / 1 triệu token vào · ra (`further-reading/model-prices.md` của repo đề, BTC xem https://platform.claude.com/docs/en/about-claude/pricing ngày 25/11/2026): `claude-haiku-5-5` 0,10 · 0,50 · `claude-sonnet-5-5` 2,00 · 10,00 · `claude-opus-5-5` 4,00 · 20,00
+- **Tỉ lệ đạt** dùng để tính: 28/30 (93%) — lượt `run-5@20261128-021955` (lượt 2)
+- Đo token trên model `claude-sonnet-5-5` (model nhóm chạy eval), tính giá model `claude-haiku-5-5` và `claude-opus-5-5`
 
 ## 2. Kết quả mô phỏng
 
-Lượt mô phỏng: `cost/simulate-__.csv` · run ID __ · __ phiên · seed __
+Lượt mô phỏng: `cost/simulate-1.csv` · run ID `simulate-1@20261128-030455` · 50 phiên · seed 42 · 0/50 phiên lỗi. Trace: `traces/simulate-1.jsonl`.
 
-*(dán bảng từ `cost/simulate-N-summary.md`)*
+Chạy với `GUARD=nemo` (mặc định của bản chạy thử): mỗi lượt hỏi gọi model 2 lần (lớp chặn NeMo + đọc hội thoại), nên token đã gồm cả lớp chặn.
 
-| Model | Chi phí / phiên | Chi phí / task thành công | / tháng — thấp | / tháng — cơ sở | / tháng — cao | / người / tháng (cơ sở) |
-|---|---|---|---|---|---|---|
-| | | | | | | |
-| | | | | | | |
+| Persona | Số phiên mô phỏng | Lượt hỏi / phiên | Token vào / phiên | Token ra / phiên | Gọi model / phiên | Gọi công cụ / phiên |
+|---|---:|---:|---:|---:|---:|---:|
+| shop_nho | 14 | 2 | 4696 | 360 | 4.0 | 6.0 |
+| shop_vua | 25 | 3 | 7072 | 535 | 6.0 | 9.0 |
+| shop_lon | 11 | 1 | 2333 | 177 | 2.0 | 3.5 |
+
+| Model | Chi phí / phiên (trung bình mẫu) | Chi phí / task thành công (= cột trước ÷ 28/30) | / tháng — thấp (580) | / tháng — cơ sở (1.741) | / tháng — cao (5.803) | / người / tháng (cơ sở) |
+|---|---:|---:|---:|---:|---:|---:|
+| claude-haiku-5-5 | $0.00074 | $0.00079 | $167.91 | $504.03 | $1,679.99 | $0.2895 |
+| claude-sonnet-5-5 | $0.0148 | $0.0159 | $3,358.25 | $10,080.53 | $33,599.82 | $5.79 |
+| claude-opus-5-5 | $0.0296 | $0.0317 | $6,716.49 | $20,161.05 | $67,199.65 | $11.58 |
 
 Chi phí / task thành công = chi phí trung bình mỗi phiên ÷ tỉ lệ đạt — **không coi như đạt 100%**.
 
+**Đọc bảng cho đúng:**
+- Hai cột đầu là **trung bình của 50 phiên mẫu** (`simulate.py` in sẵn). Mẫu có shop lớn 11/50 phiên (22%), nhưng ở kịch bản cơ sở shop lớn chiếm 0,25 × 650 / 427,5 ≈ 38% số đơn, nên trung bình mẫu chưa phải giá mỗi đơn khi triển khai. Các cột / tháng và / người / tháng đã tính theo tỉ trọng và số đơn từng kiểu shop, không bị lệch này.
+- "Task thành công" ở đây là **phiên mô phỏng sau điều chỉnh theo tỉ lệ đạt eval 28/30**, chưa phải chi phí để lên thành công một đơn: (1) 28/30 tính cả 8 câu `tu_choi`, còn mô phỏng chỉ lấy câu `thuong` và `kho` (lượt 2 đạt 20/22 ở hai nhóm này); (2) một phiên có 1–3 lượt hỏi, mỗi lượt là một hội thoại độc lập lấy ngẫu nhiên, không theo cùng một đơn đến khi tạo được đơn nháp đúng.
+
+**Chi phí / phiên theo tỉ trọng đơn ở kịch bản cơ sở** (tính từ `cost/simulate-1.csv`: chi phí trung bình từng kiểu shop × tỉ trọng × đơn / tháng ÷ 427,5 đơn / shop / tháng; nhân lại ra đúng cột / người / tháng ở trên):
+
+| Model | / phiên (trọng số đơn) | ÷ tỉ lệ đạt 28/30 | ÷ tỉ lệ đạt câu thường + khó 20/22 |
+|---|---:|---:|---:|
+| claude-haiku-5-5 | $0.00068 | $0.00073 | $0.00074 |
+| claude-sonnet-5-5 | $0.01354 | $0.01451 | $0.01490 |
+| claude-opus-5-5 | $0.02709 | $0.02902 | $0.02980 |
+
+Số nhóm dùng khi cần một giá mỗi đơn ở quy mô triển khai: **≈ $0.0149 / phiên đạt với Sonnet 5.5** (trọng số đơn, điều chỉnh theo 20/22). **Hai cấu hình trong một con số:** chi phí lấy từ `simulate-1` có bật lớp chặn NeMo, còn tỉ lệ 20/22 lấy từ `run-5` khi chưa có lớp chặn. Phép ước tính **giả định NeMo giữ nguyên tỉ lệ đạt**; lớp chặn có thể từ chối nhầm thêm câu thường hoặc khó, nên mẫu số của cấu hình demo chưa đo. Muốn thay giả định này thì chạy eval cùng cấu hình (`GUARD=nemo`) và ghi thành lượt mới. Muốn đúng đơn vị "đơn thành công" phải theo dõi cùng một đơn đến khi tạo được đơn nháp đúng — chưa làm.
+
+Hai giả định của dòng Haiku và Opus: (1) token đo trên Sonnet 5.5, chỉ đổi đơn giá; bộ tách token khác thì số thật có thể lệch. (2) Cột "chi phí / task thành công" dùng tỉ lệ đạt 28/30 của Sonnet (`run-5`); nhóm **chưa chạy eval** trên Haiku hay Opus.
+
+Giới hạn của mô phỏng: `simulate.py` không nối các lượt; mỗi lượt lấy ngẫu nhiên một câu `thuong` hoặc `kho` trong `eval/benchmark.csv`. Câu luồng B đã chứa cả hội thoại dài nên token vẫn sát.
+
 ## 3. So với impact
 
-- Impact / người / tháng (`spec.md` §2): __
-- Chi phí / người / tháng (cơ sở, model __): __
-- **Kết luận một dòng — đáng làm không:** __
+Tỷ giá: **26.030 đ / USD** (Vietcombank, bán ra, niêm yết 05:42 ngày 28/11/2026, https://chogia.vn/ty-gia/vietcombank/ · xem 28/11/2026).
 
-## 4. *(Muốn sâu hơn, không bắt buộc)*
+- Impact / người / tháng (`spec.md` §2), tức phần **đang mất** ở mỗi shop: phí ship vì chép sai 195.000–494.000đ ÷ 4 shop ≈ **48.750–123.500đ** (đầu trên *(tự ước tính)*) và ≈ **214 phút** đổi địa chỉ cũ (855 ÷ 4). Nhóm **chưa đo** AI tránh được bao nhiêu phần trong đó, nên không ghi "tiết kiệm được" số này.
+- Chi phí / người / tháng (cơ sở), quy ra VND:
 
-- Bảng độ nhạy: model rẻ hơn · cache · cắt ngữ cảnh · giới hạn bước — mỗi cần gạt đổi chi phí bao nhiêu
-- Chi phí ngoài model: hosting, lưu trữ, giờ công người duyệt
-- Quy mô nào thì bài toán còn đáng làm
+  | Model | Chi phí / shop / tháng | f\* nếu đang mất 48.750đ | f\* nếu đang mất 123.500đ |
+  |---|---:|---:|---:|
+  | claude-haiku-5-5 | $0.2895 ≈ 7.500đ | 15% | 6% |
+  | claude-sonnet-5-5 | $5.79 ≈ 150.700đ | 309% (không đủ bù) | 122% (không đủ bù) |
+  | claude-opus-5-5 | $11.58 ≈ 301.400đ | 618% (không đủ bù) | 244% (không đủ bù) |
+
+  f\* = chi phí / shop / tháng ÷ phí ship đang mất: tỉ lệ phí ship AI phải giúp tránh để hoà vốn. f\* > 100% nghĩa là riêng phí ship không đủ bù, kể cả tránh hết lỗi.
+- **Kết luận một dòng — đáng làm không:** với Sonnet 5.5 (model đang chạy), riêng phí ship không đủ bù (f\* 122–309%), phải tính thêm ≈ 214 phút / shop / tháng đổi địa chỉ cũ mới có thể đáng; với Haiku 5.5 chỉ cần tránh 6–15% phí ship đang mất, **nếu** Haiku đạt tỉ lệ như Sonnet. Kết luận phụ thuộc ba số chưa đo: tỉ lệ lỗi AI tránh được, tỉ lệ đạt eval của Haiku, và ba tỉ lệ tự ước tính của số shop. **Nhóm chốt: iterate** (28/11) — giữ lát cắt và ba tỉ lệ tự ước tính hiện tại; trước khi go phải chạy eval trên Haiku và đo tỉ lệ lỗi AI tránh được.
+
+## 4. Độ nhạy và chi phí ngoài model
+
+- **Đổi model** là cần gạt lớn nhất: Sonnet → Haiku giảm chi phí khoảng 20 lần ($5.79 → $0.29 / shop / tháng), Sonnet → Opus gấp đôi.
+- **Lớp chặn NeMo** gấp đôi số lần gọi model mỗi lượt. `GUARD=tat` giảm số lần gọi nhưng bỏ một lớp chặn tấn công; nhóm chưa đo token riêng của lớp chặn.
+- **Số shop dùng** chỉ nhân chi phí tháng, không đổi chi phí / shop / tháng và f\*.
+- **Chi phí ngoài model** chưa tính: hosting, lưu trữ nhật ký, giờ công chủ shop duyệt từng đơn nháp.

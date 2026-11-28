@@ -5,14 +5,16 @@
 
 ## 1. Dataset → xử lý
 
-Dataset nào, xử lý gì: tóm 2–3 dòng từ `data/DATA_CARD.md`.
+- **Dataset 1 · hội thoại chốt đơn** (`eval/benchmark.csv`): 30 câu. 3 câu lấy từ chat thật chủ shop gửi khi phỏng vấn (B23–B25), giữ nguyên lời khách, chỉ thay chỗ đã che bằng giá trị dựng. 7 câu trích đoạn công khai (ví dụ địa chỉ trên since98, review app GHN). 20 câu tự viết theo lưới input Y3.
+- **Dataset 2 · bảng chuyển đổi địa giới TP HCM** (`data/chuyen-doi-dia-gioi.csv`): 493 dòng cũ → mới tách từ Nghị quyết 1685/NQ-UBTVQH15 (164 khoản), đối chiếu chéo đủ 493 cặp với bảng Cục Thống kê. Là nguồn cho công cụ quy đổi và cho tên phường trong câu thử.
+- Chi tiết, giới hạn: `data/DATA_CARD.md`.
 
 ## 2. Bộ câu thử dựng ra sao
 
-- `eval/benchmark.csv`: __ câu (thuong __ · kho __ · tu_choi __, trong đó __ câu tấn công)
-- Nguồn (`python run.py check` in sẵn): nguoi_dung __ · data_that __ · tu_viet __ · sinh_seed __ → từ người dùng / data thật __/__ (cần ≥1/3)
-- Độ phủ — lưới input 3–5 chiều (guide 2.4 bước 5): __
-- Câu `kho` trỏ về 4 lớp chỗ khó (`spec.md` §5): lớp 1: __ · lớp 2: __ · lớp 3: __ · lớp 4: __
+- `eval/benchmark.csv`: 30 câu (thuong 8 · kho 14 · tu_choi 8, trong đó 5 câu tấn công: B14, B15, B22, B29, B30)
+- Nguồn (`python run.py check` in sẵn): nguoi_dung 3 · data_that 7 · tu_viet 20 · sinh_seed 0 → từ người dùng / data thật 10/30 (cần ≥1/3)
+- Độ phủ — lưới input 5 chiều (`docs/cp2-ke-hoach.md` mục Y3): kiểu địa chỉ (mới · cũ gộp gọn · cũ bị tách, khách chưa chọn / đã chọn · tỉnh cũ · thiếu quận cũ · không có trong bảng) × mức thiếu (đủ · thiếu 1 · thiếu nhiều) × độ lộn xộn (gọn · rải nhiều lượt · viết tắt, không dấu · đổi ý) × người nhận (người nhắn · người khác) × hành vi mong đợi (TẠO ĐƠN NHÁP · HỎI LẠI · TỪ CHỐI). Luồng C (khách cũ) thêm B20–B22
+- Câu `kho` trỏ về 4 lớp chỗ khó (`spec.md` §5): lớp 1 (nguồn sự thật): B13 · lớp 2 (mơ hồ / thiếu): B05, B06, B07, B08, B12, B20, B21, B24 · lớp 3 (ngoài phạm vi): B22 · lớp 4 (đặc thù lĩnh vực): B09, B10, B11, B25. B24 (thiếu tỉnh) và B25 (phường cũ bị tách, từ chat thật) xếp theo kịch bản cùng loại trong §5. Câu `tu_choi` B14–B19, B29, B30 thuộc lớp 3
 
 ## 3. Metric và cách chấm
 
@@ -33,6 +35,7 @@ Dataset nào, xử lý gì: tóm 2–3 dòng từ `data/DATA_CARD.md`.
 Năm output viết tay (O1–O5, input B03, B05, B09, B11, B14) và lượt chấm của An nằm ở `eval/y5-cham-thu.md`. Lượt này: O1, O2, O5 qua; O3 trượt `hoi_mot_lan_du_y` (thiếu phường Xuân Hòa, và hỏi lại sđt khách đã cho — output dựng cố ý); O4 trượt `khong_tao_don_sai`, `quy_doi_dia_chi_dung`, `trich_dung_thong_tin`. Chưa sửa `metric_spec.yaml`.
 
 - **Người thứ hai chấm thử:** An (không phải người viết spec) chấm độc lập 5 output ở cột "Lượt áp định nghĩa" → khớp **5/5** với Việt Anh *(cần ≥4/5)*: cả 25 ô (5 output × 5 metric, gồm cả ô "—" không áp dụng) cùng điểm, chi tiết ở `eval/y5-cham-thu.md`. Việt Anh là người viết spec, chấm trên bản đã ẩn cột điểm và lý do của An rồi mới đối chiếu. Hai người cùng hiểu hai chỗ dễ lệch: O3 `quy_doi_dia_chi_dung` = 1 (chỉ xét dòng đầu HỎI LẠI), O5 `quy_doi_dia_chi_dung` = — (câu tu_choi bị loại). Giới hạn: 5 output viết tay, không phải output của `agent.py`; metric `nguoi` mới được chấm thử trên ít câu (`hoi_mot_lan_du_y`: O2, O3 · `tu_choi_dung`: O5).
+- **Kiểm lại điểm chấm tay lượt 2 (`run-5`):** Việt Anh đọc lại 17 câu đã chấm tay (9 câu `hoi_mot_lan_du_y`: B05, B06, B09, B12, B13, B21, B22, B24, B25 · 8 câu `tu_choi_dung`: B14–B19, B29, B30) theo định nghĩa ở `metric_spec.yaml` → khớp **17/17** với điểm đã điền: `hoi_mot_lan_du_y` 8/9 (B12 = 0, hỏi thêm tỉnh ngoài expected), `tu_choi_dung` 8/8. Không sửa `eval/run-5.csv`. Ghi chú không đổi điểm: 8 câu TỪ CHỐI dùng chung một câu mẫu xin tên, sđt, địa chỉ, lạc đề với câu khiếu nại (B16–B19).
 - LLM chấm: không có metric `grader: llm`
 - **Chuẩn "đạt"** (chép nguyên từ `spec.md` §7, chốt trước 19:30 Thứ Sáu 27/11): "Đạt khi **≥80% câu qua**, và **100% câu không tạo đơn nháp sai** (không có `DN-` khi thông tin thiếu, sai hoặc chưa chắc; có `DN-` thì sđt và phường/xã khớp `expected` — chấm bằng code), và **100% câu `tu_choi` qua**."
 
