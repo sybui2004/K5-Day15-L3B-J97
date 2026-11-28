@@ -1,0 +1,42 @@
+/* Trang khách (khach.html): dùng token của app.css, bố cục một cột cho điện thoại. */
+body.trang-khach { display: block; height: auto; min-height: 100%; }
+.khung-khach { max-width: 560px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column;
+  padding: var(--s-4) var(--s-4) max(var(--s-4), env(safe-area-inset-bottom)); gap: var(--s-3); }
+.dau-khach { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.nhac-demo { font-size: var(--t-label); background: var(--wait-bg); color: var(--wait); border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3); }
+.an-chu { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.man-vao { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-4); }
+.tab-vao { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-1); background: var(--p-surface);
+  padding: var(--s-1); border-radius: var(--r-btn); margin-bottom: var(--s-4); }
+.tab-vao button { font: 600 var(--t-small)/1 var(--font-text); min-height: 40px; border: 0; border-radius: 6px;
+  background: transparent; color: var(--p-muted); cursor: pointer; }
+.tab-vao button[aria-selected="true"] { background: var(--card); color: var(--p-ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.form-vao { display: grid; gap: var(--s-2); }
+.form-vao label { font: 600 var(--t-label)/1.3 var(--font-text); margin-top: var(--s-2); }
+.form-vao input { font: 400 16px/1.4 var(--font-text); min-height: 44px; padding: 0 var(--s-3);
+  border: 1px solid var(--line-strong); border-radius: var(--r-btn); background: var(--card); color: var(--p-ink); }
+.form-vao input:focus-visible, .form-gui textarea:focus-visible { outline: 2px solid var(--p-accent); outline-offset: 1px; }
+.form-vao .btn { margin-top: var(--s-3); min-height: 44px; }
+.loi:empty { display: none; }
+
+.man-chat { flex: 1; display: flex; flex-direction: column; gap: var(--s-2); min-height: 0; }
+.ds-tin { list-style: none; margin: 0; padding: var(--s-3); flex: 1; overflow-y: auto; min-height: 50dvh;
+  max-height: 65dvh; display: flex; flex-direction: column; gap: var(--s-2); background: var(--card);
+  border: 1px solid var(--line); border-radius: var(--r-md); }
+.tin { max-width: 85%; padding: var(--s-2) var(--s-3); border-radius: var(--r-md); }
+.tin .ai-noi { display: block; font: 600 12px/1.3 var(--font-text); color: var(--p-muted); margin-bottom: 2px; }
+.tin .noi-dung { white-space: pre-wrap; overflow-wrap: anywhere; }
+.tin--khach { align-self: flex-end; background: var(--p-ink); color: #fff; border-bottom-right-radius: 4px; }
+.tin--khach .ai-noi { color: rgba(255,255,255,.7); }
+.tin--bot, .tin--shop { align-self: flex-start; background: var(--bubble-shop); border-bottom-left-radius: 4px; }
+.tin--he_thong { align-self: center; background: var(--p-surface); color: var(--p-muted); font-size: var(--t-label);
+  text-align: center; max-width: 95%; }
+.nhan-tu-dong { font: 500 11px/1 var(--font-text); padding: 2px 6px; border-radius: 999px; background: var(--card);
+  color: var(--p-muted); border: 1px solid var(--line); }
+.dang-soan { font-size: var(--t-label); color: var(--p-muted); padding-left: var(--s-1); }
+.form-gui { display: grid; grid-template-columns: 1fr auto; gap: var(--s-2); align-items: end; }
+.form-gui textarea { font: 400 16px/1.4 var(--font-text); resize: none; padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--line-strong); border-radius: var(--r-btn); background: var(--card); color: var(--p-ink); }
+.form-gui .btn { min-height: 44px; }

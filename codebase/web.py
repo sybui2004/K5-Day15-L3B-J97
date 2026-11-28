@@ -15,13 +15,16 @@ Giao diện: codebase/static/ (index.html, app.css, app.js, fonts/), dữ liệu
 Chỉ thư viện chuẩn (Postgres là tuỳ chọn, cần psycopg). Một luồng xử lý (tracing dùng biến toàn cục).
 """
 import copy
+import ipaddress
 import json
 import os
 import re
 import sys
 import threading
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.cookies import SimpleCookie
+from urllib.parse import parse_qs, urlsplit
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -36,6 +39,7 @@ from agent import lam_sach_luot, xu_ly, _so_luong  # noqa: E402
 from inbox import doc_hop_thu, xu_ly_hop_thu, THU_TU, _dung_text  # noqa: E402
 from kho import KhoFile, LoiKho, mo_kho  # noqa: E402
 from tools import validate_phone, lookup_address, create_draft_order, _bang, HCM  # noqa: E402
+from tai_khoan import HET_HAN_PHIEN, GioiHan, LoiDangNhap, QuaGioiHan, QuanLyTaiKhoan  # noqa: E402
 
 GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOP_THU_THEM = os.path.join(GOC, "data", "hop-thu-them.jsonl")  # lô "Nhận tin mới" của chế độ NAP_NEN=1
@@ -54,9 +58,36 @@ GIOI_HAN_POST_MOI = MOI_TOI_DA_LUOT * (MOI_TOI_DA_KY_TU * 12 + 256) + 4096
 HOST = (os.environ.get("WEB_HOST") or "127.0.0.1").strip()
 PORT = int(os.environ.get("WEB_PORT") or 8000)
 HOST_THEM = {h.strip().lower() for h in (os.environ.get("WEB_ALLOWED_HOSTS") or "").split(",") if h.strip()}
+
+
+def doc_trusted_proxy(gia_tri):
+    """TRUSTED_PROXY: các mạng (CIDR, cách nhau dấu phẩy) của proxy tin cậy (nginx trong compose).
+    Chỉ yêu cầu đến từ các mạng này mới được tin header X-Real-IP / X-Forwarded-Proto. Rỗng = không tin ai."""
+    return [ipaddress.ip_network(x.strip(), strict=False) for x in (gia_tri or "").split(",") if x.strip()]
+
+
+TRUSTED_PROXY = doc_trusted_proxy(os.environ.get("TRUSTED_PROXY"))
+COOKIE = "j97_phien"
+# Đường dẫn theo vai (spec chat khách §5.5). Không nằm trong ba nhóm này thì là trang tĩnh / không có.
+API_SHOP_GET = {"/api/hop-thu", "/api/nhat-ky"}
+API_SHOP_POST = {"/api/kiem", "/api/duyet", "/api/huy", "/api/tra-loi", "/api/nhan-them", "/api/moi",
+                 "/api/shop/nhan", "/api/shop/tra-bot", "/api/shop/doc-lai"}
+API_KHACH_GET = {"/api/chat"}
+API_KHACH_POST = {"/api/chat/gui"}
 SUA_DUOC = ["ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "phuong_xa", "san_pham", "so_luong"]
 BAT_BUOC_CHU = ["ten_nguoi_nhan", "dia_chi_chi_tiet", "san_pham"]
 TRANG_THAI = {"TAO_DON_NHAP": "cho_duyet", "HOI_LAI": "cho_khach", "TU_CHOI": "tu_choi"}
+# Chat của tài khoản khách (spec chat khách HITL §5.3, §5.4)
+GIOI_HAN_TIN_TAI_KHOAN = (5, 60)
+GIOI_HAN_TIN_TOAN_MAY = (60, 60)
+TIN_TOI_DA_KY_TU = 500
+TIN_TOI_DA_MOI_TK = 200
+TIN_SHOP_TOI_DA_KY_TU = 2000
+CAU_GHI_NHAN = ("Dạ shop đã ghi nhận đơn của anh/chị: {ten} · {sdt} · {dia_chi}, {phuong_xa}, {tinh_thanh} · "
+                "{san_pham} × {so_luong}. Shop kiểm lại rồi xác nhận ngay ạ.")
+CAU_DA_XAC_NHAN = "Đơn {ma_don} đã được shop xác nhận."
+KQ_TRONG = {"quyet_dinh": None, "truong": {}, "loi": [], "goi_y_phuong": [], "tin_gui_khach": "", "cho_chu_shop": "",
+            "ma_don": None, "ma_van_don": None}
 DA_XONG = ("da_duyet", "da_huy")
 
 
@@ -255,6 +286,13 @@ class ManHinh:
         self._bang_gia, self.ty_gia = _bang_gia()
         self._tong = {"lan_chay": 0, "model_calls": 0, "tokens_in": 0, "tokens_out": 0, "chi_phi_usd": 0.0,
                       "lan_chua_co_gia": 0, "loi_kho": None}
+        # chat khách: hàng đợi tài khoản chờ AI (gộp), một luồng nền xử lý lần lượt
+        self._chat_cv = threading.Condition()
+        self._chat_cho = []          # tai_khoan_id theo thứ tự đến, không trùng
+        self._chat_dang = None       # tai_khoan_id đang chạy AI
+        self._chat_luong = None
+        self._gh_tin_tk = GioiHan(*GIOI_HAN_TIN_TAI_KHOAN)
+        self._gh_tin_may = GioiHan(*GIOI_HAN_TIN_TOAN_MAY)
 
     def _chay(self, ma, nguon, ham, *args):
         with self._khoa_ai:
@@ -459,6 +497,8 @@ class ManHinh:
             self._ghi(p, "da_duyet", k["truong_da_sua"])  # ghi nhật ký được rồi mới chốt trạng thái
             p.update(trang_thai="da_duyet", ma_don=don["ma_don"], ma_van_don=don["ma_van_don"],
                      truong_duyet=k["truong"], truong_da_sua=k["truong_da_sua"])
+            if p.get("nguon") == "khach":
+                self._chot_don_khach(p, "da_duyet", k["truong"])
             return copy.deepcopy(p)
 
     def huy(self, ma):
@@ -469,6 +509,8 @@ class ManHinh:
                 raise LoiThaoTac("hội thoại %s đã %s" % (ma, "duyệt" if p["trang_thai"] == "da_duyet" else "huỷ"))
             self._ghi(p, "da_huy", [])  # ghi nhật ký được rồi mới chốt trạng thái
             p["trang_thai"] = "da_huy"
+            if p.get("nguon") == "khach":
+                self._chot_don_khach(p, "da_huy", p["kq"].get("truong") or {})
             return copy.deepcopy(p)
 
     def them_tra_loi(self, ma, tra_loi):
@@ -479,6 +521,8 @@ class ManHinh:
         with self._khoa:
             p = self._lay(ma)
             self._chua_xu_ly_xong(p)
+            if p.get("nguon") == "khach":
+                raise LoiThaoTac("hội thoại %s là tài khoản khách: khách tự nhắn, shop dùng ô Nhắn khách" % ma)
             if p["trang_thai"] in DA_XONG:
                 raise LoiThaoTac("hội thoại %s đã xong, không thêm trả lời được" % ma)
             if p["loi_doc"] or not p["text"]:
@@ -499,6 +543,226 @@ class ManHinh:
                      ma_van_don=kq.get("ma_van_don"), trace=trace, phien_ban=p["phien_ban"] + 1)
             return copy.deepcopy(p)
 
+    # ================= chat của tài khoản khách =================
+    @staticmethod
+    def _ma_chat(username):
+        return "TK-" + username
+
+    def _phien_chat_moi(self, tai_khoan_id, username):
+        ma = self._ma_chat(username)
+        return {"ma_hoi_thoai": ma, "ma_khach": ma, "text": "", "loi_doc": None, "kq": copy.deepcopy(KQ_TRONG),
+                "trang_thai": "cho_khach", "so_luot_hoi_lai": 0, "ma_don": None, "ma_van_don": None,
+                "nguon": "khach", "trace": None, "phien_ban": 1, "tai_khoan_id": tai_khoan_id, "username": username,
+                "che_do": "bot", "co_tin_chua_doc": False, "moc_tin_id": 0, "tin": [], "don_cu": []}
+
+    @staticmethod
+    def _van_ban_chat(p):
+        """Văn bản đưa AI: chỉ các tin sau mốc (đơn trước đã duyệt / huỷ), bỏ tin hệ thống. Dạng như hộp thư."""
+        luot = ["Mã khách: " + p["ma_hoi_thoai"]]
+        for t in p["tin"]:
+            if t["id"] <= p["moc_tin_id"] or t["nguoi_noi"] == "he_thong":
+                continue
+            noi = t["noi_dung"].replace("|", "/")
+            luot.append(("Khách: " if t["nguoi_noi"] == "khach" else "Shop: ") + noi)
+        return " | ".join(luot)
+
+    def _len_dau(self, ma):
+        self._phien = {ma: self._phien[ma], **{k: v for k, v in self._phien.items() if k != ma}}
+
+    def _luu_chat(self, p):
+        try:
+            self.kho.luu_cuoc_chat(p["tai_khoan_id"], {k: p.get(k) for k in (
+                "che_do", "trang_thai", "phien_ban", "kq", "ma_don", "ma_van_don", "co_tin_chua_doc", "moc_tin_id")})
+        except OSError as e:
+            self._tong["loi_kho"] = str(e)
+            print("   [kho] chưa lưu được cuộc chat %s: %s" % (p["ma_hoi_thoai"], e))
+
+    def _ghi_tin(self, p, nguoi_noi, noi_dung):
+        t = self.kho.ghi_tin(p["tai_khoan_id"], nguoi_noi, noi_dung)
+        p["tin"].append(t)
+        p["text"] = self._van_ban_chat(p)
+        return t
+
+    def _cuoc_chat(self, tk):
+        """Phiên chat của tài khoản (tạo nếu chưa có). Gọi khi đang giữ _khoa."""
+        ma = self._ma_chat(tk["username"])
+        if ma not in self._phien:
+            self._phien = {ma: self._phien_chat_moi(tk["id"], tk["username"]), **self._phien}
+        return self._phien[ma]
+
+    def _lay_chat(self, ma):
+        p = self._lay(ma)
+        if p.get("nguon") != "khach":
+            raise LoiThaoTac("hội thoại %s không phải chat của tài khoản khách" % ma)
+        return p
+
+    def khach_gui(self, tk, tin):
+        tin = str(tin or "").strip()
+        if not tin:
+            raise LoiThaoTac("tin nhắn đang trống")
+        if len(tin) > TIN_TOI_DA_KY_TU:
+            raise LoiThaoTac("tin nhắn tối đa %d ký tự" % TIN_TOI_DA_KY_TU)
+        with self._khoa:
+            p = self._cuoc_chat(tk)
+            if sum(t["nguoi_noi"] == "khach" for t in p["tin"]) >= TIN_TOI_DA_MOI_TK:
+                raise LoiThaoTac("tài khoản đã gửi đủ %d tin của bản demo" % TIN_TOI_DA_MOI_TK)
+            self._gh_tin_tk.kiem("tk:%s" % tk["id"])
+            self._gh_tin_may.kiem("may")
+            self._gh_tin_tk.dung("tk:%s" % tk["id"])
+            self._gh_tin_may.dung("may")
+            t = self._ghi_tin(p, "khach", tin)
+            self._len_dau(p["ma_hoi_thoai"])
+            if p["che_do"] == "bot":
+                self._xep_hang(p["tai_khoan_id"])
+            else:
+                p["phien_ban"] += 1
+                p["co_tin_chua_doc"] = True
+            self._luu_chat(p)
+            return dict(t)
+
+    def khach_doc(self, tk, sau_id=0):
+        with self._khoa:
+            ma = self._ma_chat(tk["username"])
+            tin = [{k: t[k] for k in ("id", "nguoi_noi", "noi_dung", "luc")}
+                   for t in (self._phien[ma]["tin"] if ma in self._phien else []) if t["id"] > sau_id]
+        with self._chat_cv:
+            dang = tk["id"] == self._chat_dang or tk["id"] in self._chat_cho
+        return {"tin": tin, "dang_soan": dang}
+
+    def shop_nhan(self, ma, tin):
+        tin = str(tin or "").strip()
+        if not tin or len(tin) > TIN_SHOP_TOI_DA_KY_TU:
+            raise LoiThaoTac("tin nhắn 1–%d ký tự" % TIN_SHOP_TOI_DA_KY_TU)
+        with self._khoa:
+            p = self._lay_chat(ma)
+            self._ghi_tin(p, "shop", tin)
+            p["che_do"] = "shop"
+            self._luu_chat(p)
+            return copy.deepcopy(p)
+
+    def shop_tra_bot(self, ma):
+        with self._khoa:
+            p = self._lay_chat(ma)
+            p["che_do"] = "bot"
+            self._luu_chat(p)
+            return copy.deepcopy(p)
+
+    def shop_doc_lai(self, ma):
+        """'Cho AI đọc lại': cập nhật đơn nháp theo các tin sau mốc, không nhắn gì cho khách."""
+        with self._khoa:
+            p = self._lay_chat(ma)
+            try:
+                kq, trace = self._chay_va_luu(ma, "khach", xu_ly, self._van_ban_chat(p), ma)
+            except LoiChayAI as e:
+                raise LoiThaoTac("chưa chạy được AI (%s), thử lại sau" % e)
+            self._luu_lan_chay(ma, kq["quyet_dinh"], trace)
+            self._ap_kq(p, kq, trace)
+            self._luu_chat(p)
+            return copy.deepcopy(p)
+
+    def _ap_kq(self, p, kq, trace):
+        kq = {k: v for k, v in kq.items() if k != "ma_hoi_thoai"}
+        p.update(kq=kq, trang_thai=TRANG_THAI.get(kq["quyet_dinh"], "cho_khach"), ma_don=kq.get("ma_don"),
+                 ma_van_don=kq.get("ma_van_don"), trace=trace, phien_ban=p["phien_ban"] + 1, co_tin_chua_doc=False)
+
+    @staticmethod
+    def _cau_bot(kq):
+        if kq["quyet_dinh"] == "TAO_DON_NHAP":
+            t = kq.get("truong") or {}
+            return CAU_GHI_NHAN.format(ten=t.get("ten_nguoi_nhan") or "", sdt=t.get("sdt") or "",
+                                       dia_chi=t.get("dia_chi_chi_tiet") or "", phuong_xa=t.get("phuong_xa") or "",
+                                       tinh_thanh=t.get("tinh_thanh") or "", san_pham=t.get("san_pham") or "",
+                                       so_luong=t.get("so_luong") or "")
+        return (kq.get("tin_gui_khach") or "").strip()
+
+    def _chot_don_khach(self, p, ket_qua, truong):
+        """Sau duyệt / huỷ: lưu đơn cũ, đặt mốc, mở đơn mới trong cùng cuộc chat. Gọi khi đang giữ _khoa."""
+        if ket_qua == "da_duyet":
+            self._ghi_tin(p, "he_thong", CAU_DA_XAC_NHAN.format(ma_don=p["ma_don"]))
+        moc = p["tin"][-1]["id"] if p["tin"] else 0
+        don = {"moc_tin_id": moc, "ket_qua": ket_qua, "ma_don": p.get("ma_don"), "truong": truong,
+               "luc": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        try:
+            self.kho.ghi_don_cu(p["tai_khoan_id"], don)
+        except OSError as e:
+            self._tong["loi_kho"] = str(e)
+        p["don_cu"].append(don)
+        p.update(kq=copy.deepcopy(KQ_TRONG), trang_thai="cho_khach", ma_don=None, ma_van_don=None,
+                 moc_tin_id=moc, co_tin_chua_doc=False, phien_ban=p["phien_ban"] + 1, trace=None)
+        for k in ("truong_duyet", "truong_da_sua"):
+            p.pop(k, None)
+        p["text"] = self._van_ban_chat(p)
+        self._luu_chat(p)
+
+    # ---- hàng đợi AI của chat khách ----
+    def _xep_hang(self, tai_khoan_id):
+        with self._chat_cv:
+            if tai_khoan_id not in self._chat_cho:
+                self._chat_cho.append(tai_khoan_id)
+            if self._chat_luong is None or not self._chat_luong.is_alive():
+                self._chat_luong = threading.Thread(target=self._luong_chat, daemon=True, name="chat-khach")
+                self._chat_luong.start()
+            self._chat_cv.notify_all()
+
+    def cho_chat_xong(self, timeout=None):
+        """Chờ hàng đợi chat rỗng và không còn lần chạy nào (test, tắt máy). True nếu xong trước timeout."""
+        with self._chat_cv:
+            return self._chat_cv.wait_for(lambda: not self._chat_cho and self._chat_dang is None, timeout)
+
+    def _luong_chat(self):
+        while True:
+            with self._chat_cv:
+                if not self._chat_cho:
+                    self._chat_luong = None
+                    self._chat_cv.notify_all()
+                    return
+                tid = self._chat_cho.pop(0)
+                self._chat_dang = tid
+            try:
+                self._chay_mot_chat(tid)
+            except Exception as e:  # noqa: BLE001 — luồng nền không được chết giữa chừng
+                print("   [chat] lỗi xử lý tài khoản %s: %s" % (tid, e))
+            finally:
+                with self._chat_cv:
+                    self._chat_dang = None
+                    self._chat_cv.notify_all()
+
+    def _chay_mot_chat(self, tid):
+        with self._khoa:
+            p = next((x for x in self._phien.values() if x.get("tai_khoan_id") == tid and x.get("nguon") == "khach"), None)
+            if p is None:
+                return
+            ma, van_ban = p["ma_hoi_thoai"], self._van_ban_chat(p)
+        try:
+            kq, trace = self._chay(ma, "khach", xu_ly, van_ban, ma)  # giữ _khoa_ai, không giữ _khoa
+        except LoiChayAI as e:
+            kq, trace = None, e.trace
+        with self._khoa:
+            self._luu_lan_chay(ma, kq["quyet_dinh"] if kq else None, trace)
+            with self._chat_cv:
+                cu = tid in self._chat_cho  # khách vừa nhắn thêm: lần sau trả lời theo văn bản mới, bỏ kết quả này
+            if kq is None or cu:
+                return
+            self._ap_kq(p, kq, trace)
+            cau = self._cau_bot(kq)
+            if p["che_do"] == "bot" and cau:  # shop đã tiếp quản thì không nhắn khách
+                self._ghi_tin(p, "bot", cau)
+            self._luu_chat(p)
+
+    def nap_cuoc_chat(self):
+        """Lúc khởi động: dựng lại các cuộc chat từ kho (tin, trạng thái, đơn cũ). Không gọi AI."""
+        with self._khoa:
+            for c in self.kho.doc_cac_cuoc_chat():
+                p = self._phien_chat_moi(c["tai_khoan_id"], c["username"])
+                p["tin"] = self.kho.doc_tin(c["tai_khoan_id"])
+                p["don_cu"] = self.kho.doc_don_cu(c["tai_khoan_id"])
+                for k in ("che_do", "trang_thai", "phien_ban", "ma_don", "ma_van_don", "co_tin_chua_doc", "moc_tin_id"):
+                    if c.get(k) is not None:
+                        p[k] = c[k]
+                p["kq"] = dict(copy.deepcopy(KQ_TRONG), **(c.get("kq") or {}))
+                p["text"] = self._van_ban_chat(p)
+                self._phien[p["ma_hoi_thoai"]] = p
+
     def _ghi(self, p, ket_qua, da_sua):
         """Ghi nhật ký; lỗi thì báo để chủ shop thử lại (trạng thái chưa đổi)."""
         try:
@@ -514,6 +778,27 @@ class ManHinh:
 def host_hop_le(host) -> bool:
     """Chỉ nhận Host trỏ về máy này (chặn DNS rebinding)."""
     return host in ("%s:%d" % (HOST, PORT), "localhost:%d" % PORT) or (host or "").lower() in HOST_THEM
+
+
+def _tu_proxy_tin_cay(handler) -> bool:
+    try:
+        ip = ipaddress.ip_address(handler.client_address[0])
+    except (ValueError, IndexError, TypeError):
+        return False
+    return any(ip in mang for mang in TRUSTED_PROXY)
+
+
+def ip_khach(handler) -> str:
+    """IP thật của người gọi: X-Real-IP (nginx ghi đè bằng CF-Connecting-IP) chỉ khi đến từ proxy tin cậy."""
+    if _tu_proxy_tin_cay(handler):
+        thuc = (handler.headers.get("X-Real-IP") or "").strip()
+        if thuc:
+            return thuc
+    return str(handler.client_address[0])
+
+
+def la_https(handler) -> bool:
+    return _tu_proxy_tin_cay(handler) and (handler.headers.get("X-Forwarded-Proto") or "").strip().lower() == "https"
 
 
 def post_hop_le(headers) -> bool:
@@ -544,13 +829,16 @@ def _phuong_moi():
 
 class XuLyYeuCau(BaseHTTPRequestHandler):
     man_hinh = None  # gán trước khi chạy server
+    tai_khoan = None  # QuanLyTaiKhoan, gán trước khi chạy server (None = không ai đăng nhập được)
 
     def log_message(self, fmt, *args):  # gọn màn hình console
         pass
 
-    def _gui(self, code, body, kieu="application/json; charset=utf-8"):
+    def _gui(self, code, body, kieu="application/json; charset=utf-8", cookie=None):
         data = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode("utf-8")
         self.send_response(code)
+        if cookie is not None:
+            self.send_header("Set-Cookie", cookie)
         self.send_header("Content-Type", kieu)
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
@@ -563,9 +851,63 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    # ---- đăng nhập ----
+    def _token(self):
+        try:
+            c = SimpleCookie(self.headers.get("Cookie") or "")
+        except Exception:  # noqa: BLE001 — cookie hỏng coi như chưa đăng nhập
+            return None
+        return c[COOKIE].value if COOKIE in c else None
+
+    def _ai_dang_nhap(self):
+        ql = self.tai_khoan
+        return ql.doc_phien(self._token()) if ql else None
+
+    def _cookie(self, token, max_age=HET_HAN_PHIEN):
+        return "%s=%s; HttpOnly; SameSite=Strict; Path=/; Max-Age=%d%s" % (
+            COOKIE, token, max_age, "; Secure" if la_https(self) else "")
+
+    def _can_vai(self, vai):
+        """Trả tài khoản nếu đúng vai; ngược lại gửi 401 / 403 và trả None — người gọi PHẢI dừng ngay."""
+        tk = self._ai_dang_nhap()
+        if tk is None:
+            self._gui(401, {"loi": "chưa đăng nhập"})
+            return None
+        if tk["vai"] != vai:
+            self._gui(403, {"loi": "không có quyền"})
+            return None
+        return tk
+
+    def _xu_ly_dang_nhap(self, duong, body):
+        ql = self.tai_khoan
+        if ql is None:
+            return self._gui(503, {"loi": "chưa bật đăng nhập"})
+        try:
+            if duong == "/api/dang-ky":
+                tk = ql.dang_ky(body.get("username"), body.get("mat_khau"), body.get("nhap_lai"), ip_khach(self))
+            else:
+                tk = ql.dang_nhap(body.get("username"), body.get("mat_khau"), ip_khach(self))
+        except QuaGioiHan as e:
+            return self._gui(429, {"loi": str(e), "cho_giay": e.cho_giay})
+        except LoiDangNhap as e:
+            return self._gui(400 if duong == "/api/dang-ky" else 401, {"loi": str(e)})
+        except LoiKho as e:
+            return self._gui(503, {"loi": "chưa lưu được (%s), thử lại" % e})
+        return self._gui(200, {"vai": tk["vai"], "username": tk["username"]}, cookie=self._cookie(ql.tao_phien(tk)))
+
     def do_GET(self):
         if not host_hop_le(self.headers.get("Host")):
             return self._gui(403, {"loi": "Host không hợp lệ"})
+        duong = urlsplit(self.path).path
+        if duong == "/api/toi":
+            tk = self._ai_dang_nhap()
+            return self._gui(200, {"vai": tk["vai"], "username": tk["username"]}) if tk else \
+                self._gui(401, {"loi": "chưa đăng nhập"})
+        if duong in API_SHOP_GET and self._can_vai("shop") is None:
+            return None
+        if duong in API_KHACH_GET:
+            tk = self._can_vai("khach")
+            return None if tk is None else self._get_khach(duong, tk)
         if self.path == "/api/hop-thu":
             ds, t = self.man_hinh.anh_chup()
             return self._gui(200, {"phien": ds, "phuong_moi": _phuong_moi(), "tong": t})
@@ -591,6 +933,20 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
                 raise ValueError("cần object JSON")
         except ValueError as e:
             return self._gui(400, {"loi": "JSON hỏng: %s" % e})
+        duong = urlsplit(self.path).path
+        if duong in ("/api/dang-ky", "/api/dang-nhap"):
+            return self._xu_ly_dang_nhap(duong, body)
+        if duong == "/api/dang-xuat":
+            if self.tai_khoan:
+                self.tai_khoan.xoa_phien(self._token())
+            return self._gui(200, {"ok": True}, cookie=self._cookie("", max_age=0))
+        if duong in API_KHACH_POST:
+            tk = self._can_vai("khach")
+            return None if tk is None else self._post_khach(duong, tk, body)
+        if duong not in API_SHOP_POST:
+            return self._gui(404, {"loi": "không có"})
+        if self._can_vai("shop") is None:
+            return None
         ma, sua = str(body.get("ma") or ""), body.get("sua") or {}
         if not isinstance(sua, dict):
             return self._gui(400, {"loi": "sua phải là object"})
@@ -607,6 +963,12 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
                 return self._gui(200, mh.huy(ma))
             if self.path == "/api/tra-loi":
                 return self._gui(200, mh.them_tra_loi(ma, str(body.get("tra_loi") or "")))
+            if duong == "/api/shop/nhan":
+                return self._gui(200, mh.shop_nhan(ma, body.get("tin")))
+            if duong == "/api/shop/tra-bot":
+                return self._gui(200, mh.shop_tra_bot(ma))
+            if duong == "/api/shop/doc-lai":
+                return self._gui(200, mh.shop_doc_lai(ma))
             if self.path == "/api/nhan-them":
                 if not mh.cho_nap_nen:
                     return self._gui(404, {"loi": "chỉ có khi chạy với NAP_NEN=1"})
@@ -621,6 +983,29 @@ class XuLyYeuCau(BaseHTTPRequestHandler):
         return self._gui(404, {"loi": "không có"})
 
 
+def _get_khach(self, duong, tk):
+    try:
+        sau = int((parse_qs(urlsplit(self.path).query).get("sau") or ["0"])[0])
+    except ValueError:
+        sau = 0
+    return self._gui(200, self.man_hinh.khach_doc(tk, sau))
+
+
+def _post_khach(self, duong, tk, body):
+    try:
+        return self._gui(200, self.man_hinh.khach_gui(tk, body.get("tin")))
+    except QuaGioiHan as e:
+        return self._gui(429, {"loi": str(e), "cho_giay": e.cho_giay})
+    except LoiThaoTac as e:
+        return self._gui(400, {"loi": str(e)})
+    except LoiKho as e:
+        return self._gui(503, {"loi": "chưa lưu được tin (%s), thử lại" % e})
+
+
+XuLyYeuCau._get_khach = _get_khach
+XuLyYeuCau._post_khach = _post_khach
+
+
 def _mo_kho():
     """Có DATABASE_URL mà Postgres lỗi thì báo rõ rồi ghi file, để demo vẫn chạy.
     DATABASE_REQUIRED=1 (compose.yaml) thì dừng hẳn: file ghi trong container sẽ mất khi container bị tạo lại."""
@@ -633,7 +1018,8 @@ def _mo_kho():
         return KhoFile(NHAT_KY)
 
 
-class MayChu(HTTPServer):
+class MayChu(ThreadingHTTPServer):
+    daemon_threads = True  # nhiều khách hỏi tin cùng lúc không phải chờ một lần gọi AI
     # Windows: SO_REUSEADDR cho tiến trình khác mở chung cổng đang dùng → tắt; nơi khác giữ mặc định
     allow_reuse_address = os.name != "nt"
 
@@ -649,6 +1035,12 @@ def main() -> int:
     try:
         hop_thu = doc_hop_thu()
         mh = ManHinh(kho=_mo_kho())
+        mat_khau_admin = (os.environ.get("ADMIN_PASSWORD") or "").strip() or "admin"
+        XuLyYeuCau.tai_khoan = QuanLyTaiKhoan(mh.kho, mat_khau_admin)
+        mh.nap_cuoc_chat()  # cuộc chat của tài khoản khách từ lần chạy trước (không gọi AI)
+        if mat_khau_admin == "admin" and HOST != "127.0.0.1":
+            print("CẢNH BÁO: tài khoản shop đang dùng mật khẩu mặc định admin/admin trên Host công khai "
+                  "— đặt ADMIN_PASSWORD trong .env", flush=True)
         print("Nhật ký duyệt và lần chạy AI lưu ở: %s" % mh.kho.ten)
         if nap_nen:  # tin đến hàng loạt: mở trang ngay, AI xử lý hộp thư ở luồng nền
             mh.cho_nap_nen = True
