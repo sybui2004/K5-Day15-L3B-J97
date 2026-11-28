@@ -31,13 +31,13 @@ Dữ liệu từng review: `evidence/review-ghn.csv` (cột `stt, so_sao, nhan, 
 | Đếm gì | x / N | % | Ghi chú |
 |---|---|---|---|
 | `sai_thieu_thong_tin_nhan_hang` | 7/100 | 7% | Nhầm mã vận đơn: STT 7, 47. Review nêu lý do giao không thành công là không liên lạc được hoặc khách không nghe máy: STT 5, 43, 63, 92, 100. |
-| `tra_loi_cham` | 1/100 | 1% | stt 6 ("Vô đợi gần 10p") |
-| `khac` | 92/100 | 92% | chậm lấy / giao hàng, app lỗi, giá, mất hàng, thái độ |
+| `tra_loi_cham` | 0/100 | 0% | stt 6 ("Vô đợi gần 10p") chuyển sang `khac` sau đối chiếu: không rõ đợi gì |
+| `khac` | 93/100 | 93% | chậm lấy / giao hàng, app lỗi, giá, mất hàng, thái độ |
 | Nhắc địa chỉ sau sáp nhập / địa giới mới | 0/100 | 0% | tìm thêm theo từ khoá (sáp nhập, phường mới, địa giới, địa chỉ cũ/mới, phường, xã, quận): chỉ stt 22 có chữ "quận" ("quận đi quận về", nói về đường đi của hàng) |
 
 **Rà lại 14 nhãn ban đầu.** Codex đối chiếu toàn văn với định nghĩa ở mục 1. Giữ 7 dòng trong bảng. Chuyển 7 dòng sang `khac`: STT 29, 39, 48, 58, 62 kể việc không gọi rồi hoàn hàng, không ghi lý do hoàn là không liên lạc được người nhận. STT 69 nói địa chỉ rõ nhưng shipper không tìm thấy nhà. STT 89 nói sai thông tin đơn nhưng không nêu trường nào sai. Kết quả phản ánh lời kể của người viết; lý do giao thất bại do bên vận chuyển ghi chưa chứng minh số điện thoại sai.
 
-**Hai người gắn nhãn 20 review đầu:** Claude Code gắn nhãn cả 100 review (20 review đầu: `khac` 17 · `sai_thieu_thong_tin_nhan_hang` 2 · `tra_loi_cham` 1). **Người thứ hai trong nhóm chưa gắn độc lập** 20 review này; khi gắn xong ghi kết quả khớp x/20 vào đây.
+**Hai người gắn nhãn 20 review đầu:** Người 1 là Claude Code, gắn nhãn cả 100 review. Người 2 là thành viên nhóm duyệt bản nhãn do Claude Code đề xuất cho 20 review đầu (không gắn độc lập; bản đề xuất chỉ thấy câu đầu của mỗi review). Lệch 3/20 (đồng ý 85%), dưới ngưỡng 4/20 nên giữ định nghĩa nhãn. Đối chiếu toàn văn 3 dòng lệch: stt 5 và 7 giữ `sai_thieu_thong_tin_nhan_hang` (phần sau review kể "bảo không liên lạc được khách hàng" và "dán lộn mã đơn"; câu đầu không chứa chi tiết này); stt 6 chuyển sang `khac`. 20 review đầu sau khi chốt: `khac` 18 · `sai_thieu_thong_tin_nhan_hang` 2.
 
 ## 4. ≥5 ví dụ cụ thể (mã dòng / mã đã ẩn danh, không đoán ai là ai)
 
