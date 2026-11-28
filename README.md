@@ -34,6 +34,7 @@ python run.py                               # mở màn hình duyệt ở http:/
 - **Hội thoại mới khi demo** (nút *Hội thoại mới* góc phải trên, `POST /api/moi`): gõ hoặc dán đoạn chat, mỗi dòng một tin, dòng bắt đầu `Shop:` là tin của shop; có 5 nút điền nhanh (đủ thông tin, phường cũ bị tách, SĐT thiếu số, đổi người nhận, câu lừa AI). AI chạy ngay, hội thoại lên đầu hộp thư với mã `HT-M01`, `HT-M02`… Mỗi lần chạy AI giữ trace: các bước model / công cụ, token, thời gian, chi phí theo giá trong `cost/personas.yaml` (model chưa có giá thì chỉ hiện token). Khung **AI đã làm gì** ở giữa màn hình hiện từng bước đó; khung bên phải liệt kê **vì sao AI chưa lên đơn**; đầu trang cộng token và chi phí của cả phiên demo; tab **Nhật ký** đọc lại nhật ký duyệt và các lần chạy.
 - **Nhật ký duyệt và lần chạy AI:** mặc định ghi `data/nhat-ky-duyet.jsonl` và `data/lan-chay-web.jsonl` (không commit). `lan-chay-web.jsonl` chứa trace từng bước, **có tên, sđt, địa chỉ** của hội thoại đã chạy: chỉ dán hội thoại đã che, xoá file sau buổi demo (spec §9). Muốn lưu vào **Postgres** (tuỳ chọn): `python -m pip install "psycopg[binary]"`, điền `DATABASE_URL` trong `.env` (vd `postgresql://user:pass@127.0.0.1:5432/j97`); bảng tự tạo khi mở màn hình. Postgres không kết nối được thì màn hình báo rồi ghi file, demo vẫn chạy. Xem lại: `GET /api/nhat-ky`.
 - **Lớp chặn đầu vào (`GUARD=nemo`, mặc định):** NeMo Guardrails gọi model một lần để kiểm lời khách trước. NeMo cho qua thì model chính đọc tiếp cả hội thoại, nên hội thoại đó tốn 2 lần gọi; NeMo chặn thì trả TỪ CHỐI ngay, bỏ qua lời gọi model chính (1 lần). Vì vậy lần đầu mở web gọi model tối đa 20 lần thay vì 10 và chờ lâu hơn. Chưa cài `nemoguardrails` thì lớp chặn tự bỏ qua và ghi vào trace; muốn tắt hẳn thì đặt `GUARD=tat` trong `.env`. Lớp chặn không tải gì từ mạng ngoài lần gọi model.
+- **Hướng dẫn chạy demo** (chuẩn bị máy, kịch bản 3 ca, câu thử lạ, xử lý sự cố, 4 câu giám khảo hay hỏi): [docs/huong-dan-demo.md](docs/huong-dan-demo.md).
 - **Bản dòng lệnh dự phòng:** `python codebase/app.py`, gõ một hội thoại, nhận QUYẾT ĐỊNH (TẠO ĐƠN NHÁP / HỎI LẠI / TỪ CHỐI).
 - **Chưa có `.env`:** chạy chế độ giả (model giả, không cần `pip install`). Luồng vẫn đi hết, nhưng model giả không trả JSON nên mọi hội thoại ra HỎI LẠI.
 - Chạy bộ câu thử, chấm, mô phỏng chi phí: xem mục "Lệnh" bên dưới.
@@ -119,7 +120,7 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 - **Claude Code** (Sỹ, CP4): soạn `cost/personas.yaml`, chạy mô phỏng `simulate-1`, viết `cost/cost-estimate.md`, `spec.md` §8 và slide 8 trang. Sỹ đối chiếu số với `simulate-1-summary.md`, xem từng trang PDF.
 - **Codex**: rà văn phong câu hỏi phỏng vấn (Sỹ); trả lời đoạn 11 của Y1, ghi riêng, không chấm (Việt Anh); sửa kế hoạch CP4 và bảng người nói (Sỹ).
 - **ChatGPT** (Việt Anh, task Y1): chạy tay đoạn chat chốt đơn để tìm lỗi trước khi viết tiêu chí chấm. Chấm `pass` bằng code (`eval/grade.py`), không dùng LLM.
-- Số liệu, trích dẫn phỏng vấn không do AI tạo. Phần của Hưng, An: *chờ xác nhận*.
+- Số liệu, trích dẫn phỏng vấn không do AI tạo. Hưng, An không dùng AI ngoài các việc đã ghi trong [docs/ai-usage.md](docs/ai-usage.md) (xác nhận 28/11).
 
 ## File mẫu — điền ở bước nào
 
@@ -151,5 +152,5 @@ Nhóm dùng stack khác (Node, Streamlit, notebook…): sửa hàm `run_app()` t
 | 4 | Bản chạy thử làm trọn lát cắt | `codebase/` · lệnh ở mục "Lệnh" |
 | 5 | Định nghĩa "tốt" + bộ câu thử | `data/DATA_CARD.md` · `eval/` |
 | 6 | Mô phỏng chi phí khi dùng thật | `cost/` |
-| 7 | Slide + demo + video dự phòng | `demo-slides.pdf` ở thư mục gốc · link video (34 giây, màn hình duyệt chạy `claude-sonnet-5-5`): https://drive.google.com/file/d/1MWRXzBWJ2ZgzxyQcHus2Ad6dGNtcgOx9/view?usp=sharing · log trong video ghi cổng 8010, `web.py` mặc định 8000 |
+| 7 | Slide + demo + video dự phòng | `demo-slides.pdf` ở thư mục gốc · link video (59 giây, quay 28/11 trên bản CP4: màn hình duyệt chạy `claude-sonnet-5-5` có lớp chặn NeMo, 3 ca B04 tạo đơn nháp · B09 hỏi lại · B14 từ chối, có phụ đề): https://drive.google.com/file/d/1-nLW1kFJ7fItPac263rkEmtqukOFSLWW/view?usp=sharing |
 | + | *Bonus:* người dùng thử | `validation/log.md` |
