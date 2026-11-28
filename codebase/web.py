@@ -48,7 +48,11 @@ MOI_TOI_DA_LUOT, MOI_TOI_DA_KY_TU = 30, 2000  # hội thoại gõ trên màn hì
 # 12 byte JSON (cặp surrogate \uXXXX\uXXXX), mỗi lượt thêm khung {"vai":..,"tin":..}; ~0,7 MB.
 GIOI_HAN_POST = 65536
 GIOI_HAN_POST_MOI = MOI_TOI_DA_LUOT * (MOI_TOI_DA_KY_TU * 12 + 256) + 4096
-HOST, PORT = "127.0.0.1", 8000
+# Mặc định chỉ máy này. Trong Docker (compose.yaml) đặt WEB_HOST=0.0.0.0 và WEB_ALLOWED_HOSTS = các Host header
+# được nhận thêm (vd tên miền qua Cloudflare Tunnel), cách nhau dấu phẩy. Cổng không mở ra ngoài: chỉ nginx gọi vào.
+HOST = (os.environ.get("WEB_HOST") or "127.0.0.1").strip()
+PORT = int(os.environ.get("WEB_PORT") or 8000)
+HOST_THEM = {h.strip().lower() for h in (os.environ.get("WEB_ALLOWED_HOSTS") or "").split(",") if h.strip()}
 SUA_DUOC = ["ten_nguoi_nhan", "sdt", "dia_chi_chi_tiet", "phuong_xa", "san_pham", "so_luong"]
 BAT_BUOC_CHU = ["ten_nguoi_nhan", "dia_chi_chi_tiet", "san_pham"]
 TRANG_THAI = {"TAO_DON_NHAP": "cho_duyet", "HOI_LAI": "cho_khach", "TU_CHOI": "tu_choi"}
@@ -432,7 +436,7 @@ class ManHinh:
 
 def host_hop_le(host) -> bool:
     """Chỉ nhận Host trỏ về máy này (chặn DNS rebinding)."""
-    return host in ("%s:%d" % (HOST, PORT), "localhost:%d" % PORT)
+    return host in ("%s:%d" % (HOST, PORT), "localhost:%d" % PORT) or (host or "").lower() in HOST_THEM
 
 
 def post_hop_le(headers) -> bool:
@@ -565,7 +569,9 @@ def main() -> int:
     except BaseException:
         server.server_close()
         raise
-    print("Mở trình duyệt: http://%s:%d   (chỉ máy này) · Thoát: Ctrl+C" % (HOST, PORT))
+    print("Mở trình duyệt: http://%s:%d   (%s) · Thoát: Ctrl+C"
+          % (HOST, PORT, "chỉ máy này" if HOST == "127.0.0.1" else "Host nhận thêm: " + ", ".join(sorted(HOST_THEM))),
+          flush=True)
     print("Bản dòng lệnh dự phòng: python codebase/app.py")
     try:
         server.serve_forever()
