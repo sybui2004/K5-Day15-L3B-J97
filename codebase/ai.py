@@ -17,7 +17,11 @@ Chế độ giả (mặc định khi .env chưa có MODEL_PROVIDER, hoặc MODEL
 Nối model thật: điền .env (chép từ .env.example), rồi viết nhánh gọi API ở dưới theo docs/connect-model.md
 (có ví dụ OpenAI, Claude, model chạy trên máy, và cách nối nhà cung cấp khác). Không dán API key vào file này.
 """
+import json
 import os
+import sys
+import urllib.error
+import urllib.request
 
 from tracing import model_call
 
@@ -42,6 +46,13 @@ MODEL_PROVIDER = (os.environ.get("MODEL_PROVIDER") or "fake").strip().lower()
 MODEL_NAME = (os.environ.get("MODEL_NAME") or "").strip()
 API_KEY = (os.environ.get("API_KEY") or "").strip()
 MODEL_EFFORT = (os.environ.get("MODEL_EFFORT") or "").strip().lower()  # low | medium | high | xhigh | max
+# Dự phòng khi Claude không gọi được (hết credit, sai key, quá tải, mất mạng): gọi DeepSeek.
+# Có API_KEY_DEEPSEEK thì tự bật; FALLBACK_PROVIDER=tat để tắt.
+API_KEY_DEEPSEEK = (os.environ.get("API_KEY_DEEPSEEK") or "").strip()
+FALLBACK_PROVIDER = (os.environ.get("FALLBACK_PROVIDER") or ("deepseek" if API_KEY_DEEPSEEK else "")).strip().lower()
+FALLBACK_MODEL = (os.environ.get("FALLBACK_MODEL") or "deepseek-flash").strip()  # DeepSeek V4.1 Flash
+DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+_da_chuyen_du_phong = None  # lý do đã chuyển hẳn sang dự phòng (hết credit / sai key) trong tiến trình này
 
 _claude = None  # client Anthropic, tạo một lần khi gọi lần đầu
 
@@ -73,14 +84,70 @@ def _call_claude(system: str, user: str) -> dict:
             "tokens_out": resp.usage.output_tokens}
 
 
+def _doc_phan_hoi_deepseek(d: dict) -> dict:
+    """Phản hồi chat/completions (chuẩn OpenAI) → hợp đồng call_model. completion_tokens đã gồm token suy luận."""
+    u = d.get("usage") or {}
+    return {"text": ((d.get("choices") or [{}])[0].get("message") or {}).get("content") or "",
+            "model": d.get("model") or FALLBACK_MODEL, "tokens_in": int(u.get("prompt_tokens") or 0),
+            "tokens_out": int(u.get("completion_tokens") or 0)}
+
+
+def _call_deepseek(system: str, user: str) -> dict:
+    """Gọi DeepSeek (API chuẩn OpenAI) bằng urllib, không thêm thư viện. Key: API_KEY_DEEPSEEK trong .env."""
+    body = json.dumps({"model": FALLBACK_MODEL, "max_tokens": 8000, "stream": False,
+                       "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}]}).encode()
+    req = urllib.request.Request(DEEPSEEK_URL, data=body, method="POST", headers={
+        "Content-Type": "application/json", "Authorization": "Bearer " + API_KEY_DEEPSEEK})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            return _doc_phan_hoi_deepseek(json.loads(r.read().decode("utf-8")))
+    except urllib.error.HTTPError as e:
+        raise RuntimeError("DeepSeek HTTP %s: %s" % (e.code, e.read().decode("utf-8", "replace")[:300])) from e
+
+
+def _loai_loi_claude(e):
+    """'han' = lỗi kéo dài cả phiên (hết credit, sai key, bị chặn quyền) → chuyển hẳn sang dự phòng.
+    'tam' = lỗi tạm thời (quá tải, giới hạn lượt, lỗi máy chủ, mất mạng) → chỉ chuyển lần gọi này.
+    None = lỗi do yêu cầu (vd 400 thiếu trường): không chuyển, để lỗi bay ra như cũ."""
+    ma = getattr(e, "status_code", None)
+    loi = str(getattr(e, "message", "") or e).lower()
+    if ma in (401, 402, 403) or (ma == 400 and ("credit" in loi or "billing" in loi)):
+        return "han"
+    if ma in (408, 409, 429) or (isinstance(ma, int) and ma >= 500):
+        return "tam"
+    if ma is None and type(e).__name__ in ("APIConnectionError", "APITimeoutError"):
+        return "tam"
+    return None
+
+
+def _co_du_phong():
+    return FALLBACK_PROVIDER == "deepseek" and bool(API_KEY_DEEPSEEK)
+
+
 @model_call
 def call_model(system: str, user: str) -> dict:
     if MODEL_PROVIDER == "fake":
         last = (user.strip().splitlines() or [""])[-1]
         return {"text": "[câu trả lời giả — chưa nối model] " + last[:60], "model": "fake", "tokens_in": 0, "tokens_out": 0}
 
+    if MODEL_PROVIDER == "deepseek":
+        return _call_deepseek(system, user)
+
     if MODEL_PROVIDER == "anthropic":
-        return _call_claude(system, user)
+        global _da_chuyen_du_phong
+        if _da_chuyen_du_phong and _co_du_phong():
+            return _call_deepseek(system, user)
+        try:
+            return _call_claude(system, user)
+        except Exception as e:  # noqa: BLE001 — chỉ chuyển với lỗi _loai_loi_claude nhận ra
+            loai = _loai_loi_claude(e)
+            if loai is None or not _co_du_phong():
+                raise
+            if loai == "han":
+                _da_chuyen_du_phong = "%s: %s" % (type(e).__name__, e)
+            print("   [dự phòng] Claude lỗi (%s: %s) → gọi %s%s" % (type(e).__name__, str(e)[:120], FALLBACK_MODEL,
+                  " cho các lần sau" if loai == "han" else ""), file=sys.stderr)
+            return _call_deepseek(system, user)
     raise NotImplementedError(
         "chưa viết phần gọi model thật cho MODEL_PROVIDER=%s trong codebase/ai.py — xem docs/connect-model.md"
         % MODEL_PROVIDER)
