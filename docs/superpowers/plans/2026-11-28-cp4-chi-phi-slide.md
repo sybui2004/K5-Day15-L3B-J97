@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Worktree `/project/template-devops/K5-Day15-L3B-J97-cp4-chi-phi`, nhánh `feature/cp4-chi-phi`, PR vào `develop` (`gh … --repo sybui2004/K5-Day15-L3B-J97`), người duyệt Hưng (§8 là phần của Hưng).
+- Worktree `/project/template-devops/K5-Day15-L3B-J97-cp4-chi-phi`, nhánh `feature/cp4-chi-phi`, PR vào `develop` (`gh … --repo sybui2004/K5-Day15-L3B-J97`).
 - Python: `PY=/project/template-devops/K5-Day15-L3B-J97/.venv/bin/python`. Venv này chỉ cấp thư viện (`anthropic`). Cấu hình model do `codebase/ai.py` đọc từ `.env` **ở gốc worktree này**, thiếu thì lặng lẽ chạy `fake` → xem Task 1 Step 2.
 - `SCRATCH` = thư mục tạm của phiên làm việc (ngoài repo): ảnh kiểm PDF và PyMuPDF để ở đây, không commit.
 - Không sửa `cost/simulate.py`, `run.py`, `eval/`, `codebase/`. Không sửa `cost/simulate-1.*` sau khi chạy; chạy lại thì thành `simulate-2`.
@@ -97,9 +97,9 @@ git commit -m "cost: persona từ phỏng vấn P1–P4, quy mô Cục Thuế TP
   - `PYTHONPATH="$SCRATCH/pymupdf" $PY -c "import fitz,sys;d=fitz.open('demo-slides.pdf');[p.get_pixmap(dpi=80).save(f'{sys.argv[1]}/trang-{i+1}.png') for i,p in enumerate(d)]" "$SCRATCH"`
   - Xem cả 8 ảnh: không mất dấu / ô vuông, không chữ bị cắt ở mép, mỗi slide đúng một trang.
 - [ ] **Step 5:** So số: mọi số tiền và tỉ lệ trên trang 5–7 có trong `eval/report.md` hoặc `cost/cost-estimate.md` (`grep -F`).
-- [ ] **Step 6:** `slides/outline.md` tích Xong các trang đã có; bảng "Ai nói trang nào" để trống. `git status` không có `node_modules`, `.env`. Commit `slides: bản nháp 8 trang + demo-slides.pdf, lệnh xuất PDF`.
+- [ ] **Step 6:** `slides/outline.md` tích Xong các trang đã có; điền bảng "Ai nói trang nào" theo phân công của nhóm. `git status` không có `node_modules`, `.env`. Commit `slides: bản nháp 8 trang + demo-slides.pdf, lệnh xuất PDF`.
 
 ### Task 4: PR
 
 - [ ] **Step 1:** `git fetch && git rebase origin/develop`, `$PY -m unittest discover -s tests` và `$PY run.py check` sạch.
-- [ ] **Step 2:** Push, mở PR vào `develop` (`--repo sybui2004/K5-Day15-L3B-J97`), mô tả: đã làm gì, số chính (chi phí / task thành công 2 model, chi phí / shop / tháng), chỗ tự ước tính, phần chưa làm (go/iterate/stop nhóm chốt, bảng người nói, video), nhờ Hưng duyệt. Không có dòng "Generated with".
+- [ ] **Step 2:** Push, mở PR vào `develop` (`--repo sybui2004/K5-Day15-L3B-J97`), mô tả: đã làm gì, số chính (chi phí / task thành công 2 model, chi phí / shop / tháng), chỗ tự ước tính, phần chưa làm (go/iterate/stop nhóm chốt, video). Không có dòng "Generated with".

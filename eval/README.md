@@ -5,14 +5,16 @@
 
 ## 1. Dataset → xử lý
 
-Dataset nào, xử lý gì: tóm 2–3 dòng từ `data/DATA_CARD.md`.
+- **Dataset 1 · hội thoại chốt đơn** (`eval/benchmark.csv`): 30 câu. 3 câu lấy từ chat thật chủ shop gửi khi phỏng vấn (B23–B25), giữ nguyên lời khách, chỉ thay chỗ đã che bằng giá trị dựng. 7 câu trích đoạn công khai (ví dụ địa chỉ trên since98, review app GHN). 20 câu tự viết theo lưới input Y3.
+- **Dataset 2 · bảng chuyển đổi địa giới TP HCM** (`data/chuyen-doi-dia-gioi.csv`): 493 dòng cũ → mới tách từ Nghị quyết 1685/NQ-UBTVQH15 (164 khoản), đối chiếu chéo đủ 493 cặp với bảng Cục Thống kê. Là nguồn cho công cụ quy đổi và cho tên phường trong câu thử.
+- Chi tiết, giới hạn: `data/DATA_CARD.md`.
 
 ## 2. Bộ câu thử dựng ra sao
 
-- `eval/benchmark.csv`: __ câu (thuong __ · kho __ · tu_choi __, trong đó __ câu tấn công)
-- Nguồn (`python run.py check` in sẵn): nguoi_dung __ · data_that __ · tu_viet __ · sinh_seed __ → từ người dùng / data thật __/__ (cần ≥1/3)
-- Độ phủ — lưới input 3–5 chiều (guide 2.4 bước 5): __
-- Câu `kho` trỏ về 4 lớp chỗ khó (`spec.md` §5): lớp 1: __ · lớp 2: __ · lớp 3: __ · lớp 4: __
+- `eval/benchmark.csv`: 30 câu (thuong 8 · kho 14 · tu_choi 8, trong đó 5 câu tấn công: B14, B15, B22, B29, B30)
+- Nguồn (`python run.py check` in sẵn): nguoi_dung 3 · data_that 7 · tu_viet 20 · sinh_seed 0 → từ người dùng / data thật 10/30 (cần ≥1/3)
+- Độ phủ — lưới input 5 chiều (`docs/cp2-ke-hoach.md` mục Y3): kiểu địa chỉ (mới · cũ gộp gọn · cũ bị tách, khách chưa chọn / đã chọn · tỉnh cũ · thiếu quận cũ · không có trong bảng) × mức thiếu (đủ · thiếu 1 · thiếu nhiều) × độ lộn xộn (gọn · rải nhiều lượt · viết tắt, không dấu · đổi ý) × người nhận (người nhắn · người khác) × hành vi mong đợi (TẠO ĐƠN NHÁP · HỎI LẠI · TỪ CHỐI). Luồng C (khách cũ) thêm B20–B22
+- Câu `kho` trỏ về 4 lớp chỗ khó (`spec.md` §5): lớp 1 (nguồn sự thật): B13 · lớp 2 (mơ hồ / thiếu): B05, B06, B07, B08, B12, B20, B21, B24 · lớp 3 (ngoài phạm vi): B22 · lớp 4 (đặc thù lĩnh vực): B09, B10, B11, B25. B24 (thiếu tỉnh) và B25 (phường cũ bị tách, từ chat thật) xếp theo kịch bản cùng loại trong §5. Câu `tu_choi` B14–B19, B29, B30 thuộc lớp 3
 
 ## 3. Metric và cách chấm
 

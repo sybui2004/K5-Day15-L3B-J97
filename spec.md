@@ -47,7 +47,7 @@ Data BTC cấp đã dùng (nếu có — không commit nguyên file): không dù
   - **H2 đúng:** 4/4 shop chép sai hoặc thiếu thông tin nhận hàng trong 1 tháng qua, mỗi shop 1–4 lần.
   - **Địa chỉ kiểu cũ:** 4/4 shop nói khách vẫn ghi, khoảng 20–45% số đơn, mỗi đơn mất thêm 1–3 phút. 4/4 shop từng quy đổi sai hoặc bị GHN từ chối phường cũ.
   - **H1 phải đổi:** chỉ 1/4 shop kể rõ khách bỏ vì shop trả lời chậm. 3/4 kể khách bỏ khi bị hỏi lại nhiều lần.
-  - **Chưa có** nguồn kiểm chéo: đếm review Google Play của app GHN mới viết cách đếm, chưa đếm.
+  - **Nguồn kiểm chéo** (đào data, 28/11): 7/100 review mới nhất của app GHN trên Google Play kể sai hoặc thiếu thông tin nhận hàng (2 nhầm mã vận đơn, 5 nêu lý do "không liên lạc được người nhận"), khớp với H2; 0/100 nhắc địa chỉ sau sáp nhập, nên tỉ lệ đơn địa chỉ cũ chỉ có nguồn phỏng vấn (`evidence/data-mining.md`).
 
 ## §2. Impact & quyết định chọn *(guide 1.3)*
 
@@ -218,10 +218,10 @@ flowchart LR
 - Kết quả: lượt 1 28/30 (93%, chưa đạt: `tu_choi` 7/8) · lượt 2 28/30 (93%, đạt: không tạo đơn sai, `tu_choi` 8/8) — run ID: run-3@20261128-014137 / run-5@20261128-021955, cùng bộ 30 câu. `run-1`, `run-2` (bộ 19 câu) và `run-4` (có code khớp cụm từ câu thử, đã gỡ) giữ file, không tính → chi tiết `eval/report.md`, hồ sơ `eval/README.md`
 
 ## §8. Chi phí khi dùng thật *(guide 4.2)*
-- Persona + giá: `cost/personas.yaml` · lượt mô phỏng: `cost/simulate-__.csv` (__ phiên)
-- Chi phí / task thành công: __ (model __) · __ (model __)
-- Chi phí / tháng ở quy mô thật: thấp __ · cơ sở __ · cao __ → chi tiết `cost/cost-estimate.md`
-- So với impact / người / tháng (§2): đáng làm không, vì sao:
+- Persona + giá: `cost/personas.yaml` (3 kiểu shop từ phỏng vấn P1–P4: nhỏ 260 · vừa 400 · lớn 650 đơn / tháng; giá Haiku 5.5, Sonnet 5.5, Opus 5.5) · lượt mô phỏng: `cost/simulate-1.csv` (50 phiên, `simulate-1@20261128-030455`, seed 42, có lớp chặn NeMo)
+- Chi phí / task thành công (cột của `simulate.py` = chi phí trung bình / phiên mô phỏng ÷ tỉ lệ đạt eval 28/30): $0.0159 (model `claude-sonnet-5-5`, đo thật) · $0.00079 (model `claude-haiku-5-5`). Theo tỉ trọng đơn ở kịch bản cơ sở và tỉ lệ đạt câu thường + khó 20/22: ≈ $0.0149 / phiên đạt (Sonnet). Chưa phải chi phí lên thành công một đơn: một phiên gồm 1–3 hội thoại độc lập, không theo cùng một đơn (`cost/cost-estimate.md` §2). Dòng Haiku dùng token đo trên Sonnet và tỉ lệ đạt 28/30 của Sonnet (`run-5`); chưa chạy eval trên Haiku
+- Chi phí / tháng ở quy mô thật (Sonnet 5.5): thấp $3,358 (580 shop) · cơ sở $10,081 (1.741 shop) · cao $33,600 (5.803 shop). Số shop = 11.606 người nộp thuế TMĐT TP.HCM (mốc tham chiếu) × ba tỉ lệ *(tự ước tính)* → chi tiết `cost/cost-estimate.md`
+- So với impact / người / tháng (§2): đáng làm không, vì sao: mỗi shop đang mất ≈ 48.750–123.500đ phí ship và ≈ 214 phút / tháng. Chi phí / shop / tháng (cơ sở): Sonnet ≈ 150.700đ, lớn hơn phí ship đang mất (f\* 122–309%), nên riêng phí ship không đủ bù; Haiku ≈ 7.500đ, chỉ cần tránh 6–15% phí ship đang mất, **nếu** Haiku đạt như Sonnet. Chưa đo AI tránh được bao nhiêu lỗi. **Nhóm chốt: iterate** (28/11): giữ lát cắt và ba tỉ lệ tự ước tính, chạy eval trên Haiku và đo tỉ lệ lỗi tránh được trước khi go
 
 ## §9. Rủi ro & an toàn
 - **Dữ liệu: đã ẩn danh gì, không thu gì, không đưa gì vào model gói miễn phí:**
@@ -250,7 +250,7 @@ flowchart LR
 - Phân công có tên (theo chặng, chia cặp — guide "Cách chia việc"; chi tiết task: `docs/cp2-ke-hoach.md`):
   - **Đến CP2:** Sỹ — sơ đồ §4, tổng hợp bằng chứng, tự soát và nộp · Hưng — bảng chuyển đổi địa giới · Việt Anh — bộ câu thử, data card, metric · An — bộ câu thử (câu từ người dùng), canvas, chuẩn "đạt" §7 · Việt Anh + An — hai người chấm thử.
   - **CP2 → CP3:** Sỹ — luồng chính `agent.py`, hộp thư (A) · Hưng — công cụ `tools.py`, màn hình duyệt (D + B) · Việt Anh — khách cũ (C), mở rộng bộ câu thử, §5 · An — `eval/grade.py`, chạy lượt 1.
-- Dùng AI vào việc gì (2–3 dòng; chi tiết `docs/ai-usage.md`): Claude Code (Sỹ, Việt Anh) viết code luồng chính, hộp thư, luồng khách cũ, data tự dựng và các mục spec, README; người cặp kia duyệt mọi PR. ChatGPT (Việt Anh) chạy tay ở Y1 để tìm lỗi trước khi viết tiêu chí. Chấm `pass` bằng code, không dùng LLM. Phần của Hưng, An chờ xác nhận.
+- Dùng AI vào việc gì (2–3 dòng; chi tiết `docs/ai-usage.md`): Claude Code (Sỹ, Việt Anh) viết code luồng chính, hộp thư, luồng khách cũ, data tự dựng và các mục spec, README; người cặp kia duyệt mọi PR. ChatGPT (Việt Anh) chạy tay ở Y1 để tìm lỗi trước khi viết tiêu chí. Chấm `pass` bằng code, không dùng LLM. CP4: Claude Code (Sỹ) soạn persona, chạy `simulate-1`, viết §8, `cost/cost-estimate.md` và slide; Codex sửa kế hoạch CP4, bảng người nói và trả lời đoạn 11 của Y1. Phần của Hưng, An chờ xác nhận.
 - Nhật ký thay đổi — **mọi thay đổi sau CP2 19:30 Thứ Sáu 27/11 phải có dòng ở đây**:
 
 **CP2 → CP4** (vd thu hẹp lát cắt, hỏi thêm người dùng, lần cải tiến trước lượt 2)
@@ -281,6 +281,11 @@ flowchart LR
 | 28/11 (review PR #52) | §9 "Đưa vào model": với `GUARD=nemo`, NeMo gửi lời khách để kiểm; cho qua thì model chính nhận cả hội thoại (lời khách gửi hai lần), chặn thì dừng sau lần đầu; `GUARD=tat` chỉ model chính nhận · §9 "TỪ CHỐI": hai lớp NeMo + cờ `yeu_cau_ngoai_pham_vi`, NeMo lỗi thì đi tiếp và ghi trace; giữ ba nhánh khi model bỏ sót cờ · README: lần gọi thêm chỉ khi NeMo chạy và cho qua | Review PR #52, đối chiếu `codebase/agent.py` (`xu_ly`, lớp chặn đầu vào), `codebase/guard.py` (`kiem_dau_vao`). Không đổi số bằng chứng, câu thử, §7, metric, code |
 | 28/11 | README: điền link video demo 34 giây (màn hình duyệt, `claude-sonnet-5-5`, log token ở đầu video) | Guide 3.4: video 30 giây, thao tác thật, AI trả kết quả thật |
 | 28/11 | §9 dòng "Đưa vào model": thay "chờ Việt Anh xác nhận" bằng xác nhận Y1: soạn 11 đoạn tự viết, dán đoạn 1–10 vào ChatGPT (27/11), đoạn 11 hỏi Codex (28/11), không có thông tin khách thật · thêm `eval/chay-tay-y1.md` (trước chỉ nằm trên nhánh Y1, chưa merge) · `eval/README.md`: Việt Anh kiểm lại điểm chấm tay run-5 | Việt Anh xác nhận nội dung đã dán khi chạy tay Y1 (review PR #51 để chờ). Không đổi số bằng chứng, câu thử, §7, metric, code |
+| 28/11 | §8, `cost/`: `personas.yaml` 3 kiểu shop từ phỏng vấn P1–P4, số shop = 11.606 (mốc tham chiếu) × hệ số phủ × tỉ lệ thuộc lát cắt × tỉ lệ sử dụng (580 / 1.741 / 5.803, ba tỉ lệ *(tự ước tính)*), giá 3 model; `simulate-1` 50 phiên, tỉ lệ đạt từ `run-5`; `cost-estimate.md` §1–§4 với ngưỡng hoà vốn theo phí ship · `eval/README.md` mục 1–2 · `slides/demo-slides.html` + `demo-slides.pdf` | Guide 4.2, 5.1. 11.606 là số người nộp thuế TMĐT, không phải số shop dùng sản phẩm, nên tách thành thừa số. Không đổi câu thử, §7, metric, kết quả các lượt đã chạy |
+| 28/11 | Chốt kết luận: **iterate**; giữ ba tỉ lệ tự ước tính của số shop (580 / 1.741 / 5.803), không chạy lại mô phỏng. §8, `cost/cost-estimate.md` §3, slide trang 7 đổi "đề xuất" thành quyết định | Sonnet ≈ 150.700đ / shop / tháng, cao hơn đầu trên phí ship đang mất (123.500đ); Haiku rẻ hơn nhưng chưa có eval trên bộ 30 câu; chưa đo tỉ lệ lỗi AI tránh được. Không đổi số mô phỏng, câu thử, §7, metric |
+| 28/11 | Đào data (nguồn kiểm chéo R1): 100 review mới nhất app GHN trên Google Play, gắn nhãn theo cách đếm viết 27/11 → ban đầu 14/100 `sai_thieu_thong_tin_nhan_hang`, 0/100 nhắc địa chỉ sau sáp nhập. Thêm `evidence/review-ghn.csv`, `evidence/count_review.py`; điền `evidence/data-mining.md` mục 2–5, `evidence/summary.md`, §1; slide trang 1, 8 | Guide 1.2, rubric R1 (nguồn thứ hai). Cách đếm và nhãn giữ nguyên như viết trước khi đọc review. Không đổi số phỏng vấn, câu thử, §7, metric |
+| 28/11 | Rà toàn văn 14 review GHN đã gắn nhãn: giữ 7, chuyển 7 sang `khac`. Đối chiếu nhãn 20 review đầu: lệch 3/20, stt 6 chuyển `tra_loi_cham` → `khac`. Cập nhật §1 và slide theo số đếm 7/100. Sỹ duyệt toàn bộ nhãn | Áp dụng định nghĩa ở `evidence/data-mining.md` §1; lệch 3/20 dưới ngưỡng 4/20 nên giữ định nghĩa nhãn |
+| 28/11 (review PR #54) | `cost/cost-estimate.md` §2, §8, slide trang 6: ghi rõ "chi phí / task thành công" của `simulate.py` là chi phí trung bình / phiên mô phỏng ÷ tỉ lệ đạt eval 28/30, chưa phải chi phí lên thành công một đơn; thêm bảng chi phí / phiên theo tỉ trọng đơn ở kịch bản cơ sở (Sonnet $0.01354, ÷ 20/22 ≈ $0.0149). `evidence/review-ghn.csv` thêm cột `nhac_dia_gioi_moi`, `count_review.py` in tổng cột | 28/30 gồm 8 câu `tu_choi` mô phỏng không lấy (câu thường + khó đạt 20/22); mẫu có shop lớn 22% phiên nhưng ≈ 38% đơn; kết quả 0/100 địa giới mới cần kiểm lại được. Không đổi `simulate-1.*`, câu thử, §7, metric |
 
 **Sau CP4 (đến 23:59 Thứ Bảy 28/11)** (sửa theo góp ý — không sửa chuẩn "đạt", câu thử, số bằng chứng, kết quả các lượt đã chạy)
 
