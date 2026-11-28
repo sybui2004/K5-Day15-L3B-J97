@@ -983,9 +983,12 @@ class TestGioiHanPost(_MayChuThu, unittest.TestCase):
     def gui(self, duong, body):
         import http.client
         c = http.client.HTTPConnection("127.0.0.1", web.PORT, timeout=10)
-        c.request("POST", duong, body=body, headers={"Host": "127.0.0.1:%d" % web.PORT, "X-Man-Hinh-Duyet": "1",
-                                                     "Content-Type": "application/json",
-                                                     "Cookie": "j97_phien=" + self.ck})
+        try:
+            c.request("POST", duong, body=body, headers={"Host": "127.0.0.1:%d" % web.PORT, "X-Man-Hinh-Duyet": "1",
+                                                         "Content-Type": "application/json",
+                                                         "Cookie": "j97_phien=" + self.ck})
+        except BrokenPipeError:
+            pass  # quá giới hạn: máy chủ trả 413 và đóng khi thân chưa gửi hết, mã trả về vẫn đọc được
         r = c.getresponse()
         r.read()
         c.close()
