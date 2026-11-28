@@ -623,3 +623,22 @@ class TestGioiHanPost(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestMoKho(unittest.TestCase):
+    """Có DATABASE_URL mà Postgres lỗi: chạy máy thì ghi file để demo vẫn chạy; DATABASE_REQUIRED=1 (Docker) thì dừng."""
+
+    def _loi(self, *a, **k):
+        raise web.LoiKho("Postgres: password authentication failed")
+
+    def test_mac_dinh_lui_ve_file(self):
+        from unittest import mock
+        with mock.patch.object(web, "mo_kho", self._loi), mock.patch.dict(os.environ, {"DATABASE_REQUIRED": ""}):
+            self.assertIsInstance(web._mo_kho(), web.KhoFile)
+
+    def test_bat_buoc_postgres_thi_dung(self):
+        from unittest import mock
+        with mock.patch.object(web, "mo_kho", self._loi), mock.patch.dict(os.environ, {"DATABASE_REQUIRED": "1"}):
+            with self.assertRaises(SystemExit) as cm:
+                web._mo_kho()
+            self.assertIn("password authentication failed", str(cm.exception.code))
