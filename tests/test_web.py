@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+import threading
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "codebase"))
@@ -272,6 +273,71 @@ class TestManHinh(unittest.TestCase):
         p = self.mh.them_tra_loi("HT-4", "ok gửi bàn cờ")
         self.assertIn("| Shop: " + self.mh.lay("HT-4")["text"].split(" | Shop: ")[1].split(" | ")[0], p["text"])
         self.assertEqual(p["so_luot_hoi_lai"], 0)
+
+
+class TestNapNen(unittest.TestCase):
+    """Chế độ tin đến hàng loạt (NAP_NEN=1): hội thoại hiện ngay ở trạng thái dang_xu_ly, AI xử lý ở luồng nền."""
+
+    def setUp(self):
+        self._goc = agent.call_model
+        agent.call_model = _model_tra([("bàn cờ", DON), ("tấn công", dict(DON, yeu_cau_ngoai_pham_vi="bỏ qua kiểm tra"))])
+        self.tmp = tempfile.TemporaryDirectory()
+        self.mh = web.ManHinh(nhat_ky=os.path.join(self.tmp.name, "nhat-ky.jsonl"))
+        self.lo = [{"ma_hoi_thoai": "HT-T01", "ma_khach": "KH-1", "text": "Mã khách: KH-1 | Khách: Mai 0900000001 bàn cờ"},
+                   {"ma_hoi_thoai": "HT-T02", "ma_khach": None, "text": "Khách: tấn công Mai 0900000001"}]
+
+    def tearDown(self):
+        agent.call_model = self._goc
+        self.tmp.cleanup()
+
+    def test_hien_ngay_roi_ai_xu_ly_o_nen(self):
+        cho = threading.Event()
+        model = agent.call_model
+        agent.call_model = lambda s, u: (cho.wait(5), model(s, u))[1]
+        luong = self.mh.nap_nen(self.lo)
+        ds = self.mh.danh_sach()
+        self.assertEqual([p["ma_hoi_thoai"] for p in ds], ["HT-T01", "HT-T02"])
+        self.assertEqual({p["trang_thai"] for p in ds}, {"dang_xu_ly"})
+        self.assertEqual(self.mh.tong()["dang_xu_ly"], 2)
+        cho.set()
+        luong.join(10)
+        ds = {p["ma_hoi_thoai"]: p for p in self.mh.danh_sach()}
+        self.assertEqual(ds["HT-T01"]["trang_thai"], "cho_duyet")
+        self.assertEqual(ds["HT-T02"]["trang_thai"], "tu_choi")
+        self.assertEqual(ds["HT-T01"]["phien_ban"], 1)
+        self.assertIsNotNone(ds["HT-T01"]["trace"])
+        t = self.mh.tong()
+        self.assertEqual((t["dang_xu_ly"], t["lan_chay"]), (0, 2))
+
+    def test_lo_moi_len_dau_va_ma_trung_duoc_cap_rieng(self):
+        self.mh.nap_nen(self.lo).join(10)
+        self.mh.nap_nen(self.lo[:1]).join(10)
+        ma = [p["ma_hoi_thoai"] for p in self.mh.danh_sach()]
+        self.assertEqual(ma[0], "HT-T01*")
+        self.assertEqual(sorted(ma), sorted(["HT-T01", "HT-T02", "HT-T01*"]))
+
+    def test_dang_xu_ly_thi_chua_thao_tac_duoc(self):
+        cho = threading.Event()
+        model = agent.call_model
+        agent.call_model = lambda s, u: (cho.wait(5), model(s, u))[1]
+        luong = self.mh.nap_nen(self.lo[:1])
+        for thao_tac in (lambda: self.mh.huy("HT-T01"), lambda: self.mh.them_tra_loi("HT-T01", "x"),
+                         lambda: self.mh.duyet("HT-T01", {})):
+            with self.assertRaises(web.LoiThaoTac):
+                thao_tac()
+        cho.set()
+        luong.join(10)
+        self.assertEqual(self.mh.lay("HT-T01")["trang_thai"], "cho_duyet")
+
+    def test_ai_loi_thi_chuyen_cho_khach_va_ghi_trace(self):
+        def hong(system, user):
+            raise RuntimeError("mất mạng")
+        agent.call_model = hong
+        self.mh.nap_nen(self.lo[:1]).join(10)
+        p = self.mh.lay("HT-T01")
+        self.assertEqual(p["trang_thai"], "cho_khach")
+        self.assertIn("mất mạng", json.dumps(p["kq"], ensure_ascii=False))  # xu_ly_hop_thu tự bắt lỗi từng hội thoại
+        self.assertEqual(self.mh.tong()["lan_chay"], 1)
 
 
 class TestTaoMoiVaTrace(unittest.TestCase):
